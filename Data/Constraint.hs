@@ -8,7 +8,10 @@
   KindSignatures,
   TypeOperators,
   Rank2Types,
-  GADTs #-}
+  GADTs,
+  DefaultSignatures,
+  TypeFamilies
+  #-}
 
 module Data.Constraint
   (
@@ -47,13 +50,35 @@ r \\ Sub Dict = r
 class Class (b :: Constraint) (h :: Constraint) | h -> b where
   cls :: h :- b
 
+class Cls (h :: Constraint) where
+  type Super h :: Constraint
+  type Super h = ()
+  cs :: h :- Super h
+  default cs :: h :- ()
+  cs = Sub Dict
+
+class Ins (h :: Constraint) where
+  type Context h :: Constraint
+  type Context h = ()
+  is :: Context h :- h
+  default is :: h => () :- h
+  is = Sub Dict
+
+instance Cls (Cls h)
+instance Ins (Cls (Cls h))
+instance Ins (Ins (Cls (Cls h)))
+
 infixr 9 :=>
 class (b :: Constraint) :=> (h :: Constraint) | h -> b where
   ins :: b :- h
+-- no default implementations for MPTCs, even if they could fundep away to univariate TCs
+--  default ins :: h => () :- h
+--  ins = Sub Dict
 
 instance               Class () (Class b h) where cls = Sub Dict
 instance        () :=> Class () (Class b h) where ins = Sub Dict
 instance () :=> () :=> Class () (Class b h) where ins = Sub Dict
+
 
 instance               Class () (b :=> h) where cls = Sub Dict
 instance        () :=> Class () (b :=> h) where ins = Sub Dict
@@ -63,8 +88,9 @@ instance () :=> () :=> Class () (b :=> h) where ins = Sub Dict
 instance (caa :=> ca :=> a) => (ca :=> a) :=> caa :=> ca :=> a where ins = Sub Dict
 
 -- admissable instances for products and units
-instance        Class () () where cls = Sub Dict
-instance () :=> Class () () where ins = Sub Dict
+instance               Class () () where cls = Sub Dict
+instance        () :=> Class () () where ins = Sub Dict
+instance () :=> () :=> Class () () where ins = Sub Dict
 
 instance        (Class ca a, Class cb b)  => Class (ca, cb) (a, b) where cls = cls *** cls
 instance        (Class ca a, Class cb b) :=> Class (ca, cb) (a, b) where ins = Sub Dict
@@ -80,65 +106,67 @@ instance (caa :=> ca :=> a, cbb :=> cb :=> b) => ((caa, cbb) :=> (ca, cb) :=> (a
   ins = Sub $ Dict \\ ((ins :: caa :- (ca :=> a)) *** (ins :: cbb :- (cb :=> b)))
 
 -- instances for Dict
-instance               Eq (Dict a) where Dict == Dict = True
-instance        () :=> Eq (Dict a) where ins = Sub Dict
 instance () :=> () :=> Eq (Dict a) where ins = Sub Dict
+instance        () :=> Eq (Dict a) where ins = Sub Dict
+instance               Eq (Dict a) where
+  Dict == Dict = True
 
-instance               Ord (Dict a) where compare Dict Dict = EQ
-instance        () :=> Ord (Dict a) where ins = Sub Dict
 instance () :=> () :=> Ord (Dict a) where ins = Sub Dict
+instance        () :=> Ord (Dict a) where ins = Sub Dict
+instance               Ord (Dict a) where
+  compare Dict Dict = EQ
 
+instance () :=> a :=> Enum (Dict a) where ins = Sub Dict
+instance        a :=> Enum (Dict a) where ins = Sub Dict
 instance        a  => Enum (Dict a) where
   toEnum _ = Dict
   fromEnum Dict = 0
-instance        a :=> Enum (Dict a) where ins = Sub Dict
-instance () :=> a :=> Enum (Dict a) where ins = Sub Dict
 
-instance a => Bounded (Dict a) where
+instance () :=> a :=> Bounded (Dict a) where ins = Sub Dict
+instance        a :=> Bounded (Dict a) where ins = Sub Dict
+instance        a  => Bounded (Dict a) where
   minBound = Dict
   maxBound = Dict
-instance        a :=> Bounded (Dict a) where ins = Sub Dict
-instance () :=> a :=> Bounded (Dict a) where ins = Sub Dict
 
-instance Show (Dict a) where
+instance () :=> () :=> Show (Dict a) where ins = Sub Dict
+instance        () :=> Show (Dict a) where ins = Sub Dict
+instance               Show (Dict a) where
   showsPrec _ Dict = showString "Dict"
 
-instance        () :=> Show (Dict a) where ins = Sub Dict
-instance () :=> () :=> Show (Dict a) where ins = Sub Dict
 
-instance a => Read (Dict a) where
+instance () :=> a :=> Read (Dict a) where ins = Sub Dict
+instance        a :=> Read (Dict a) where ins = Sub Dict
+instance        a  => Read (Dict a) where
   readsPrec d = readParen (d > 10) $ \s ->
     [ (Dict, t) | ("Dict", t) <- lex s ]
-instance        a :=> Read (Dict a) where ins = Sub Dict
-instance () :=> a :=> Read (Dict a) where ins = Sub Dict
 
 -- instance Semigroup (Dict a) where Dict <> Dict = Dict
 -- instance        () :=> Semigroup (Dict a) where ins = Sub Dict
 -- instance () :=> () :=> Semigroup (Dict a) where ins = Sub Dict
 
-instance a => Monoid (Dict a) where
+instance () :=> a :=> Monoid (Dict a) where ins = Sub Dict
+instance        a :=> Monoid (Dict a) where ins = Sub Dict
+instance        a  => Monoid (Dict a) where
   mappend Dict Dict = Dict
   mempty = Dict
-instance        a :=> Monoid (Dict a) where ins = Sub Dict
-instance () :=> a :=> Monoid (Dict a) where ins = Sub Dict
 
 -- instances for entailment
-instance Eq (a :- b) where
-  Sub _ == Sub _ = True
-instance        () :=> Eq (a :- b) where ins = Sub Dict
 instance () :=> () :=> Eq (a :- b) where ins = Sub Dict
+instance        () :=> Eq (a :- b) where ins = Sub Dict
+instance               Eq (a :- b) where
+  Sub _ == Sub _ = True
 
-instance Ord (a :- b) where
+instance () :=> () :=> Ord (a :- b) where ins = Sub Dict
+instance        () :=> Ord (a :- b) where ins = Sub Dict
+instance               Ord (a :- b) where
   compare (Sub _) (Sub _) = EQ
 
-instance        () :=> Ord (a :- b) where ins = Sub Dict
-instance () :=> () :=> Ord (a :- b) where ins = Sub Dict
 
-instance Show (a :- b) where
+instance () :=> () :=> Show (a :- b) where ins = Sub Dict
+instance        () :=> Show (a :- b) where ins = Sub Dict
+instance               Show (a :- b) where
   showsPrec d (Sub _) = showParen (d > 10) $ showString "Sub Dict"
 
-instance        () :=> Show (a :- b) where ins = Sub Dict
-instance () :=> () :=> Show (a :- b) where ins = Sub Dict
 
 -- weakening constraints / constraint product projections
 weaken1 :: (a,b) :- a
@@ -185,134 +213,134 @@ top = Sub Dict
 -- Prelude instances
 
 -- Eq
-instance               Class () (Eq a) where cls = Sub Dict
-instance        () :=> Class () (Eq a) where ins = Sub Dict
 instance () :=> () :=> Class () (Eq a) where ins = Sub Dict
+instance        () :=> Class () (Eq a) where ins = Sub Dict
+instance               Class () (Eq a) where cls = Sub Dict
 
-instance        () :=> Eq () where ins = Sub Dict
 instance () :=> () :=> Eq () where ins = Sub Dict
+instance        () :=> Eq () where ins = Sub Dict
 
-instance        () :=> Eq Int where ins = Sub Dict
 instance () :=> () :=> Eq Int where ins = Sub Dict
+instance        () :=> Eq Int where ins = Sub Dict
 
-instance        Eq a :=> Eq [a] where ins = Sub Dict
 instance () :=> Eq a :=> Eq [a] where ins = Sub Dict
+instance        Eq a :=> Eq [a] where ins = Sub Dict
 
-instance        (Eq a, Eq b) :=> Eq (a, b) where ins = Sub Dict
 instance () :=> (Eq a, Eq b) :=> Eq (a, b) where ins = Sub Dict
+instance        (Eq a, Eq b) :=> Eq (a, b) where ins = Sub Dict
 
 -- Ord
-instance               Class (Eq a) (Ord a) where cls = Sub Dict
-instance        () :=> Class (Eq a) (Ord a) where ins = Sub Dict
 instance () :=> () :=> Class (Eq a) (Ord a) where ins = Sub Dict
+instance        () :=> Class (Eq a) (Ord a) where ins = Sub Dict
+instance               Class (Eq a) (Ord a) where cls = Sub Dict
 
-instance        () :=> Ord () where ins = Sub Dict
 instance () :=> () :=> Ord () where ins = Sub Dict
+instance        () :=> Ord () where ins = Sub Dict
 
-instance        () :=> Ord Int where ins = Sub Dict
 instance () :=> () :=> Ord Int where ins = Sub Dict
+instance        () :=> Ord Int where ins = Sub Dict
 
-instance        Ord a :=> Ord [a] where ins = Sub Dict
 instance () :=> Ord a :=> Ord [a] where ins = Sub Dict
+instance        Ord a :=> Ord [a] where ins = Sub Dict
 
-instance        (Ord a, Ord b) :=> Ord (a, b) where ins = Sub Dict
 instance () :=> (Ord a, Ord b) :=> Ord (a, b) where ins = Sub Dict
+instance        (Ord a, Ord b) :=> Ord (a, b) where ins = Sub Dict
 
 -- Enum
-instance               Class () (Enum a) where cls = Sub Dict
-instance        () :=> Class () (Enum a) where ins = Sub Dict
 instance () :=> () :=> Class () (Enum a) where ins = Sub Dict
+instance        () :=> Class () (Enum a) where ins = Sub Dict
+instance               Class () (Enum a) where cls = Sub Dict
 
-instance        Class () (Bounded a) where cls = Sub Dict
 instance () :=> Class () (Bounded a) where ins = Sub Dict
+instance        Class () (Bounded a) where cls = Sub Dict
 
-instance        Class () (Num a) where cls = Sub Dict
 instance () :=> Class () (Num a) where ins = Sub Dict
+instance        Class () (Num a) where cls = Sub Dict
 
 -- Semigroup
-instance               Class () (Semigroup a) where cls = Sub Dict
-instance        () :=> Class () (Semigroup a) where ins = Sub Dict
 instance () :=> () :=> Class () (Semigroup a) where ins = Sub Dict
+instance        () :=> Class () (Semigroup a) where ins = Sub Dict
+instance               Class () (Semigroup a) where cls = Sub Dict
 
 instance Monoid w :=> Semigroup (WrappedMonoid w) where ins = Sub Dict
 
 -- Monoid
-instance               Class () (Monoid a) where cls = Sub Dict
-instance        () :=> Class () (Monoid a) where ins = Sub Dict
 instance () :=> () :=> Class () (Monoid a) where ins = Sub Dict
+instance        () :=> Class () (Monoid a) where ins = Sub Dict
+instance               Class () (Monoid a) where cls = Sub Dict
 
 -- Functor
-instance               Class () (Functor f) where cls = Sub Dict
-instance        () :=> Class () (Functor f) where ins = Sub Dict
 instance () :=> () :=> Class () (Functor f) where ins = Sub Dict
+instance        () :=> Class () (Functor f) where ins = Sub Dict
+instance               Class () (Functor f) where cls = Sub Dict
 
-instance        () :=> Functor [] where ins = Sub Dict
 instance () :=> () :=> Functor [] where ins = Sub Dict
+instance        () :=> Functor [] where ins = Sub Dict
 
-instance        () :=> Functor Maybe where ins = Sub Dict
 instance () :=> () :=> Functor Maybe where ins = Sub Dict
+instance        () :=> Functor Maybe where ins = Sub Dict
 
-instance        () :=> Functor ((->) a) where ins = Sub Dict
 instance () :=> () :=> Functor ((->) a) where ins = Sub Dict
+instance        () :=> Functor ((->) a) where ins = Sub Dict
 
-instance        () :=> Functor ((,) a) where ins = Sub Dict
 instance () :=> () :=> Functor ((,) a) where ins = Sub Dict
+instance        () :=> Functor ((,) a) where ins = Sub Dict
 
 instance Monad m :=> Functor (WrappedMonad m) where ins = Sub Dict
 
 -- Applicative
-instance               Class (Functor f) (Applicative f) where cls = Sub Dict
-instance        () :=> Class (Functor f) (Applicative f) where ins = Sub Dict
 instance () :=> () :=> Class (Functor f) (Applicative f) where ins = Sub Dict
+instance        () :=> Class (Functor f) (Applicative f) where ins = Sub Dict
+instance               Class (Functor f) (Applicative f) where cls = Sub Dict
 
-instance        () :=> Applicative [] where ins = Sub Dict
 instance () :=> () :=> Applicative [] where ins = Sub Dict
+instance        () :=> Applicative [] where ins = Sub Dict
 
-instance        () :=> Applicative Maybe where ins = Sub Dict
 instance () :=> () :=> Applicative Maybe where ins = Sub Dict
+instance        () :=> Applicative Maybe where ins = Sub Dict
 
-instance        () :=> Applicative ((->) a) where ins = Sub Dict
 instance () :=> () :=> Applicative ((->) a) where ins = Sub Dict
+instance        () :=> Applicative ((->) a) where ins = Sub Dict
 
-instance        Monoid w :=> Applicative ((,) w) where ins = Sub Dict
 instance () :=> Monoid w :=> Applicative ((,) w) where ins = Sub Dict
+instance        Monoid w :=> Applicative ((,) w) where ins = Sub Dict
 
 instance Monad m :=> Applicative (WrappedMonad m) where ins = Sub Dict
 
 -- Alternative
-instance               Class (Applicative f) (Alternative f) where cls = Sub Dict
-instance        () :=> Class (Applicative f) (Alternative f) where ins = Sub Dict
 instance () :=> () :=> Class (Applicative f) (Alternative f) where ins = Sub Dict
+instance        () :=> Class (Applicative f) (Alternative f) where ins = Sub Dict
+instance               Class (Applicative f) (Alternative f) where cls = Sub Dict
 
-instance        () :=> Alternative [] where ins = Sub Dict
 instance () :=> () :=> Alternative [] where ins = Sub Dict
+instance        () :=> Alternative [] where ins = Sub Dict
 
-instance        () :=> Alternative Maybe where ins = Sub Dict
 instance () :=> () :=> Alternative Maybe where ins = Sub Dict
+instance        () :=> Alternative Maybe where ins = Sub Dict
 
 instance MonadPlus m :=> Alternative (WrappedMonad m) where ins = Sub Dict
 
 -- Monad
-instance               Class () (Monad f) where cls = Sub Dict
-instance        () :=> Class () (Monad f) where ins = Sub Dict
 instance () :=> () :=> Class () (Monad f) where ins = Sub Dict
+instance        () :=> Class () (Monad f) where ins = Sub Dict
+instance               Class () (Monad f) where cls = Sub Dict
 
-instance        () :=> Monad [] where ins = Sub Dict
 instance () :=> () :=> Monad [] where ins = Sub Dict
+instance        () :=> Monad [] where ins = Sub Dict
 
-instance        () :=> Monad ((->) a) where ins = Sub Dict
 instance () :=> () :=> Monad ((->) a) where ins = Sub Dict
+instance        () :=> Monad ((->) a) where ins = Sub Dict
 
 -- MonadPlus
-instance               Class (Monad f) (MonadPlus f) where cls = Sub Dict
-instance        () :=> Class (Monad f) (MonadPlus f) where ins = Sub Dict
 instance () :=> () :=> Class (Monad f) (MonadPlus f) where ins = Sub Dict
+instance        () :=> Class (Monad f) (MonadPlus f) where ins = Sub Dict
+instance               Class (Monad f) (MonadPlus f) where cls = Sub Dict
 
-instance        () :=> MonadPlus [] where ins = Sub Dict
 instance () :=> () :=> MonadPlus [] where ins = Sub Dict
+instance        () :=> MonadPlus [] where ins = Sub Dict
 
-instance        () :=> MonadPlus Maybe where ins = Sub Dict
 instance () :=> () :=> MonadPlus Maybe where ins = Sub Dict
+instance        () :=> MonadPlus Maybe where ins = Sub Dict
 
 -- unsafe local instance resolution
 
