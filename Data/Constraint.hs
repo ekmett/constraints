@@ -51,18 +51,16 @@ deriving instance Ord (Dict a)
 deriving instance Show (Dict a)
 
 infixr 9 :-
--- entailment
-data (:-) :: Constraint -> Constraint -> * where
-  Sub :: (a => Dict b) -> a :- b
+data a :- b = Sub (a => Dict b)
 
-instance Eq (a :- b) where 
-  Sub _ == Sub _ = True
+instance Eq (a :- b) where
+  _ == _ = True
 
 instance Ord (a :- b) where
-  compare (Sub _) (Sub _) = EQ
+  compare _ _ = EQ
 
 instance Show (a :- b) where
-  showsPrec d (Sub _) = showParen (d > 10) $ showString "Sub Dict"
+  showsPrec d _ = showParen (d > 10) $ showString "Sub Dict"
 
 infixl 1 \\ -- required comment
 
@@ -122,11 +120,11 @@ top = Sub Dict
 evil :: a :- b
 evil = unsafeCoerce refl
 
-class Class (b :: Constraint) (h :: Constraint) | h -> b where
+class Class b h | h -> b where
   cls :: h :- b
 
 infixr 9 :=>
-class (b :: Constraint) :=> (h :: Constraint) | h -> b where
+class b :=> h | h -> b where
   ins :: b :- h
 
 instance Class () (Class b a) where cls = Sub Dict
