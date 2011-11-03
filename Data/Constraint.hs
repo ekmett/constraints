@@ -8,6 +8,7 @@
   TypeOperators,
   FunctionalDependencies,
   Rank2Types,
+  StandaloneDeriving,
   GADTs
   #-}
 
@@ -41,24 +42,20 @@ import Data.Complex
 import Data.Ratio
 import Unsafe.Coerce
 
+-- | Capture a dictionary for a given constraint
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
 
-instance Eq (Dict a) where
-  Dict == Dict = True
-
-instance Ord (Dict a) where
-  compare Dict Dict = EQ
-
-instance Show (Dict a) where
-  showsPrec _ Dict = showString "Dict"
+deriving instance Eq (Dict a)
+deriving instance Ord (Dict a)
+deriving instance Show (Dict a)
 
 infixr 9 :-
 -- entailment
 data (:-) :: Constraint -> Constraint -> * where
   Sub :: (a => Dict b) -> a :- b
 
-instance Eq (a :- b) where
+instance Eq (a :- b) where 
   Sub _ == Sub _ = True
 
 instance Ord (a :- b) where
@@ -68,41 +65,60 @@ instance Show (a :- b) where
   showsPrec d (Sub _) = showParen (d > 10) $ showString "Sub Dict"
 
 infixl 1 \\ -- required comment
+
+-- | Given that @a :- b@, derive something that needs a context @b@, using the context @a@
 (\\) :: a => (b => r) -> (a :- b) -> r
 r \\ Sub Dict = r
 
--- due to the hack for the kind of (,) in the compiler we can't actually make (,) a bifunctor!
+-- | due to the hack for the kind of (,) in the current version of GHC we can't actually
+-- make instances for (,) :: Constraint -> Constraint -> Constraint
 (***) :: (a :- b) -> (c :- d) -> (a, c) :- (b, d)
 f *** g = Sub $ Dict \\ f \\ g
 
--- weakening constraints / constraint product projections
-weaken1 :: (a,b) :- a
+-- | Weakening a constraint product
+weaken1 :: (a, b) :- a
 weaken1 = Sub Dict
 
-weaken2 :: (a,b) :- b
+-- | Weakening a constraint product
+weaken2 :: (a, b) :- b
 weaken2 = Sub Dict
 
--- contracting constraints / diagonal morphism
+-- | Contracting a constraint / diagonal morphism
 contract :: a :- (a, a)
 contract = Sub Dict
 
--- constraint product
-(&&&) :: (a :- b) -> (a :- c) -> a :- (b,c)
+-- | Constraint product
+--
+-- > trans weaken1 (f &&& g) = f
+-- > trans weaken2 (f &&& g) = g
+(&&&) :: (a :- b) -> (a :- c) -> a :- (b, c)
 f &&& g = Sub $ Dict \\ f \\ g
 
--- transitivity of entailment
+--    ?
+--   / \
+-- (#)  ??  ???
+--     /  \ / \
+--    #    *  Constraint
+
+-- | Transitivity of entailment
+--
+-- If we view '(:-)' as a Constraint-indexed category, then this is '(.)'
 trans :: (b :- c) -> (a :- b) -> a :- c
 trans f g = Sub $ Dict \\ f \\ g
 
--- reflexivity
+-- | Reflexivity of entailment
+-- 
+-- If we view '(:-)' as a Constraint-indexed category, then this is 'id'
 refl :: a :- a
 refl = Sub Dict
 
--- terminal arrows
+-- | Every constraint implies truth
+--
+-- These are the terminal arrows of the category, and () is the terminal object.
 top :: a :- ()
 top = Sub Dict
 
--- don't do this!
+-- | Don't be evil
 evil :: a :- b
 evil = unsafeCoerce refl
 
@@ -116,10 +132,10 @@ class (b :: Constraint) :=> (h :: Constraint) | h -> b where
 instance Class () (Class b a) where cls = Sub Dict
 instance Class () (b :=> a) where cls = Sub Dict
 
--- bootstrapping
-
 #ifdef UNDECIDABLE
+-- | Decidable under GHC HEAD
 instance Class b a => () :=> Class b a where ins = Sub Dict
+-- | Decidable under GHC HEAD
 instance (b :=> a) => () :=> b :=> a where ins = Sub Dict
 #endif
 
@@ -299,9 +315,7 @@ instance a => Bounded (Dict a) where
   maxBound = Dict
 
 instance a :=> Read (Dict a) where ins = Sub Dict
-instance a => Read (Dict a) where
-  readsPrec d = readParen (d > 10) $ \s ->
-    [ (Dict, t) | ("Dict", t) <- lex s ]
+deriving instance a => Read (Dict a)
 
 instance a :=> Monoid (Dict a) where ins = Sub Dict
 instance a => Monoid (Dict a) where
@@ -315,7 +329,6 @@ applicative m = m \\ trans (evil :: Applicative (WrappedMonad m) :- Applicative 
 alternative :: forall m a. MonadPlus m => (Alternative m => m a) -> m a
 alternative m = m \\ trans (evil :: Alternative (WrappedMonad m) :- Alternative m) ins
 
--- Using applicative sugar given just a monad, no lifting needed
+-- Demonstration of the use of applicative sugar given just a monad, no lifting needed
 (<&>) :: Monad m => m a -> m b -> m (a, b)
 m <&> n = applicative $ (,) <$> m <*> n
-
