@@ -51,7 +51,7 @@ deriving instance Ord (Dict a)
 deriving instance Show (Dict a)
 
 infixr 9 :-
-data a :- b = Sub (a => Dict b)
+newtype a :- b = Sub (a => Dict b)
 
 instance Eq (a :- b) where
   _ == _ = True

@@ -42,7 +42,7 @@ import Data.Monoid
 import Data.Ratio
 import Unsafe.Coerce
 
-data Dict :: Constraint -> * where
+data Dict a where
   Dict :: a => Dict a
 
 instance Eq (Dict a) where
@@ -55,18 +55,16 @@ instance Show (Dict a) where
   showsPrec _ Dict = showString "Dict"
 
 infixr 9 :-
--- entailment
-data (:-) :: Constraint -> Constraint -> * where
-  Sub :: (a => Dict b) -> a :- b
+data a :- b = Sub (a => Dict b)
 
 instance Eq (a :- b) where
-  Sub _ == Sub _ = True
+  _ == _ = True
 
 instance Ord (a :- b) where
-  compare (Sub _) (Sub _) = EQ
+  compare _ _ = EQ
 
 instance Show (a :- b) where
-  showsPrec d (Sub _) = showParen (d > 10) $ showString "Sub Dict"
+  showsPrec d _ = showParen (d > 10) $ showString "Sub Dict"
 
 infixl 1 \\ -- required comment
 (\\) :: a => (b => r) -> (a :- b) -> r
@@ -107,14 +105,14 @@ top = Sub Dict
 evil :: a :- b
 evil = unsafeCoerce refl
 
-class Class (h :: Constraint) where
+class Class h where
   type Sup h :: Constraint
   type Sup h = ()
   cls :: h :- Sup h
   default cls :: h :- ()
   cls = Sub Dict
 
-class Instance (h :: Constraint) where
+class Instance h where
   type Ctx h :: Constraint
   type Ctx h = ()
   ins :: Ctx h :- h
