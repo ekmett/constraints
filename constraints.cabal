@@ -2,7 +2,7 @@ name:          constraints
 category:      Constraints
 version:       0.1
 license:       BSD3
-cabal-version: >= 1.6
+cabal-version: >= 1.10
 license-file:  LICENSE
 author:        Edward A. Kmett
 maintainer:    Edward A. Kmett <ekmett@gmail.com>
@@ -31,10 +31,10 @@ library
     Rank2Types,
     GADTs
 
-  build-depends:
-    base >= 4.4 && < 5
-
+  build-depends: base >= 4.4 && < 5
   exposed-modules:
     Data.Constraint
+    Data.Constraint.Forall
+    Data.Constraint.Unsafe
 
   ghc-options: -Wall

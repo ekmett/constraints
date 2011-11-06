@@ -1,19 +1,16 @@
-{-# LANGUAGE
-  CPP,
-  ScopedTypeVariables,
-  FlexibleInstances,
-  FlexibleContexts,
-  ConstraintKinds,
-  KindSignatures,
-  TypeOperators,
-  FunctionalDependencies,
-  Rank2Types,
-  StandaloneDeriving,
-  GADTs
-  #-}
-
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
-#define UNDECIDABLE
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE Safe #-}
 
 module Data.Constraint
   (
@@ -29,21 +26,13 @@ module Data.Constraint
   -- * Reflection
   , Class(..)
   , (:=>)(..)
-  -- * Quantification
-  , Forall
-  , inst
-  -- * Sugar
-  , applicative
-  , alternative
   ) where
 
 import Control.Monad
-import Control.Monad.Instances
 import Control.Applicative
 import Data.Monoid
 import Data.Complex
 import Data.Ratio
-import Unsafe.Coerce
 
 -- | Capture a dictionary for a given constraint
 data Dict :: Constraint -> * where
@@ -119,18 +108,6 @@ refl = Sub Dict
 top :: a :- ()
 top = Sub Dict
 
--- | Don't be evil
-evil :: a :- b
-evil = unsafeCoerce refl
-
--- skolem variables, do not export!
-data A
-data B
-type Forall (p :: * -> Constraint) = (p A, p B)
-
-inst :: Forall p :- p a
-inst = trans (evil :: p A :- p a) weaken1
-
 class Class b h | h -> b where
   cls :: h :- b
 
@@ -141,12 +118,8 @@ class b :=> h | h -> b where
 instance Class () (Class b a) where cls = Sub Dict
 instance Class () (b :=> a) where cls = Sub Dict
 
-#ifdef UNDECIDABLE
--- | Decidable under GHC HEAD
 instance Class b a => () :=> Class b a where ins = Sub Dict
--- | Decidable under GHC HEAD
 instance (b :=> a) => () :=> b :=> a where ins = Sub Dict
-#endif
 
 instance Class () () where cls = Sub Dict
 instance () :=> () where ins = Sub Dict
@@ -312,7 +285,6 @@ instance () :=> MonadPlus [] where ins = Sub Dict
 instance () :=> MonadPlus Maybe where ins = Sub Dict
 
 -- UndecidableInstances
-#ifdef UNDECIDABLE
 instance a :=> Enum (Dict a) where ins = Sub Dict
 instance a => Enum (Dict a) where
   toEnum _ = Dict
@@ -330,14 +302,3 @@ instance a :=> Monoid (Dict a) where ins = Sub Dict
 instance a => Monoid (Dict a) where
   mappend Dict Dict = Dict
   mempty = Dict
-#endif
-
-applicative :: forall m a. Monad m => (Applicative m => m a) -> m a
-applicative m = m \\ trans (evil :: Applicative (WrappedMonad m) :- Applicative m) ins
-
-alternative :: forall m a. MonadPlus m => (Alternative m => m a) -> m a
-alternative m = m \\ trans (evil :: Alternative (WrappedMonad m) :- Alternative m) ins
-
--- Demonstration of the use of applicative sugar given just a monad, no lifting needed
-(<&>) :: Monad m => m a -> m b -> m (a, b)
-m <&> n = applicative $ (,) <$> m <*> n
