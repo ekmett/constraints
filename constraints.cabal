@@ -1,0 +1,40 @@
+name:          constraints
+category:      Constraints
+version:       0.1
+license:       BSD3
+cabal-version: >= 1.6
+license-file:  LICENSE
+author:        Edward A. Kmett
+maintainer:    Edward A. Kmett <ekmett@gmail.com>
+stability:     experimental
+homepage:      http://github.com/ekmett/constraints/
+copyright:     Copyright (C) 2011 Edward A. Kmett
+synopsis:      Constraint manipulation
+description:   Constraint manipulation
+build-type:    Simple
+
+source-repository head
+  type: git
+  location: git://github.com/ekmett/constraints.git
+
+library
+  default-language: Haskell2010
+  other-extensions
+    FunctionalDependencies,
+    ScopedTypeVariables,
+    StandaloneDeriving,
+    FlexibleInstances,
+    FlexibleContexts,
+    ConstraintKinds,
+    KindSignatures,
+    TypeOperators,
+    Rank2Types,
+    GADTs
+
+  build-depends:
+    base >= 4.4 && < 5
+
+  exposed-modules:
+    Data.Constraint
+
+  ghc-options: -Wall

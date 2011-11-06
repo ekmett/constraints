@@ -29,6 +29,9 @@ module Data.Constraint
   -- * Reflection
   , Class(..)
   , (:=>)(..)
+  -- * Quantification
+  , Forall
+  , inst
   -- * Sugar
   , applicative
   , alternative
@@ -119,6 +122,14 @@ top = Sub Dict
 -- | Don't be evil
 evil :: a :- b
 evil = unsafeCoerce refl
+
+-- skolem variables, do not export!
+data A
+data B
+type Forall (p :: * -> Constraint) = (p A, p B)
+
+inst :: Forall p :- p a
+inst = trans (evil :: p A :- p a) weaken1
 
 class Class b h | h -> b where
   cls :: h :- b
