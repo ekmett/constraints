@@ -8,14 +8,16 @@
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE Safe #-}
 
 module Data.Constraint
   (
+  -- * Constraints
+    Constraint
   -- * Dictionary
-    Dict(Dict)
+  , Dict(Dict)
   -- * Entailment
   , (:-)(Sub)
   , (\\)
@@ -33,6 +35,7 @@ import Control.Applicative
 import Data.Monoid
 import Data.Complex
 import Data.Ratio
+import GHC.Prim (Constraint)
 
 -- | Capture a dictionary for a given constraint
 data Dict :: Constraint -> * where

@@ -37,3 +37,4 @@ applicative m = m \\ trans (evil :: Applicative (WrappedMonad m) :- Applicative 
 
 alternative :: forall m a. MonadPlus m => (Alternative m => m a) -> m a
 alternative m = m \\ trans (evil :: Alternative (WrappedMonad m) :- Alternative m) ins
+
