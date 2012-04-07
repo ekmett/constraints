@@ -11,6 +11,18 @@
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Constraint
+-- Copyright   :  (C) 2011-2012 Edward Kmett,
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Edward Kmett <ekmett@gmail.com>
+-- Stability   :  experimental
+-- Portability :  non-portable
+--
+----------------------------------------------------------------------------
+
 
 module Data.Constraint
   (
@@ -111,10 +123,12 @@ refl = Sub Dict
 top :: a :- ()
 top = Sub Dict
 
+-- | Reify the relationship between a class and its superclass constraints as a class
 class Class b h | h -> b where
   cls :: h :- b
 
 infixr 9 :=>
+-- | Reify the relationship between an instance head and its body as a class
 class b :=> h | h -> b where
   ins :: b :- h
 
