@@ -1,6 +1,6 @@
 name:          constraints
 category:      Constraints
-version:       0.3
+version:       0.3.0.1
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE
@@ -8,6 +8,7 @@ author:        Edward A. Kmett
 maintainer:    Edward A. Kmett <ekmett@gmail.com>
 stability:     experimental
 homepage:      http://github.com/ekmett/constraints/
+bug-reports:   http://github.com/ekmett/constraints/issues
 copyright:     Copyright (C) 2011 Edward A. Kmett
 synopsis:      Constraint manipulation
 description:   Constraint manipulation

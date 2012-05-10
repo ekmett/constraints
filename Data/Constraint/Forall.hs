@@ -36,6 +36,7 @@ data F a
 data M a
 type Forall1 (p :: (* -> *) -> Constraint) = (p F, p M)
 
+
 -- | instantiate a quantified constraint on kind @*@
 inst :: forall p a. Forall p :- p a
 inst = trans (unsafeCoerceConstraint :: p A :- p a) weaken1
@@ -43,3 +44,5 @@ inst = trans (unsafeCoerceConstraint :: p A :- p a) weaken1
 -- | instantiate a quantified constraint on kind @* -> *@
 inst1 :: forall (p :: (* -> *) -> Constraint) (f :: * -> *). Forall1 p :- p f
 inst1 = trans (unsafeCoerceConstraint :: p F :- p f) weaken1
+
+-- class Forall p where instantiate :: Dict (p a)
