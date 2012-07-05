@@ -32,7 +32,7 @@ library
     Rank2Types,
     GADTs
 
-  build-depends: 
+  build-depends:
     base >= 4.4 && < 5,
     newtype >= 0.2 && < 0.3,
     ghc-prim
