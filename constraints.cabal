@@ -1,6 +1,6 @@
 name:          constraints
 category:      Constraints
-version:       0.3.0.1
+version:       0.3.1
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE
@@ -13,6 +13,7 @@ copyright:     Copyright (C) 2011 Edward A. Kmett
 synopsis:      Constraint manipulation
 description:   Constraint manipulation
 build-type:    Simple
+extra-source-files: README.markdown
 
 source-repository head
   type: git
