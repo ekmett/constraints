@@ -22,6 +22,7 @@ module Data.Constraint.Forall
   ( Forall, inst
   , ForallF, instF
   , Forall1, inst1
+  , ForallT, instT
   ) where
 
 import Data.Constraint
@@ -39,6 +40,8 @@ data F a
 data M a
 type Forall1 (p :: (* -> *) -> Constraint) = (p F, p M)
 
+type ForallT (p :: * -> Constraint) (t :: (* -> *) -> * -> *) = (p (t F A), p (t M B))
+
 
 -- | instantiate a quantified constraint on kind @*@
 inst :: forall p a. Forall p :- p a
@@ -50,4 +53,7 @@ instF = trans (unsafeCoerceConstraint :: p (f A) :- p (f a)) weaken1
 -- | instantiate a quantified constraint on kind @* -> *@
 inst1 :: forall (p :: (* -> *) -> Constraint) (f :: * -> *). Forall1 p :- p f
 inst1 = trans (unsafeCoerceConstraint :: p F :- p f) weaken1
+
+instT :: forall (p :: * -> Constraint) (t :: (* -> *) -> * -> *) (f :: * -> *) a. ForallT p t :- p (t f a)
+instT = trans (unsafeCoerceConstraint :: p (t F A) :- p (t f a)) weaken1
 
