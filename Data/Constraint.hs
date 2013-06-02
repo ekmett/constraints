@@ -11,6 +11,7 @@
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE CPP #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint
@@ -41,8 +42,8 @@ module Data.Constraint
   , Class(..)
   , (:=>)(..)
   ) where
-
 import Control.Monad
+import Control.Category
 import Control.Applicative
 import Data.Monoid
 import Data.Complex
@@ -59,6 +60,12 @@ deriving instance Show (Dict a)
 
 infixr 9 :-
 newtype a :- b = Sub (a => Dict b)
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+instance Category (:-) where
+  id  = refl
+  (.) = trans
+#endif
 
 instance Eq (a :- b) where
   _ == _ = True
