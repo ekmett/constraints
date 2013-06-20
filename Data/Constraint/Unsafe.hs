@@ -7,6 +7,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE Unsafe #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint.Unsafe
