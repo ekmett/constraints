@@ -37,7 +37,7 @@ module Data.Constraint
   , weaken1, weaken2, contract
   , (&&&), (***)
   , trans, refl
-  , top
+  , top, bottom
   -- * Reflection
   , Class(..)
   , (:=>)(..)
@@ -129,6 +129,22 @@ refl = Sub Dict
 -- These are the terminal arrows of the category, and () is the terminal object.
 top :: a :- ()
 top = Sub Dict
+
+type family Ex (a :: *) (c :: Constraint) :: Constraint
+type instance Ex () c = ()
+type instance Ex Bool c = c
+
+falso :: (() ~ a) :- Ex a c
+falso = Sub Dict
+
+-- |
+-- A bad type coercion lets you derive any type you want.
+--
+-- These are the initial arrows of the category and (() ~ Bool) is the initial object
+--
+-- This demonstrates the law of classical logical <http://en.wikipedia.org/wiki/Principle_of_explosion ex falso quodlibet>
+bottom :: (() ~ Bool) :- c
+bottom = thing
 
 -- | Reify the relationship between a class and its superclass constraints as a class
 class Class b h | h -> b where
@@ -326,3 +342,4 @@ instance a :=> Monoid (Dict a) where ins = Sub Dict
 instance a => Monoid (Dict a) where
   mappend Dict Dict = Dict
   mempty = Dict
+
