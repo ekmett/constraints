@@ -8,6 +8,7 @@
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
@@ -43,7 +44,9 @@ module Data.Constraint
   , (:=>)(..)
   ) where
 import Control.Monad
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 import Control.Category
+#endif
 import Control.Applicative
 import Data.Monoid
 import Data.Complex
@@ -144,7 +147,7 @@ falso = Sub Dict
 --
 -- This demonstrates the law of classical logical <http://en.wikipedia.org/wiki/Principle_of_explosion ex falso quodlibet>
 bottom :: (() ~ Bool) :- c
-bottom = thing
+bottom = falso
 
 -- | Reify the relationship between a class and its superclass constraints as a class
 class Class b h | h -> b where
