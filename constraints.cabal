@@ -9,7 +9,7 @@ maintainer:    Edward A. Kmett <ekmett@gmail.com>
 stability:     experimental
 homepage:      http://github.com/ekmett/constraints/
 bug-reports:   http://github.com/ekmett/constraints/issues
-copyright:     Copyright (C) 2011 Edward A. Kmett
+copyright:     Copyright (C) 2011-2013 Edward A. Kmett
 synopsis:      Constraint manipulation
 description:   Constraint manipulation
 build-type:    Simple
