@@ -13,7 +13,7 @@ copyright:     Copyright (C) 2011-2013 Edward A. Kmett
 synopsis:      Constraint manipulation
 description:   Constraint manipulation
 build-type:    Simple
-tested-with:   GHC == 7.7-20131025, GHC == 7.6.3
+tested-with:   GHC == 7.7.20131027, GHC == 7.7.20131025, GHC == 7.6.3
 extra-source-files: README.markdown
 
 source-repository head
