@@ -13,6 +13,9 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE CPP #-}
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+{-# LANGUAGE AllowAmbiguousTypes #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint
