@@ -15,6 +15,7 @@
 {-# LANGUAGE CPP #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE RoleAnnotations #-}
 #endif
 -----------------------------------------------------------------------------
 -- |
@@ -60,12 +61,19 @@ import GHC.Prim (Constraint)
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
 
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+type role Dict nominal
+#endif
+
 deriving instance Eq (Dict a)
 deriving instance Ord (Dict a)
 deriving instance Show (Dict a)
 
 infixr 9 :-
 newtype a :- b = Sub (a => Dict b)
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+type role (:-) nominal nominal
+#endif
 
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 instance Category (:-) where

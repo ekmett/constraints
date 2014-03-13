@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -6,6 +7,9 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE Trustworthy #-}
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+{-# LANGUAGE RoleAnnotations #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint.Forall
@@ -38,9 +42,15 @@ type ForallF (p :: * -> Constraint) (f :: * -> *) = (p (f A), p (f B))
 
 data F a
 data M a
+
 type Forall1 (p :: (* -> *) -> Constraint) = (p F, p M)
 
 type ForallT (p :: * -> Constraint) (t :: (* -> *) -> * -> *) = (p (t F A), p (t M B))
+
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+type role F nominal
+type role M nominal
+#endif
 
 
 -- | instantiate a quantified constraint on kind @*@
