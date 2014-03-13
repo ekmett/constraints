@@ -1,3 +1,7 @@
+0.3.5
+-----
+* Explicit role annotations
+
 0.3.4.1
 -------
 * Fixed build failures.
