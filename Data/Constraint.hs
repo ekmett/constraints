@@ -2,7 +2,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
@@ -16,6 +15,7 @@
 {-# LANGUAGE CPP #-}
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RoleAnnotations #-}
 #endif
 -----------------------------------------------------------------------------
@@ -56,15 +56,17 @@ import Control.Applicative
 import Data.Monoid
 import Data.Complex
 import Data.Ratio
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 import Data.Typeable (Typeable)
+#endif
 import GHC.Prim (Constraint)
 
 -- | Capture a dictionary for a given constraint
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
   deriving Typeable
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 type role Dict nominal
 #endif
 
@@ -75,6 +77,8 @@ deriving instance Show (Dict a)
 infixr 9 :-
 newtype a :- b = Sub (a => Dict b)
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+  deriving Typeable
+
 type role (:-) nominal nominal
 #endif
 
@@ -359,4 +363,3 @@ instance a :=> Monoid (Dict a) where ins = Sub Dict
 instance a => Monoid (Dict a) where
   mappend Dict Dict = Dict
   mempty = Dict
-
