@@ -2,6 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
@@ -55,11 +56,13 @@ import Control.Applicative
 import Data.Monoid
 import Data.Complex
 import Data.Ratio
+import Data.Typeable (Typeable)
 import GHC.Prim (Constraint)
 
 -- | Capture a dictionary for a given constraint
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
+  deriving Typeable
 
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 type role Dict nominal
