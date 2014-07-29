@@ -1,3 +1,7 @@
+0.4
+---
+* `Typeable`
+
 0.3.5
 -----
 * Explicit role annotations

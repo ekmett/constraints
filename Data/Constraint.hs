@@ -57,7 +57,7 @@ import Data.Monoid
 import Data.Complex
 import Data.Ratio
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
-import Data.Typeable (Typeable)
+import Data.Data
 #endif
 import GHC.Prim (Constraint)
 
@@ -68,6 +68,20 @@ data Dict :: Constraint -> * where
   deriving Typeable
 
 type role Dict nominal
+
+instance (Typeable p, p) => Data (Dict p) where
+  gfoldl _ z Dict = z Dict
+  toConstr _ = dictConstr
+  gunfold _ z c = case constrIndex c of
+    1 -> z Dict
+    _ -> error "gunfold"
+  dataTypeOf _ = dictDataType
+
+dictConstr :: Constr
+dictConstr = mkConstr dictDataType "Dict" [] Prefix
+
+dictDataType :: DataType
+dictDataType = mkDataType "Data.Constraint.Dict" [dictConstr]
 #endif
 
 deriving instance Eq (Dict a)
@@ -80,9 +94,25 @@ newtype a :- b = Sub (a => Dict b)
   deriving Typeable
 
 type role (:-) nominal nominal
-#endif
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+-- TODO: _proper_ Data for (p :- q) requires (:-) to be cartesian closed.
+-- This is admissable, but not present by default
+
+-- constraint should be instance (Typeable p, Typeable q, p |- q) => Data (p :- q)
+instance (Typeable p, Typeable q, p, q) => Data (p :- q) where
+  gfoldl k z (Sub Dict) = z (Sub Dict)
+  toConstr _ = subConstr
+  gunfold k z c = case constrIndex c of
+    1 -> z (Sub Dict)
+    _ -> error "gunfold"
+  dataTypeOf _ = subDataType
+
+subConstr :: Constr
+subConstr = mkConstr dictDataType "Sub" [] Prefix
+
+subDataType :: DataType
+subDataType = mkDataType "Data.Constraint.:-" [subConstr]
+
 instance Category (:-) where
   id  = refl
   (.) = trans
