@@ -100,9 +100,9 @@ type role (:-) nominal nominal
 
 -- constraint should be instance (Typeable p, Typeable q, p |- q) => Data (p :- q)
 instance (Typeable p, Typeable q, p, q) => Data (p :- q) where
-  gfoldl k z (Sub Dict) = z (Sub Dict)
+  gfoldl _ z (Sub Dict) = z (Sub Dict)
   toConstr _ = subConstr
-  gunfold k z c = case constrIndex c of
+  gunfold _ z c = case constrIndex c of
     1 -> z (Sub Dict)
     _ -> error "gunfold"
   dataTypeOf _ = subDataType
