@@ -1,3 +1,7 @@
+0.4.1.1
+-------
+* Minor documentation fixes.
+
 0.4.1
 -----
 * Added `mapDict` and `unmapDict`.

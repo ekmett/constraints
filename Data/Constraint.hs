@@ -159,22 +159,18 @@ infixr 9 :-
 -- Well, we can go from @'Ord' a ':-' 'Eq' a@ via the
 -- superclass relationship, and them from @'Eq' a ':-' 'Eq' [a]@ via the
 -- instance, or we can go from @'Ord' a ':-' 'Ord' [a]@ via the instance
--- then from @'Ord' [a] ':-' 'Eq' [a]'@ through the superclass relationship
+-- then from @'Ord' [a] ':-' 'Eq' [a]@ through the superclass relationship
 -- and this diagram by definition must \"commute\".
 --
 -- Diagrammatically,
 --
--- @
---                      Ord a
---                      /   \
---                  ins/     \cls
---                    v       v
---               Ord [a]     Eq a
---                    \       /
---                  cls\     /ins
---                      v   v
---                      Eq [a]
--- @
+-- >                    Ord a
+-- >                ins /     \ cls
+-- >                   v       v
+-- >             Ord [a]     Eq a
+-- >                cls \     / ins
+-- >                     v   v
+-- >                    Eq [a]
 --
 -- This safety net ensures that pretty much anything you can write with this
 -- library is sensible and can't break any assumptions on the behalf of
@@ -185,7 +181,7 @@ newtype a :- b = Sub (a => Dict b)
 
 type role (:-) nominal nominal
 
--- TODO: _proper_ Data for @(p :- q)@ requires @(:-)@ to be cartesian _closed_.
+-- TODO: _proper_ Data for @(p ':-' q)@ requires @(:-)@ to be cartesian _closed_.
 --
 -- This is admissable, but not present by default
 
