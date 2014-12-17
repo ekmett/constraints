@@ -37,9 +37,11 @@
 -- @
 --
 -- The need for this extension was first publicized in the paper
+--
 -- <http://research.microsoft.com/pubs/67439/gmap3.pdf Scrap your boilerplate with class: extensible generic functions>
--- by Ralf Lämmel and Simon Peyton Jones in 2005, which shoehorned all the things they needed into a
--- custom 'Sat' typeclass.
+--
+-- by Ralf Lämmel and Simon Peyton Jones in 2005, which shoehorned all the
+-- things they needed into a custom 'Sat' typeclass.
 --
 -- With @ConstraintKinds@ we can put into code a lot of tools for manipulating
 -- these new types without such awkward workarounds.
@@ -77,11 +79,19 @@ import Data.Data
 #endif
 import GHC.Prim (Constraint)
 
--- | Capture a dictionary for a given constraint
+-- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
 -- e.g.
 --
--- @Dict :: Dict (Eq Int)@ captures a dictionary that proves we have 'instance Eq Int'.
+-- @
+-- 'Dict' :: 'Dict' ('Eq' 'Int')
+-- @
+--
+-- captures a dictionary that proves we have an:
+--
+-- @
+-- instance 'Eq' 'Int
+-- @
 --
 -- Pattern matching on the 'Dict' constructor will bring this instance into scope.
 --
@@ -123,13 +133,14 @@ infixr 9 :-
 -- Because @'Eq' a@ is a superclass of @'Ord' a@, we can show that @'Ord' a@
 -- entails @'Eq' a@.
 --
--- Because @instance 'Ord' a => 'Ord' [a]@ exists, we can show that @'Ord a'@
+-- Because @instance 'Ord' a => 'Ord' [a]@ exists, we can show that @'Ord' a@
 -- entails @'Ord' [a]@ as well.
 --
--- This relationship is captured in the ':-' entailment type.
+-- This relationship is captured in the ':-' entailment type here.
 --
 -- Since @p ':-' p@ and entailment composes, ':-' forms the arrows of a 'Category'
--- of constraints.
+-- of constraints. However, 'Category' only because sufficiently general to support this
+-- instance in GHC 7.8, so prior to 7.8 this instance is unavailable.
 --
 -- But due to the coherence of instance resolution in Haskell, this 'Category'
 -- has some very interesting properties. Notably, in the absence of
@@ -158,7 +169,8 @@ newtype a :- b = Sub (a => Dict b)
 
 type role (:-) nominal nominal
 
--- TODO: _proper_ Data for (p :- q) requires (:-) to be cartesian closed.
+-- TODO: _proper_ Data for @(p :- q)@ requires @(:-)@ to be cartesian _closed_.
+--
 -- This is admissable, but not present by default
 
 -- constraint should be instance (Typeable p, Typeable q, p |- q) => Data (p :- q)
@@ -302,6 +314,10 @@ unmapDict f = Sub (f Dict)
 
 type role Dict nominal
 
+--------------------------------------------------------------------------------
+-- Reflection
+--------------------------------------------------------------------------------
+
 -- | Reify the relationship between a class and its superclass constraints as a class
 --
 -- Given a definition such as
@@ -337,10 +353,7 @@ infixr 9 :=>
 class b :=> h | h -> b where
   ins :: b :- h
 
---------------------------------------------------------------------------------
 -- Bootstrapping
---------------------------------------------------------------------------------
-
 
 instance Class () (Class b a) where cls = Sub Dict
 instance Class () (b :=> a) where cls = Sub Dict
@@ -351,9 +364,7 @@ instance (b :=> a) => () :=> b :=> a where ins = Sub Dict
 instance Class () () where cls = Sub Dict
 instance () :=> () where ins = Sub Dict
 
---------------------------------------------------------------------------------
 -- Local, Prelude, Applicative, C.M.I and Data.Monoid instances
---------------------------------------------------------------------------------
 
 -- Eq
 instance Class () (Eq a) where cls = Sub Dict
@@ -389,6 +400,7 @@ instance Integral a :=> Ord (Ratio a) where ins = Sub Dict
 instance () :=> Ord (Dict a) where ins = Sub Dict
 instance () :=> Ord (a :- b) where ins = Sub Dict
 
+-- Show
 instance Class () (Show a) where cls = Sub Dict
 instance () :=> Show () where ins = Sub Dict
 instance () :=> Show Bool where ins = Sub Dict
@@ -403,6 +415,7 @@ instance (Integral a, Show a) :=> Show (Ratio a) where ins = Sub Dict
 instance () :=> Show (Dict a) where ins = Sub Dict
 instance () :=> Show (a :- b) where ins = Sub Dict
 
+-- Read
 instance Class () (Read a) where cls = Sub Dict
 instance () :=> Read () where ins = Sub Dict
 instance () :=> Read Bool where ins = Sub Dict
@@ -415,6 +428,7 @@ instance (Read a, Read b) :=> Read (a, b) where ins = Sub Dict
 instance (Read a, Read b) :=> Read (Either a b) where ins = Sub Dict
 instance (Integral a, Read a) :=> Read (Ratio a) where ins = Sub Dict
 
+-- Enum
 instance Class () (Enum a) where cls = Sub Dict
 instance () :=> Enum () where ins = Sub Dict
 instance () :=> Enum Bool where ins = Sub Dict
@@ -426,6 +440,7 @@ instance () :=> Enum Float where ins = Sub Dict
 instance () :=> Enum Double where ins = Sub Dict
 instance Integral a :=> Enum (Ratio a) where ins = Sub Dict
 
+-- Bounded
 instance Class () (Bounded a) where cls = Sub Dict
 instance () :=> Bounded () where ins = Sub Dict
 instance () :=> Bounded Ordering where ins = Sub Dict
@@ -434,6 +449,7 @@ instance () :=> Bounded Int where ins = Sub Dict
 instance () :=> Bounded Char where ins = Sub Dict
 instance (Bounded a, Bounded b) :=> Bounded (a,b) where ins = Sub Dict
 
+-- Num
 instance Class () (Num a) where cls = Sub Dict
 instance () :=> Num Int where ins = Sub Dict
 instance () :=> Num Integer where ins = Sub Dict
@@ -442,6 +458,7 @@ instance () :=> Num Double where ins = Sub Dict
 instance RealFloat a :=> Num (Complex a) where ins = Sub Dict
 instance Integral a :=> Num (Ratio a) where ins = Sub Dict
 
+-- Real
 instance Class (Num a, Ord a) (Real a) where cls = Sub Dict
 instance () :=> Real Int where ins = Sub Dict
 instance () :=> Real Integer where ins = Sub Dict
@@ -449,30 +466,36 @@ instance () :=> Real Float where ins = Sub Dict
 instance () :=> Real Double where ins = Sub Dict
 instance Integral a :=> Real (Ratio a) where ins = Sub Dict
 
+-- Integral
 instance Class (Real a, Enum a) (Integral a) where cls = Sub Dict
 instance () :=> Integral Int where ins = Sub Dict
 instance () :=> Integral Integer where ins = Sub Dict
 
+-- Fractional
 instance Class (Num a) (Fractional a) where cls = Sub Dict
 instance () :=> Fractional Float where ins = Sub Dict
 instance () :=> Fractional Double where ins = Sub Dict
 instance RealFloat a :=> Fractional (Complex a) where ins = Sub Dict
 instance Integral a :=> Fractional (Ratio a) where ins = Sub Dict
 
+-- Floating
 instance Class (Fractional a) (Floating a) where cls = Sub Dict
 instance () :=> Floating Float where ins = Sub Dict
 instance () :=> Floating Double where ins = Sub Dict
 instance RealFloat a :=> Floating (Complex a) where ins = Sub Dict
 
+-- RealFrac
 instance Class (Real a, Fractional a) (RealFrac a) where cls = Sub Dict
 instance () :=> RealFrac Float where ins = Sub Dict
 instance () :=> RealFrac Double where ins = Sub Dict
 instance Integral a :=> RealFrac (Ratio a) where ins = Sub Dict
 
+-- RealFloat
 instance Class (RealFrac a, Floating a) (RealFloat a) where cls = Sub Dict
 instance () :=> RealFloat Float where ins = Sub Dict
 instance () :=> RealFloat Double where ins = Sub Dict
 
+-- Monoid
 instance Class () (Monoid a) where cls = Sub Dict
 instance () :=> Monoid () where ins = Sub Dict
 instance () :=> Monoid Ordering where ins = Sub Dict
@@ -480,6 +503,7 @@ instance () :=> Monoid [a] where ins = Sub Dict
 instance Monoid a :=> Monoid (Maybe a) where ins = Sub Dict
 instance (Monoid a, Monoid b) :=> Monoid (a, b) where ins = Sub Dict
 
+-- Functor
 instance Class () (Functor f) where cls = Sub Dict
 instance () :=> Functor [] where ins = Sub Dict
 instance () :=> Functor Maybe where ins = Sub Dict
@@ -489,6 +513,7 @@ instance () :=> Functor ((,) a) where ins = Sub Dict
 instance () :=> Functor IO where ins = Sub Dict
 instance Monad m :=> Functor (WrappedMonad m) where ins = Sub Dict
 
+-- Applicative
 instance Class (Functor f) (Applicative f) where cls = Sub Dict
 instance () :=> Applicative [] where ins = Sub Dict
 instance () :=> Applicative Maybe where ins = Sub Dict
@@ -498,17 +523,20 @@ instance () :=> Applicative IO where ins = Sub Dict
 instance Monoid a :=> Applicative ((,)a) where ins = Sub Dict
 instance Monad m :=> Applicative (WrappedMonad m) where ins = Sub Dict
 
+-- Alternative
 instance Class (Applicative f) (Alternative f) where cls = Sub Dict
 instance () :=> Alternative [] where ins = Sub Dict
 instance () :=> Alternative Maybe where ins = Sub Dict
 instance MonadPlus m :=> Alternative (WrappedMonad m) where ins = Sub Dict
 
+-- Monad
 instance Class () (Monad f) where cls = Sub Dict
 instance () :=> Monad [] where ins = Sub Dict
 instance () :=> Monad ((->) a) where ins = Sub Dict
 instance () :=> Monad (Either a) where ins = Sub Dict
 instance () :=> Monad IO where ins = Sub Dict
 
+-- MonadPlus
 instance Class (Monad f) (MonadPlus f) where cls = Sub Dict
 instance () :=> MonadPlus [] where ins = Sub Dict
 instance () :=> MonadPlus Maybe where ins = Sub Dict
