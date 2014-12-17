@@ -1,3 +1,8 @@
+0.4.1
+-----
+* Added `mapDict` and `unmapDict`.
+* Added a lot of documentation.
+
 0.4
 ---
 * `Typeable` and `Data`. The `Data` instance for `(:-)` is a conservative approximation that avoids having to turn (:-) into a cartesian closed category.

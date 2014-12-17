@@ -21,19 +21,32 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint
--- Copyright   :  (C) 2011-2013 Edward Kmett,
+-- Copyright   :  (C) 2011-2014 Edward Kmett,
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
 -- Stability   :  experimental
 -- Portability :  non-portable
 --
+-- @ConstraintKinds@ made type classes into types of a new kind, @Constraint@.
+--
+-- @
+-- 'Eq' :: * -> 'Constraint'
+-- 'Ord' :: * -> 'Constraint'
+-- 'Monad' :: (* -> *) -> 'Constraint'
+-- @
+--
+-- The need for this extension was first publicized in the paper
+-- <http://research.microsoft.com/pubs/67439/gmap3.pdf Scrap your boilerplate with class: extensible generic functions>
+-- by Ralf Lämmel and Simon Peyton Jones in 2005, which shoehorned all the things they needed into a
+-- custom 'Sat' typeclass.
+--
+-- With @ConstraintKinds@ we can put into code a lot of tools for manipulating
+-- these new types without such awkward workarounds.
 ----------------------------------------------------------------------------
-
-
 module Data.Constraint
   (
-  -- * Constraints
+  -- * The Kind of Constraints
     Constraint
   -- * Dictionary
   , Dict(Dict)
@@ -44,6 +57,9 @@ module Data.Constraint
   , (&&&), (***)
   , trans, refl
   , top, bottom
+  -- * Dict is fully faithful
+  , mapDict
+  , unmapDict
   -- * Reflection
   , Class(..)
   , (:=>)(..)
@@ -62,12 +78,18 @@ import Data.Data
 import GHC.Prim (Constraint)
 
 -- | Capture a dictionary for a given constraint
+--
+-- e.g.
+--
+-- @Dict :: Dict (Eq Int)@ captures a dictionary that proves we have 'instance Eq Int'.
+--
+-- Pattern matching on the 'Dict' constructor will bring this instance into scope.
+--
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
   deriving Typeable
 
-type role Dict nominal
 
 instance (Typeable p, p) => Data (Dict p) where
   gfoldl _ z Dict = z Dict
@@ -89,6 +111,47 @@ deriving instance Ord (Dict a)
 deriving instance Show (Dict a)
 
 infixr 9 :-
+
+-- | This is the type of entailment.
+--
+-- @a ':-' b@ is read as @a@ \"entails\" @b@.
+--
+-- With this we can actually build a category for 'Constraint' resolution.
+--
+-- e.g.
+--
+-- Because @'Eq' a@ is a superclass of @'Ord' a@, we can show that @'Ord' a@
+-- entails @'Eq' a@.
+--
+-- Because @instance 'Ord' a => 'Ord' [a]@ exists, we can show that @'Ord a'@
+-- entails @'Ord' [a]@ as well.
+--
+-- This relationship is captured in the ':-' entailment type.
+--
+-- Since @p ':-' p@ and entailment composes, ':-' forms the arrows of a 'Category'
+-- of constraints.
+--
+-- But due to the coherence of instance resolution in Haskell, this 'Category'
+-- has some very interesting properties. Notably, in the absence of
+-- @IncoherentInstances@, this category is \"thin\", which is to say that
+-- between any two objects (constraints) there is at most one distinguishable
+-- arrow.
+--
+-- This means that for instance, even though there are two ways to derive
+-- @'Ord' a ':-' 'Eq' a@, the answers from these two paths _must_ by
+-- construction be equal. This is a property that Haskell offers that is
+-- pretty much unique in the space of languages with things they call \"type
+-- classes\".
+--
+-- What are the two ways? Well, we can go from @'Ord' a ':-' 'Eq' a@ via the
+-- superclass relationship, and them from @'Eq' a ':-' 'Eq' [a]@ via the
+-- instance, or we can go from @'Ord' a ':-' 'Ord' [a]@ via the instance
+-- then from @'Ord' [a] ':-' 'Eq' [a]'@ through the superclass relationship
+-- and this diagram by definition must \"commute\".
+--
+-- This safety net ensures that pretty much anything you can write with this
+-- library is sensible and can't break any assumptions on the behalf of
+-- library authors.
 newtype a :- b = Sub (a => Dict b)
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
   deriving Typeable
@@ -113,14 +176,17 @@ subConstr = mkConstr dictDataType "Sub" [] Prefix
 subDataType :: DataType
 subDataType = mkDataType "Data.Constraint.:-" [subConstr]
 
+-- | Possible since GHC 7.8, when 'Category' was made polykinded.
 instance Category (:-) where
   id  = refl
   (.) = trans
 #endif
 
+-- | Assumes 'IncoherentInstances' doesn't exist.
 instance Eq (a :- b) where
   _ == _ = True
 
+-- | Assumes 'IncoherentInstances' doesn't exist.
 instance Ord (a :- b) where
   compare _ _ = EQ
 
@@ -133,20 +199,51 @@ infixl 1 \\ -- required comment
 (\\) :: a => (b => r) -> (a :- b) -> r
 r \\ Sub Dict = r
 
--- | due to the hack for the kind of (,) in the current version of GHC we can't actually
--- make instances for (,) :: Constraint -> Constraint -> Constraint
+--------------------------------------------------------------------------------
+-- Constraints form a Category
+--------------------------------------------------------------------------------
+
+-- | Transitivity of entailment
+--
+-- If we view '(:-)' as a Constraint-indexed category, then this is '(.)'
+trans :: (b :- c) -> (a :- b) -> a :- c
+trans f g = Sub $ Dict \\ f \\ g
+
+-- | Reflexivity of entailment
+--
+-- If we view '(:-)' as a Constraint-indexed category, then this is 'id'
+refl :: a :- a
+refl = Sub Dict
+
+--------------------------------------------------------------------------------
+-- (,) is a Bifunctor
+--------------------------------------------------------------------------------
+
+-- | due to the hack for the kind of @(,)@ in the current version of GHC we can't actually
+-- make instances for @(,) :: Constraint -> Constraint -> Constraint@, but @(,)@ is a
+-- bifunctor on the category of constraints. This lets us map over both sides.
 (***) :: (a :- b) -> (c :- d) -> (a, c) :- (b, d)
 f *** g = Sub $ Dict \\ f \\ g
 
+--------------------------------------------------------------------------------
+-- Constraints are Cartesian
+--------------------------------------------------------------------------------
+
 -- | Weakening a constraint product
+--
+-- The category of constraints is Cartesian. We can forget information.
 weaken1 :: (a, b) :- a
 weaken1 = Sub Dict
 
 -- | Weakening a constraint product
+--
+-- The category of constraints is Cartesian. We can forget information.
 weaken2 :: (a, b) :- b
 weaken2 = Sub Dict
 
 -- | Contracting a constraint / diagonal morphism
+--
+-- The category of constraints is Cartesian. We can reuse information.
 contract :: a :- (a, a)
 contract = Sub Dict
 
@@ -157,27 +254,15 @@ contract = Sub Dict
 (&&&) :: (a :- b) -> (a :- c) -> a :- (b, c)
 f &&& g = Sub $ Dict \\ f \\ g
 
---    ?
---   / \
--- (#)  ??  ???
---     /  \ / \
---    #    *  Constraint
-
--- | Transitivity of entailment
---
--- If we view '(:-)' as a Constraint-indexed category, then this is '(.)'
-trans :: (b :- c) -> (a :- b) -> a :- c
-trans f g = Sub $ Dict \\ f \\ g
-
--- | Reflexivity of entailment
--- 
--- If we view '(:-)' as a Constraint-indexed category, then this is 'id'
-refl :: a :- a
-refl = Sub Dict
+--------------------------------------------------------------------------------
+-- Initial and terminal morphisms
+--------------------------------------------------------------------------------
 
 -- | Every constraint implies truth
 --
--- These are the terminal arrows of the category, and () is the terminal object.
+-- These are the terminal arrows of the category, and @()@ is the terminal object.
+--
+-- Given any constraint there is a unique entailment of the @()@ constraint from that constraint.
 top :: a :- ()
 top = Sub Dict
 
@@ -189,22 +274,73 @@ falso :: (() ~ a) :- Ex a c
 falso = Sub Dict
 
 -- |
--- A bad type coercion lets you derive any type you want.
+-- A bad type coercion lets you derive any constraint you want.
 --
--- These are the initial arrows of the category and (() ~ Bool) is the initial object
+-- These are the initial arrows of the category and @(() ~ Bool)@ is the initial object
 --
--- This demonstrates the law of classical logical <http://en.wikipedia.org/wiki/Principle_of_explosion ex falso quodlibet>
+-- This demonstrates the law of classical logic <http://en.wikipedia.org/wiki/Principle_of_explosion "ex falso quodlibet">
 bottom :: (() ~ Bool) :- c
 bottom = falso
 
+--------------------------------------------------------------------------------
+-- Dict is fully faithful
+--------------------------------------------------------------------------------
+
+-- | Apply an entailment to a dictionary.
+--
+-- From a category theoretic perspective 'Dict' is a functor that maps from the category
+-- of constraints (with arrows in ':-') to the category Hask of Haskell data types.
+mapDict :: (a :- b) -> Dict a -> Dict b
+mapDict p Dict = case p of Sub q -> q
+
+-- |
+-- This functor is fully faithful, which is to say that given any function you can write
+-- @Dict a -> Dict b@ there also exists an entailment @a :- b@ in the category of constraints
+-- that you can build.
+unmapDict :: (Dict a -> Dict b) -> a :- b
+unmapDict f = Sub (f Dict)
+
+type role Dict nominal
+
 -- | Reify the relationship between a class and its superclass constraints as a class
+--
+-- Given a definition such as
+--
+-- @
+-- class Foo a => Bar a
+-- @
+--
+-- you can capture the relationship between 'Bar a' and its superclass 'Foo a' with
+--
+-- @
+-- instance 'Class' (Foo a) (Bar a) where 'cls' = 'Sub' 'Dict'
+-- @
+--
+-- Now the user can use 'cls :: Bar a :- Foo a'
 class Class b h | h -> b where
   cls :: h :- b
 
 infixr 9 :=>
 -- | Reify the relationship between an instance head and its body as a class
+--
+-- Given a definition such as
+--
+-- @
+-- instance Foo a => Foo [a]
+-- @
+--
+-- you can capture the relationship between the instance head and its body with
+--
+-- @
+-- instance Foo a ':=>' Foo [a] where 'ins' = 'Sub' 'Dict'
+-- @
 class b :=> h | h -> b where
   ins :: b :- h
+
+--------------------------------------------------------------------------------
+-- Bootstrapping
+--------------------------------------------------------------------------------
+
 
 instance Class () (Class b a) where cls = Sub Dict
 instance Class () (b :=> a) where cls = Sub Dict
@@ -215,7 +351,9 @@ instance (b :=> a) => () :=> b :=> a where ins = Sub Dict
 instance Class () () where cls = Sub Dict
 instance () :=> () where ins = Sub Dict
 
+--------------------------------------------------------------------------------
 -- Local, Prelude, Applicative, C.M.I and Data.Monoid instances
+--------------------------------------------------------------------------------
 
 -- Eq
 instance Class () (Eq a) where cls = Sub Dict
@@ -375,7 +513,10 @@ instance Class (Monad f) (MonadPlus f) where cls = Sub Dict
 instance () :=> MonadPlus [] where ins = Sub Dict
 instance () :=> MonadPlus Maybe where ins = Sub Dict
 
+--------------------------------------------------------------------------------
 -- UndecidableInstances
+--------------------------------------------------------------------------------
+
 instance a :=> Enum (Dict a) where ins = Sub Dict
 instance a => Enum (Dict a) where
   toEnum _ = Dict

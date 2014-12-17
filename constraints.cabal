@@ -1,6 +1,6 @@
 name:          constraints
 category:      Constraints
-version:       0.4
+version:       0.4.1
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE
@@ -9,11 +9,15 @@ maintainer:    Edward A. Kmett <ekmett@gmail.com>
 stability:     experimental
 homepage:      http://github.com/ekmett/constraints/
 bug-reports:   http://github.com/ekmett/constraints/issues
-copyright:     Copyright (C) 2011-2013 Edward A. Kmett
+copyright:     Copyright (C) 2011-2014 Edward A. Kmett
 synopsis:      Constraint manipulation
-description:   Constraint manipulation
+description:
+  GHC 7.4 gave us the ability to talk about @ConstraintKinds@. They stopped crashing the compiler in GHC 7.6.
+  .
+  This package provides a vocabulary for working with them.
+
 build-type:    Simple
-tested-with:   GHC == 7.7.20131027, GHC == 7.7.20131025, GHC == 7.6.3
+tested-with:   GHC == 7.8.3, GHC == 7.7.20131027, GHC == 7.7.20131025, GHC == 7.6.3
 extra-source-files: README.markdown
 
 source-repository head
