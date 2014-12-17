@@ -149,16 +149,32 @@ infixr 9 :-
 -- arrow.
 --
 -- This means that for instance, even though there are two ways to derive
--- @'Ord' a ':-' 'Eq' a@, the answers from these two paths _must_ by
+-- @'Ord' a ':-' 'Eq' [a]@, the answers from these two paths _must_ by
 -- construction be equal. This is a property that Haskell offers that is
 -- pretty much unique in the space of languages with things they call \"type
 -- classes\".
 --
--- What are the two ways? Well, we can go from @'Ord' a ':-' 'Eq' a@ via the
+-- What are the two ways?
+--
+-- Well, we can go from @'Ord' a ':-' 'Eq' a@ via the
 -- superclass relationship, and them from @'Eq' a ':-' 'Eq' [a]@ via the
 -- instance, or we can go from @'Ord' a ':-' 'Ord' [a]@ via the instance
 -- then from @'Ord' [a] ':-' 'Eq' [a]'@ through the superclass relationship
 -- and this diagram by definition must \"commute\".
+--
+-- Diagrammatically,
+--
+-- @
+--                      Ord a
+--                      /   \
+--                  ins/     \cls
+--                    v       v
+--               Ord [a]     Eq a
+--                    \       /
+--                  cls\     /ins
+--                      v   v
+--                      Eq [a]
+-- @
 --
 -- This safety net ensures that pretty much anything you can write with this
 -- library is sensible and can't break any assumptions on the behalf of
