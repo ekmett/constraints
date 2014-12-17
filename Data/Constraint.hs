@@ -217,13 +217,13 @@ r \\ Sub Dict = r
 
 -- | Transitivity of entailment
 --
--- If we view '(:-)' as a Constraint-indexed category, then this is '(.)'
+-- If we view @(':-')@ as a Constraint-indexed category, then this is @('.')@
 trans :: (b :- c) -> (a :- b) -> a :- c
 trans f g = Sub $ Dict \\ f \\ g
 
 -- | Reflexivity of entailment
 --
--- If we view '(:-)' as a Constraint-indexed category, then this is 'id'
+-- If we view @(':-')@ as a Constraint-indexed category, then this is 'id'
 refl :: a :- a
 refl = Sub Dict
 
