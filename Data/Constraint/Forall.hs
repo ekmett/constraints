@@ -20,6 +20,7 @@
 -- Stability   :  experimental
 -- Portability :  non-portable
 --
+-- This module uses a trick to provide quantification over constraints.
 ----------------------------------------------------------------------------
 
 module Data.Constraint.Forall
