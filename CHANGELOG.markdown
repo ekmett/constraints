@@ -1,3 +1,7 @@
+0.4.1.2
+-------
+* Restore support for building on older GHCs
+
 0.4.1.1
 -------
 * Minor documentation fixes.
