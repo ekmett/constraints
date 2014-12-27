@@ -324,7 +324,9 @@ mapDict p Dict = case p of Sub q -> q
 unmapDict :: (Dict a -> Dict b) -> a :- b
 unmapDict f = Sub (f Dict)
 
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
 type role Dict nominal
+#endif
 
 --------------------------------------------------------------------------------
 -- Reflection
