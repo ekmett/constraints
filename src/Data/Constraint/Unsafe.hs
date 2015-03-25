@@ -35,7 +35,7 @@ import Control.Monad
 import Data.Constraint
 import Unsafe.Coerce
 
-#if __GLASGOW_HASKELL__ > 708
+#if __GLASGOW_HASKELL__ >= 708
 
 import Data.Coerce
 
