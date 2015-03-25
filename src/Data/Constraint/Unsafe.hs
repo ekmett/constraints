@@ -21,7 +21,7 @@
 --
 ----------------------------------------------------------------------------
 module Data.Constraint.Unsafe
-  ( Coercible(..)
+  ( Coercible
   , unsafeCoerceConstraint
   , unsafeDerive
   , unsafeUnderive
