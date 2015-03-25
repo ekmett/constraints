@@ -13,6 +13,7 @@ module Data.Constraint.Lifting
   ) where
 
 import Control.Applicative
+import Control.Applicative.Backwards
 import Control.DeepSeq
 import Control.Monad
 import Control.Monad.Fix
@@ -26,7 +27,6 @@ import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.RWS.Lazy as Lazy
 import Control.Monad.Trans.RWS.Strict as Strict
-import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Lazy as Lazy
 import Control.Monad.Trans.State.Strict as Strict
 import Control.Monad.Trans.Writer.Lazy as Lazy
@@ -307,6 +307,20 @@ instance Show1 f => Lifting Show (Reverse f) where lifting = Sub Dict
 instance Read1 f => Lifting Read (Reverse f) where lifting = Sub Dict
 instance Ord1 f => Lifting Ord (Reverse f) where lifting = Sub Dict
 instance Eq1 f => Lifting Eq (Reverse f) where lifting = Sub Dict
+
+instance Lifting Functor Backwards where lifting = Sub Dict
+instance Lifting Foldable Backwards where lifting = Sub Dict
+instance Lifting Traversable Backwards where lifting = Sub Dict
+instance Lifting Applicative Backwards where lifting = Sub Dict
+instance Lifting Alternative Backwards where lifting = Sub Dict
+instance Lifting Show1 Backwards where lifting = Sub Dict
+instance Lifting Read1 Backwards where lifting = Sub Dict
+instance Lifting Ord1 Backwards where lifting = Sub Dict
+instance Lifting Eq1 Backwards where lifting = Sub Dict
+instance Show1 f => Lifting Show (Backwards f) where lifting = Sub Dict
+instance Read1 f => Lifting Read (Backwards f) where lifting = Sub Dict
+instance Ord1 f => Lifting Ord (Backwards f) where lifting = Sub Dict
+instance Eq1 f => Lifting Eq (Backwards f) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: p a :- Lifting p (f a) -- (p a, p b) :- p (f a b)
