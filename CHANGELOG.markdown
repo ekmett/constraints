@@ -1,3 +1,7 @@
+0.4.2
+-----
+* Added `Data.Constraint.Lifting`.
+
 0.4.1.3
 -------
 * Acknowledge we actually need at least base 4.5
