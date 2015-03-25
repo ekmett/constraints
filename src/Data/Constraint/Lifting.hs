@@ -38,6 +38,7 @@ import Data.Constraint
 import Data.Foldable
 import Data.Functor.Classes
 import Data.Functor.Compose as Functor
+import Data.Functor.Identity
 import Data.Functor.Product as Functor
 import Data.Functor.Reverse as Functor
 import Data.Functor.Sum as Functor
@@ -336,6 +337,11 @@ instance Show1 f => Lifting Show (Lift f) where lifting = Sub Dict
 instance Read1 f => Lifting Read (Lift f) where lifting = Sub Dict
 instance Ord1 f => Lifting Ord (Lift f) where lifting = Sub Dict
 instance Eq1 f => Lifting Eq (Lift f) where lifting = Sub Dict
+
+instance Lifting Eq Identity where lifting = Sub Dict
+instance Lifting Ord Identity where lifting = Sub Dict
+instance Lifting Show Identity where lifting = Sub Dict
+instance Lifting Read Identity where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: p a :- Lifting p (f a) -- (p a, p b) :- p (f a b)
