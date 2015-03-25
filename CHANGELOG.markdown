@@ -1,4 +1,4 @@
-0.4.2
+0.5
 -----
 * Added `Data.Constraint.Lifting`.
 
