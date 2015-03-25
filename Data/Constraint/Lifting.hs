@@ -15,10 +15,13 @@ import Control.Applicative
 import Control.DeepSeq
 import Data.Binary
 import Data.Constraint
-import Data.Hashable
+import Data.Foldable
 import Data.Functor.Compose as Functor
 import Data.Functor.Product as Functor
+import Data.Functor.Sum as Functor
+import Data.Hashable
 import Data.Monoid
+import Data.Traversable
 
 class Lifting p f where
   lifting :: p a :- p (f a)
@@ -72,6 +75,7 @@ instance Functor f => Lifting Functor (Compose f)
 instance Applicative f => Lifting Applicative (Compose f)
 
 instance Functor f => Lifting Functor (Functor.Product f)
+instance Functor f => Lifting Functor (Functor.Sum f)
 
 class Lifting2 p f where
   lifting2 :: (p a, p b) :- p (f a b)
@@ -94,6 +98,14 @@ instance Lifting2 NFData (,) where lifting2 = Sub Dict
 instance Lifting2 Monoid (,) where lifting2 = Sub Dict
 
 instance Lifting2 Functor Compose where lifting2 = Sub Dict
+instance Lifting2 Foldable Compose where lifting2 = Sub Dict
+instance Lifting2 Traversable Compose where lifting2 = Sub Dict
 instance Lifting2 Applicative Compose where lifting2 = Sub Dict
-instance Lifting2 Functor Functor.Product where lifting2 = Sub Dict
 
+instance Lifting2 Functor Functor.Product where lifting2 = Sub Dict
+instance Lifting2 Foldable Functor.Product where lifting2 = Sub Dict
+instance Lifting2 Traversable Functor.Product where lifting2 = Sub Dict
+
+instance Lifting2 Functor Functor.Sum where lifting2 = Sub Dict
+instance Lifting2 Foldable Functor.Sum where lifting2 = Sub Dict
+instance Lifting2 Traversable Functor.Sum where lifting2 = Sub Dict
