@@ -48,12 +48,6 @@ import GHC.Arr
 
 class Lifting p f where
   lifting :: p a :- p (f a)
-  default lifting :: (Lifting2 p q, p b, f ~ q b) => p a :- p (f a)
-  lifting = liftingDefault
-
-liftingDefault :: forall p q a b. (Lifting2 p q, p a) => p b :- p (q a b)
-liftingDefault = Sub $ case lifting2 :: (p a, p b) :- p (q a b) of
-  Sub Dict -> Dict
 
 instance Lifting Eq [] where lifting = Sub Dict
 instance Lifting Ord [] where lifting = Sub Dict
@@ -81,29 +75,29 @@ instance Lifting Show Complex where lifting = Sub Dict
 
 instance Lifting Monoid ((->) a) where lifting = Sub Dict
 
-instance Eq a => Lifting Eq (Either a)
-instance Ord a => Lifting Ord (Either a)
-instance Show a => Lifting Show (Either a)
-instance Read a => Lifting Read (Either a)
-instance Hashable a => Lifting Hashable (Either a)
-instance Binary a => Lifting Binary (Either a)
-instance NFData a => Lifting NFData (Either a)
+instance Eq a => Lifting Eq (Either a) where lifting = Sub Dict
+instance Ord a => Lifting Ord (Either a) where lifting = Sub Dict
+instance Show a => Lifting Show (Either a) where lifting = Sub Dict
+instance Read a => Lifting Read (Either a) where lifting = Sub Dict
+instance Hashable a => Lifting Hashable (Either a) where lifting = Sub Dict
+instance Binary a => Lifting Binary (Either a) where lifting = Sub Dict
+instance NFData a => Lifting NFData (Either a) where lifting = Sub Dict
 
-instance Eq a => Lifting Eq ((,) a)
-instance Ord a => Lifting Ord ((,) a)
-instance Show a => Lifting Show ((,) a)
-instance Read a => Lifting Read ((,) a)
-instance Hashable a => Lifting Hashable ((,) a)
-instance Binary a => Lifting Binary ((,) a)
-instance NFData a => Lifting NFData ((,) a)
-instance Monoid a => Lifting Monoid ((,) a)
-instance Bounded a => Lifting Bounded ((,) a)
-instance Ix a => Lifting Ix ((,) a)
+instance Eq a => Lifting Eq ((,) a) where lifting = Sub Dict
+instance Ord a => Lifting Ord ((,) a) where lifting = Sub Dict
+instance Show a => Lifting Show ((,) a) where lifting = Sub Dict
+instance Read a => Lifting Read ((,) a) where lifting = Sub Dict
+instance Hashable a => Lifting Hashable ((,) a) where lifting = Sub Dict
+instance Binary a => Lifting Binary ((,) a) where lifting = Sub Dict
+instance NFData a => Lifting NFData ((,) a) where lifting = Sub Dict
+instance Monoid a => Lifting Monoid ((,) a) where lifting = Sub Dict
+instance Bounded a => Lifting Bounded ((,) a) where lifting = Sub Dict
+instance Ix a => Lifting Ix ((,) a) where lifting = Sub Dict
 
-instance Functor f => Lifting Functor (Compose f)
-instance Foldable f => Lifting Foldable (Compose f)
-instance Traversable f => Lifting Traversable (Compose f)
-instance Applicative f => Lifting Applicative (Compose f)
+instance Functor f => Lifting Functor (Compose f) where lifting = Sub Dict
+instance Foldable f => Lifting Foldable (Compose f) where lifting = Sub Dict
+instance Traversable f => Lifting Traversable (Compose f) where lifting = Sub Dict
+instance Applicative f => Lifting Applicative (Compose f) where lifting = Sub Dict
 instance Alternative f => Lifting Alternative (Compose f) where lifting = Sub Dict -- overconstrained
 instance (Functor f, Show1 f) => Lifting Show1 (Compose f) where lifting = Sub Dict
 instance (Functor f, Eq1 f) => Lifting Eq1 (Compose f) where lifting = Sub Dict
@@ -114,30 +108,30 @@ instance (Functor f, Ord1 f, Ord1 g) => Lifting Ord (Compose f g) where lifting 
 instance (Functor f, Read1 f, Read1 g) => Lifting Read (Compose f g) where lifting = Sub Dict
 instance (Functor f, Show1 f, Show1 g) => Lifting Show (Compose f g) where lifting = Sub Dict
 
-instance Functor f => Lifting Functor (Functor.Product f)
-instance Foldable f => Lifting Foldable (Functor.Product f)
-instance Traversable f => Lifting Traversable (Functor.Product f)
-instance Applicative f => Lifting Applicative (Functor.Product f)
-instance Alternative f => Lifting Alternative (Functor.Product f)
-instance Monad f => Lifting Monad (Functor.Product f)
-instance MonadFix f => Lifting MonadFix (Functor.Product f)
-instance MonadPlus f => Lifting MonadPlus (Functor.Product f)
-instance Show1 f => Lifting Show1 (Functor.Product f)
-instance Eq1 f => Lifting Eq1 (Functor.Product f)
-instance Ord1 f => Lifting Ord1 (Functor.Product f)
-instance Read1 f => Lifting Read1 (Functor.Product f)
+instance Functor f => Lifting Functor (Functor.Product f) where lifting = Sub Dict
+instance Foldable f => Lifting Foldable (Functor.Product f) where lifting = Sub Dict
+instance Traversable f => Lifting Traversable (Functor.Product f) where lifting = Sub Dict
+instance Applicative f => Lifting Applicative (Functor.Product f) where lifting = Sub Dict
+instance Alternative f => Lifting Alternative (Functor.Product f) where lifting = Sub Dict
+instance Monad f => Lifting Monad (Functor.Product f) where lifting = Sub Dict
+instance MonadFix f => Lifting MonadFix (Functor.Product f) where lifting = Sub Dict
+instance MonadPlus f => Lifting MonadPlus (Functor.Product f) where lifting = Sub Dict
+instance Show1 f => Lifting Show1 (Functor.Product f) where lifting = Sub Dict
+instance Eq1 f => Lifting Eq1 (Functor.Product f) where lifting = Sub Dict
+instance Ord1 f => Lifting Ord1 (Functor.Product f) where lifting = Sub Dict
+instance Read1 f => Lifting Read1 (Functor.Product f) where lifting = Sub Dict
 instance (Eq1 f, Eq1 g) => Lifting Eq (Functor.Product f g) where lifting = Sub Dict
 instance (Ord1 f, Ord1 g) => Lifting Ord (Functor.Product f g) where lifting = Sub Dict
 instance (Read1 f, Read1 g) => Lifting Read (Functor.Product f g) where lifting = Sub Dict
 instance (Show1 f, Show1 g) => Lifting Show (Functor.Product f g) where lifting = Sub Dict
 
-instance Functor f => Lifting Functor (Functor.Sum f)
-instance Foldable f => Lifting Foldable (Functor.Sum f)
-instance Traversable f => Lifting Traversable (Functor.Sum f)
-instance Show1 f => Lifting Show1 (Functor.Sum f)
-instance Eq1 f => Lifting Eq1 (Functor.Sum f)
-instance Ord1 f => Lifting Ord1 (Functor.Sum f)
-instance Read1 f => Lifting Read1 (Functor.Sum f)
+instance Functor f => Lifting Functor (Functor.Sum f) where lifting = Sub Dict
+instance Foldable f => Lifting Foldable (Functor.Sum f) where lifting = Sub Dict
+instance Traversable f => Lifting Traversable (Functor.Sum f) where lifting = Sub Dict
+instance Show1 f => Lifting Show1 (Functor.Sum f) where lifting = Sub Dict
+instance Eq1 f => Lifting Eq1 (Functor.Sum f) where lifting = Sub Dict
+instance Ord1 f => Lifting Ord1 (Functor.Sum f) where lifting = Sub Dict
+instance Read1 f => Lifting Read1 (Functor.Sum f) where lifting = Sub Dict
 instance (Eq1 f, Eq1 g) => Lifting Eq (Functor.Sum f g) where lifting = Sub Dict
 instance (Ord1 f, Ord1 g) => Lifting Ord (Functor.Sum f g) where lifting = Sub Dict
 instance (Read1 f, Read1 g) => Lifting Read (Functor.Sum f g) where lifting = Sub Dict
@@ -315,7 +309,7 @@ instance Ord1 f => Lifting Ord (Reverse f) where lifting = Sub Dict
 instance Eq1 f => Lifting Eq (Reverse f) where lifting = Sub Dict
 
 class Lifting2 p f where
-  lifting2 :: (p a, p b) :- p (f a b)
+  lifting2 :: p a :- Lifting p (f a) -- (p a, p b) :- p (f a b)
 
 instance Lifting2 Eq Either where lifting2 = Sub Dict
 instance Lifting2 Ord Either where lifting2 = Sub Dict
