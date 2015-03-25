@@ -17,6 +17,8 @@ import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Trans.State.Strict as Strict
 import Control.Monad.Trans.State.Lazy as Lazy
+import Control.Monad.Trans.Writer.Lazy as Lazy
+import Control.Monad.Trans.Writer.Strict as Strict
 import Control.Monad.Trans.Reader
 import Control.Monad.Fix
 import Data.Binary
@@ -42,10 +44,6 @@ liftingDefault :: forall p q a b. (Lifting2 p q, p a) => p b :- p (q a b)
 liftingDefault = Sub $ case lifting2 :: (p a, p b) :- p (q a b) of
   Sub Dict -> Dict
 
-{-
-instance Lifting Monad (ReaderT e) where lifting = Sub Dict
-instance Lifting Monad (WriterT w) where lifting = Sub Dict
--}
 
 instance Lifting Eq [] where lifting = Sub Dict
 instance Lifting Ord [] where lifting = Sub Dict
@@ -154,6 +152,42 @@ instance Lifting Monad (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadPlus (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadFix (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadIO (ReaderT e) where lifting = Sub Dict
+
+instance Lifting Functor (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting Applicative (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting Alternative (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting Monad (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting MonadFix (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting MonadPlus (Strict.WriterT w) where lifting = Sub Dict
+instance Lifting Foldable (Strict.WriterT w) where lifting = Sub Dict
+instance Lifting Traversable (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting MonadIO (Strict.WriterT w) where lifting = Sub Dict
+instance Show w => Lifting Show1 (Strict.WriterT w) where lifting = Sub Dict
+instance Eq w => Lifting Eq1 (Strict.WriterT w) where lifting = Sub Dict
+instance Ord w => Lifting Ord1 (Strict.WriterT w) where lifting = Sub Dict
+instance Read w => Lifting Read1 (Strict.WriterT w) where lifting = Sub Dict
+instance (Show w, Show1 m) => Lifting Show (Strict.WriterT w m) where lifting = Sub Dict
+instance (Eq w, Eq1 m) => Lifting Eq (Strict.WriterT w m) where lifting = Sub Dict
+instance (Ord w, Ord1 m) => Lifting Ord (Strict.WriterT w m) where lifting = Sub Dict
+instance (Read w, Read1 m) => Lifting Read (Strict.WriterT w m) where lifting = Sub Dict
+
+instance Lifting Functor (Lazy.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting Applicative (Lazy.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting Alternative (Lazy.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting Monad (Lazy.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting MonadFix (Lazy.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting MonadPlus (Lazy.WriterT w) where lifting = Sub Dict
+instance Lifting Foldable (Lazy.WriterT w) where lifting = Sub Dict
+instance Lifting Traversable (Lazy.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting MonadIO (Lazy.WriterT w) where lifting = Sub Dict
+instance Show w => Lifting Show1 (Lazy.WriterT w) where lifting = Sub Dict
+instance Eq w => Lifting Eq1 (Lazy.WriterT w) where lifting = Sub Dict
+instance Ord w => Lifting Ord1 (Lazy.WriterT w) where lifting = Sub Dict
+instance Read w => Lifting Read1 (Lazy.WriterT w) where lifting = Sub Dict
+instance (Show w, Show1 m) => Lifting Show (Lazy.WriterT w m) where lifting = Sub Dict
+instance (Eq w, Eq1 m) => Lifting Eq (Lazy.WriterT w m) where lifting = Sub Dict
+instance (Ord w, Ord1 m) => Lifting Ord (Lazy.WriterT w m) where lifting = Sub Dict
+instance (Read w, Read1 m) => Lifting Read (Lazy.WriterT w m) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: (p a, p b) :- p (f a b)
