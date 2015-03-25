@@ -14,6 +14,10 @@ module Data.Constraint.Lifting
 import Control.Applicative
 import Control.DeepSeq
 import Control.Monad
+import Control.Monad.IO.Class
+import Control.Monad.Trans.State.Strict as Strict
+import Control.Monad.Trans.State.Lazy as Lazy
+import Control.Monad.Trans.Reader
 import Control.Monad.Fix
 import Data.Binary
 import Data.Complex
@@ -39,7 +43,6 @@ liftingDefault = Sub $ case lifting2 :: (p a, p b) :- p (q a b) of
   Sub Dict -> Dict
 
 {-
-instance Lifting Monad (StateT s) where lifting = Sub Dict
 instance Lifting Monad (ReaderT e) where lifting = Sub Dict
 instance Lifting Monad (WriterT w) where lifting = Sub Dict
 -}
@@ -67,6 +70,8 @@ instance Lifting Eq Ratio where lifting = Sub Dict
 instance Lifting Eq Complex where lifting = Sub Dict
 instance Lifting Read Complex where lifting = Sub Dict
 instance Lifting Show Complex where lifting = Sub Dict
+
+instance Lifting Monoid ((->) a) where lifting = Sub Dict
 
 instance Eq a => Lifting Eq (Either a)
 instance Ord a => Lifting Ord (Either a)
@@ -129,6 +134,26 @@ instance (Eq1 f, Eq1 g) => Lifting Eq (Functor.Sum f g) where lifting = Sub Dict
 instance (Ord1 f, Ord1 g) => Lifting Ord (Functor.Sum f g) where lifting = Sub Dict
 instance (Read1 f, Read1 g) => Lifting Read (Functor.Sum f g) where lifting = Sub Dict
 instance (Show1 f, Show1 g) => Lifting Show (Functor.Sum f g) where lifting = Sub Dict
+
+instance Lifting Functor (Strict.StateT s) where lifting = Sub Dict
+instance Lifting Monad (Strict.StateT s) where lifting = Sub Dict
+instance Lifting MonadFix (Strict.StateT s) where lifting = Sub Dict
+instance Lifting MonadIO (Strict.StateT s) where lifting = Sub Dict
+instance Lifting MonadPlus (Strict.StateT s) where lifting = Sub Dict
+
+instance Lifting Functor (Lazy.StateT s) where lifting = Sub Dict
+instance Lifting Monad (Lazy.StateT s) where lifting = Sub Dict
+instance Lifting MonadFix (Lazy.StateT s) where lifting = Sub Dict
+instance Lifting MonadIO (Lazy.StateT s) where lifting = Sub Dict
+instance Lifting MonadPlus (Lazy.StateT s) where lifting = Sub Dict
+
+instance Lifting Functor (ReaderT e) where lifting = Sub Dict
+instance Lifting Applicative (ReaderT e) where lifting = Sub Dict
+instance Lifting Alternative (ReaderT e) where lifting = Sub Dict
+instance Lifting Monad (ReaderT e) where lifting = Sub Dict
+instance Lifting MonadPlus (ReaderT e) where lifting = Sub Dict
+instance Lifting MonadFix (ReaderT e) where lifting = Sub Dict
+instance Lifting MonadIO (ReaderT e) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: (p a, p b) :- p (f a b)
