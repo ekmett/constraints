@@ -6,6 +6,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
+{-# OPTIONS_GHC -fno-warn-deprecations #-}
 module Data.Constraint.Lifting 
   ( Lifting(..)
   , Lifting2(..)
@@ -14,13 +15,15 @@ module Data.Constraint.Lifting
 import Control.Applicative
 import Control.DeepSeq
 import Control.Monad
+import Control.Monad.Fix
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Cont
+import Control.Monad.Trans.Error
+import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict as Strict
 import Control.Monad.Trans.State.Lazy as Lazy
 import Control.Monad.Trans.Writer.Lazy as Lazy
 import Control.Monad.Trans.Writer.Strict as Strict
-import Control.Monad.Trans.Reader
-import Control.Monad.Fix
 import Data.Binary
 import Data.Complex
 import Data.Constraint
@@ -153,6 +156,22 @@ instance Lifting MonadPlus (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadFix (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadIO (ReaderT e) where lifting = Sub Dict
 
+instance Lifting Functor (ErrorT e) where lifting = Sub Dict
+instance Lifting Foldable (ErrorT e) where lifting = Sub Dict
+instance Lifting Traversable (ErrorT e) where lifting = Sub Dict
+instance Error e => Lifting Monad (ErrorT e) where lifting = Sub Dict
+instance Error e => Lifting MonadFix (ErrorT e) where lifting = Sub Dict
+instance Error e => Lifting MonadPlus (ErrorT e) where lifting = Sub Dict -- overconstrained!
+instance Error e => Lifting MonadIO (ErrorT e) where lifting = Sub Dict
+instance Show e => Lifting Show1 (ErrorT e) where lifting = Sub Dict
+instance Eq e => Lifting Eq1 (ErrorT e) where lifting = Sub Dict
+instance Ord e => Lifting Ord1 (ErrorT e) where lifting = Sub Dict
+instance Read e => Lifting Read1 (ErrorT e) where lifting = Sub Dict
+instance (Show e, Show1 m) => Lifting Show (ErrorT e m) where lifting = Sub Dict
+instance (Eq e, Eq1 m) => Lifting Eq (ErrorT e m) where lifting = Sub Dict
+instance (Ord e, Ord1 m) => Lifting Ord (ErrorT e m) where lifting = Sub Dict
+instance (Read e, Read1 m) => Lifting Read (ErrorT e m) where lifting = Sub Dict
+
 instance Lifting Functor (Strict.WriterT w) where lifting = Sub Dict
 instance Monoid w => Lifting Applicative (Strict.WriterT w) where lifting = Sub Dict
 instance Monoid w => Lifting Alternative (Strict.WriterT w) where lifting = Sub Dict
@@ -188,6 +207,11 @@ instance (Show w, Show1 m) => Lifting Show (Lazy.WriterT w m) where lifting = Su
 instance (Eq w, Eq1 m) => Lifting Eq (Lazy.WriterT w m) where lifting = Sub Dict
 instance (Ord w, Ord1 m) => Lifting Ord (Lazy.WriterT w m) where lifting = Sub Dict
 instance (Read w, Read1 m) => Lifting Read (Lazy.WriterT w m) where lifting = Sub Dict
+
+instance Lifting Functor (ContT r) where lifting = Sub Dict -- overconstrained
+instance Lifting Applicative (ContT r) where lifting = Sub Dict -- overconstrained
+instance Lifting Monad (ContT r) where lifting = Sub Dict -- overconstrained
+instance Lifting MonadIO (ContT r) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: (p a, p b) :- p (f a b)
