@@ -17,6 +17,7 @@ import Control.Applicative.Backwards
 import Control.Applicative.Lift
 import Control.DeepSeq
 import Control.Monad
+import Control.Monad.Cont.Class
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Cont
@@ -342,6 +343,19 @@ instance Lifting Eq Identity where lifting = Sub Dict
 instance Lifting Ord Identity where lifting = Sub Dict
 instance Lifting Show Identity where lifting = Sub Dict
 instance Lifting Read Identity where lifting = Sub Dict
+
+instance Lifting MonadCont MaybeT where lifting = Sub Dict
+instance Lifting MonadCont ListT where lifting = Sub Dict
+instance Lifting MonadCont IdentityT where lifting = Sub Dict
+instance Monoid w => Lifting MonadCont (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting MonadCont (Lazy.WriterT w) where lifting = Sub Dict
+instance Error e => Lifting MonadCont (ErrorT e) where lifting = Sub Dict
+instance Lifting MonadCont (ExceptT w) where lifting = Sub Dict
+instance Lifting MonadCont (Strict.StateT s) where lifting = Sub Dict
+instance Lifting MonadCont (Lazy.StateT s) where lifting = Sub Dict
+instance Lifting MonadCont (ReaderT e) where lifting = Sub Dict
+instance Monoid w => Lifting MonadCont (Strict.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting MonadCont (Lazy.RWST r w s) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: p a :- Lifting p (f a) -- (p a, p b) :- p (f a b)
