@@ -24,8 +24,11 @@ import Control.Monad.Trans.Identity
 import Control.Monad.Trans.List
 import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Reader
-import Control.Monad.Trans.State.Strict as Strict
+import Control.Monad.Trans.RWS.Lazy as Lazy
+import Control.Monad.Trans.RWS.Strict as Strict
+import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Lazy as Lazy
+import Control.Monad.Trans.State.Strict as Strict
 import Control.Monad.Trans.Writer.Lazy as Lazy
 import Control.Monad.Trans.Writer.Strict as Strict
 import Data.Binary
@@ -35,6 +38,7 @@ import Data.Foldable
 import Data.Functor.Classes
 import Data.Functor.Compose as Functor
 import Data.Functor.Product as Functor
+import Data.Functor.Reverse as Functor
 import Data.Functor.Sum as Functor
 import Data.Hashable
 import Data.Monoid
@@ -150,6 +154,18 @@ instance Lifting Monad (Lazy.StateT s) where lifting = Sub Dict
 instance Lifting MonadFix (Lazy.StateT s) where lifting = Sub Dict
 instance Lifting MonadIO (Lazy.StateT s) where lifting = Sub Dict
 instance Lifting MonadPlus (Lazy.StateT s) where lifting = Sub Dict
+
+instance Lifting Functor (Lazy.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting Monad (Lazy.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting MonadFix (Lazy.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting MonadPlus (Lazy.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting MonadIO (Lazy.RWST r w s) where lifting = Sub Dict
+
+instance Lifting Functor (Strict.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting Monad (Strict.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting MonadFix (Strict.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting MonadPlus (Strict.RWST r w s) where lifting = Sub Dict
+instance Monoid w => Lifting MonadIO (Strict.RWST r w s) where lifting = Sub Dict
 
 instance Lifting Functor (ReaderT e) where lifting = Sub Dict
 instance Lifting Applicative (ReaderT e) where lifting = Sub Dict
@@ -283,6 +299,20 @@ instance Show1 m => Lifting Show (MaybeT m) where lifting = Sub Dict
 instance Read1 m => Lifting Read (MaybeT m) where lifting = Sub Dict
 instance Ord1 m => Lifting Ord (MaybeT m) where lifting = Sub Dict
 instance Eq1 m => Lifting Eq (MaybeT m) where lifting = Sub Dict
+
+instance Lifting Functor Reverse where lifting = Sub Dict
+instance Lifting Applicative Reverse where lifting = Sub Dict
+instance Lifting Alternative Reverse where lifting = Sub Dict
+instance Lifting Foldable Reverse where lifting = Sub Dict
+instance Lifting Traversable Reverse where lifting = Sub Dict
+instance Lifting Show1 Reverse where lifting = Sub Dict
+instance Lifting Read1 Reverse where lifting = Sub Dict
+instance Lifting Ord1 Reverse where lifting = Sub Dict
+instance Lifting Eq1 Reverse where lifting = Sub Dict
+instance Show1 f => Lifting Show (Reverse f) where lifting = Sub Dict
+instance Read1 f => Lifting Read (Reverse f) where lifting = Sub Dict
+instance Ord1 f => Lifting Ord (Reverse f) where lifting = Sub Dict
+instance Eq1 f => Lifting Eq (Reverse f) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: (p a, p b) :- p (f a b)
