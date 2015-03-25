@@ -21,7 +21,6 @@ import Control.Monad.Cont.Class
 import Control.Monad.Error.Class
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.Reader.Class
 import Control.Monad.RWS.Class
 import Control.Monad.Trans.Cont
 import Control.Monad.Trans.Error
@@ -386,6 +385,16 @@ instance Lifting (MonadReader r) (Lazy.StateT s) where lifting = Sub Dict
 instance Lifting (MonadReader r) (ExceptT e) where lifting = Sub Dict
 instance Error e => Lifting (MonadReader r) (ErrorT e) where lifting = Sub Dict
 instance Lifting (MonadReader r) (ContT r') where lifting = Sub Dict
+
+instance Lifting (MonadState s) MaybeT where lifting = Sub Dict
+instance Lifting (MonadState s) ListT where lifting = Sub Dict
+instance Lifting (MonadState s) IdentityT where lifting = Sub Dict
+instance Monoid w => Lifting (MonadState s) (Strict.WriterT w) where lifting = Sub Dict
+instance Monoid w => Lifting (MonadState s) (Lazy.WriterT w) where lifting = Sub Dict
+instance Lifting (MonadState s) (ReaderT r) where lifting = Sub Dict
+instance Lifting (MonadState s) (ExceptT e) where lifting = Sub Dict
+instance Error e => Lifting (MonadState s) (ErrorT e) where lifting = Sub Dict
+instance Lifting (MonadState s) (ContT r') where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: p a :- Lifting p (f a) -- (p a, p b) :- p (f a b)
