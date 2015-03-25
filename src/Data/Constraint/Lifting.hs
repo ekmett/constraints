@@ -14,6 +14,7 @@ module Data.Constraint.Lifting
 
 import Control.Applicative
 import Control.Applicative.Backwards
+import Control.Applicative.Lift
 import Control.DeepSeq
 import Control.Monad
 import Control.Monad.Fix
@@ -321,6 +322,20 @@ instance Show1 f => Lifting Show (Backwards f) where lifting = Sub Dict
 instance Read1 f => Lifting Read (Backwards f) where lifting = Sub Dict
 instance Ord1 f => Lifting Ord (Backwards f) where lifting = Sub Dict
 instance Eq1 f => Lifting Eq (Backwards f) where lifting = Sub Dict
+
+instance Lifting Functor Lift where lifting = Sub Dict
+instance Lifting Foldable Lift where lifting = Sub Dict
+instance Lifting Traversable Lift where lifting = Sub Dict
+instance Lifting Applicative Lift where lifting = Sub Dict
+instance Lifting Alternative Lift where lifting = Sub Dict
+instance Lifting Show1 Lift where lifting = Sub Dict
+instance Lifting Read1 Lift where lifting = Sub Dict
+instance Lifting Ord1 Lift where lifting = Sub Dict
+instance Lifting Eq1 Lift where lifting = Sub Dict
+instance Show1 f => Lifting Show (Lift f) where lifting = Sub Dict
+instance Read1 f => Lifting Read (Lift f) where lifting = Sub Dict
+instance Ord1 f => Lifting Ord (Lift f) where lifting = Sub Dict
+instance Eq1 f => Lifting Eq (Lift f) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: p a :- Lifting p (f a) -- (p a, p b) :- p (f a b)
