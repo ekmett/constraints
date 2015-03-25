@@ -20,6 +20,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Cont
 import Control.Monad.Trans.Error
 import Control.Monad.Trans.Except
+import Control.Monad.Trans.Identity
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict as Strict
 import Control.Monad.Trans.State.Lazy as Lazy
@@ -47,7 +48,6 @@ class Lifting p f where
 liftingDefault :: forall p q a b. (Lifting2 p q, p a) => p b :- p (q a b)
 liftingDefault = Sub $ case lifting2 :: (p a, p b) :- p (q a b) of
   Sub Dict -> Dict
-
 
 instance Lifting Eq [] where lifting = Sub Dict
 instance Lifting Ord [] where lifting = Sub Dict
@@ -229,6 +229,24 @@ instance Lifting Functor (ContT r) where lifting = Sub Dict -- overconstrained
 instance Lifting Applicative (ContT r) where lifting = Sub Dict -- overconstrained
 instance Lifting Monad (ContT r) where lifting = Sub Dict -- overconstrained
 instance Lifting MonadIO (ContT r) where lifting = Sub Dict
+
+instance Lifting Functor IdentityT where lifting = Sub Dict
+instance Lifting Applicative IdentityT where lifting = Sub Dict
+instance Lifting Alternative IdentityT where lifting = Sub Dict
+instance Lifting Monad IdentityT where lifting = Sub Dict
+instance Lifting MonadPlus IdentityT where lifting = Sub Dict
+instance Lifting MonadFix IdentityT where lifting = Sub Dict
+instance Lifting Foldable IdentityT where lifting = Sub Dict
+instance Lifting Traversable IdentityT where lifting = Sub Dict
+instance Lifting MonadIO IdentityT where lifting = Sub Dict
+instance Lifting Show1 IdentityT where lifting = Sub Dict
+instance Lifting Read1 IdentityT where lifting = Sub Dict
+instance Lifting Ord1 IdentityT where lifting = Sub Dict
+instance Lifting Eq1 IdentityT where lifting = Sub Dict
+instance Show1 m => Lifting Show (IdentityT m) where lifting = Sub Dict
+instance Read1 m => Lifting Read (IdentityT m) where lifting = Sub Dict
+instance Ord1 m => Lifting Ord (IdentityT m) where lifting = Sub Dict
+instance Eq1 m => Lifting Eq (IdentityT m) where lifting = Sub Dict
 
 class Lifting2 p f where
   lifting2 :: (p a, p b) :- p (f a b)
