@@ -16,6 +16,7 @@ import Control.DeepSeq
 import Control.Monad
 import Control.Monad.Fix
 import Data.Binary
+import Data.Complex
 import Data.Constraint
 import Data.Foldable
 import Data.Functor.Classes
@@ -24,7 +25,9 @@ import Data.Functor.Product as Functor
 import Data.Functor.Sum as Functor
 import Data.Hashable
 import Data.Monoid
+import Data.Ratio
 import Data.Traversable
+import GHC.Arr
 
 class Lifting p f where
   lifting :: p a :- p (f a)
@@ -56,6 +59,14 @@ instance Lifting Read Maybe where lifting = Sub Dict
 instance Lifting Hashable Maybe where lifting = Sub Dict
 instance Lifting Binary Maybe where lifting = Sub Dict
 instance Lifting NFData Maybe where lifting = Sub Dict
+instance Lifting Monoid Maybe where lifting = Sub Dict
+
+instance Lifting Eq Ratio where lifting = Sub Dict
+-- instance Lifting Show Ratio where lifting = Sub Dict -- requires 7.10
+
+instance Lifting Eq Complex where lifting = Sub Dict
+instance Lifting Read Complex where lifting = Sub Dict
+instance Lifting Show Complex where lifting = Sub Dict
 
 instance Eq a => Lifting Eq (Either a)
 instance Ord a => Lifting Ord (Either a)
@@ -73,6 +84,8 @@ instance Hashable a => Lifting Hashable ((,) a)
 instance Binary a => Lifting Binary ((,) a)
 instance NFData a => Lifting NFData ((,) a)
 instance Monoid a => Lifting Monoid ((,) a)
+instance Bounded a => Lifting Bounded ((,) a)
+instance Ix a => Lifting Ix ((,) a)
 
 instance Functor f => Lifting Functor (Compose f)
 instance Foldable f => Lifting Foldable (Compose f)
@@ -136,6 +149,8 @@ instance Lifting2 Hashable (,) where lifting2 = Sub Dict
 instance Lifting2 Binary (,) where lifting2 = Sub Dict
 instance Lifting2 NFData (,) where lifting2 = Sub Dict
 instance Lifting2 Monoid (,) where lifting2 = Sub Dict
+instance Lifting2 Bounded (,) where lifting2 = Sub Dict
+instance Lifting2 Ix (,) where lifting2 = Sub Dict
 
 instance Lifting2 Functor Compose where lifting2 = Sub Dict
 instance Lifting2 Foldable Compose where lifting2 = Sub Dict
