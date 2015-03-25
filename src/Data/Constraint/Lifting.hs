@@ -19,6 +19,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Cont
 import Control.Monad.Trans.Error
+import Control.Monad.Trans.Except
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict as Strict
 import Control.Monad.Trans.State.Lazy as Lazy
@@ -171,6 +172,22 @@ instance (Show e, Show1 m) => Lifting Show (ErrorT e m) where lifting = Sub Dict
 instance (Eq e, Eq1 m) => Lifting Eq (ErrorT e m) where lifting = Sub Dict
 instance (Ord e, Ord1 m) => Lifting Ord (ErrorT e m) where lifting = Sub Dict
 instance (Read e, Read1 m) => Lifting Read (ErrorT e m) where lifting = Sub Dict
+
+instance Lifting Functor (ExceptT e) where lifting = Sub Dict
+instance Lifting Foldable (ExceptT e) where lifting = Sub Dict
+instance Lifting Traversable (ExceptT e) where lifting = Sub Dict
+instance Lifting Monad (ExceptT e) where lifting = Sub Dict
+instance Lifting MonadFix (ExceptT e) where lifting = Sub Dict
+instance Monoid e => Lifting MonadPlus (ExceptT e) where lifting = Sub Dict -- overconstrained!
+instance Lifting MonadIO (ExceptT e) where lifting = Sub Dict
+instance Show e => Lifting Show1 (ExceptT e) where lifting = Sub Dict
+instance Eq e => Lifting Eq1 (ExceptT e) where lifting = Sub Dict
+instance Ord e => Lifting Ord1 (ExceptT e) where lifting = Sub Dict
+instance Read e => Lifting Read1 (ExceptT e) where lifting = Sub Dict
+instance (Show e, Show1 m) => Lifting Show (ExceptT e m) where lifting = Sub Dict
+instance (Eq e, Eq1 m) => Lifting Eq (ExceptT e m) where lifting = Sub Dict
+instance (Ord e, Ord1 m) => Lifting Ord (ExceptT e m) where lifting = Sub Dict
+instance (Read e, Read1 m) => Lifting Read (ExceptT e m) where lifting = Sub Dict
 
 instance Lifting Functor (Strict.WriterT w) where lifting = Sub Dict
 instance Monoid w => Lifting Applicative (Strict.WriterT w) where lifting = Sub Dict
