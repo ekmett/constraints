@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -20,7 +21,8 @@
 --
 ----------------------------------------------------------------------------
 module Data.Constraint.Unsafe
-  ( unsafeCoerceConstraint
+  ( Coercible(..)
+  , unsafeCoerceConstraint
   , unsafeDerive
   , unsafeUnderive
   -- * Sugar
@@ -30,20 +32,31 @@ module Data.Constraint.Unsafe
 
 import Control.Applicative
 import Control.Monad
-import Control.Newtype
 import Data.Constraint
 import Unsafe.Coerce
+
+#if __GLASGOW_HASKELL__ > 708
+
+import Data.Coerce
+
+#else
+
+import Control.Newtype
+
+type Coercible = Newtype
+
+#endif
 
 -- | Coerce a dictionary unsafely from one type to another
 unsafeCoerceConstraint :: a :- b
 unsafeCoerceConstraint = unsafeCoerce refl
 
 -- | Coerce a dictionary unsafely from one type to a newtype of that type
-unsafeDerive :: Newtype n o => (o -> n) -> t o :- t n
+unsafeDerive :: Coercible n o => (o -> n) -> t o :- t n
 unsafeDerive _ = unsafeCoerceConstraint
 
 -- | Coerce a dictionary unsafely from a newtype of a type to the base type
-unsafeUnderive :: Newtype n o => (o -> n) -> t n :- t o
+unsafeUnderive :: Coercible n o => (o -> n) -> t n :- t o
 unsafeUnderive _ = unsafeCoerceConstraint
 
 -- | Construct an Applicative instance from a Monad
