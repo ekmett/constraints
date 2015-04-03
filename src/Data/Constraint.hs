@@ -13,7 +13,7 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE CPP #-}
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+#if __GLASGOW_HASKELL__ >= 707
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RoleAnnotations #-}
@@ -67,14 +67,14 @@ module Data.Constraint
   , (:=>)(..)
   ) where
 import Control.Monad
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+#if __GLASGOW_HASKELL__ >= 707
 import Control.Category
 #endif
 import Control.Applicative
 import Data.Monoid
 import Data.Complex
 import Data.Ratio
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+#if __GLASGOW_HASKELL__ >= 707
 import Data.Data
 #endif
 import GHC.Prim (Constraint)
@@ -97,7 +97,7 @@ import GHC.Prim (Constraint)
 --
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+#if __GLASGOW_HASKELL__ >= 707
   deriving Typeable
 
 
@@ -176,7 +176,7 @@ infixr 9 :-
 -- library is sensible and can't break any assumptions on the behalf of
 -- library authors.
 newtype a :- b = Sub (a => Dict b)
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+#if __GLASGOW_HASKELL__ >= 707
   deriving Typeable
 
 type role (:-) nominal nominal
@@ -324,7 +324,7 @@ mapDict p Dict = case p of Sub q -> q
 unmapDict :: (Dict a -> Dict b) -> a :- b
 unmapDict f = Sub (f Dict)
 
-#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 707
+#if __GLASGOW_HASKELL__ >= 707
 type role Dict nominal
 #endif
 
