@@ -26,7 +26,6 @@ before_install:
 install:
  - travis_retry cabal update
  - cabal install --only-dependencies
- - travis_retry sudo apt-get -q -y install hlint || cabal install hlint
 
 # Here starts the actual work to be performed for the package under
 # test; any command which exits with a non-zero exit code causes the
@@ -41,7 +40,6 @@ script:
 
  # tests that a source-distribution can be generated
  - cabal sdist
- - hlint src --cpp-define HLINT
 
  # check that the generated source-distribution can be built & installed
  - export SRC_TGZ=$(cabal info . | awk '{print $2 ".tar.gz";exit}') ;
