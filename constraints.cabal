@@ -1,6 +1,6 @@
 name:          constraints
 category:      Constraints
-version:       0.5
+version:       0.5.1
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE
@@ -55,6 +55,7 @@ library
 
   exposed-modules:
     Data.Constraint
+    Data.Constraint.Deferrable
     Data.Constraint.Forall
     Data.Constraint.Lifting
     Data.Constraint.Unsafe

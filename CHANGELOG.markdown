@@ -1,3 +1,7 @@
+0.5.1
+-----
+* Added `Data.Constraint.Deferrable`.
+
 0.5
 -----
 * Added `Data.Constraint.Lifting`.
