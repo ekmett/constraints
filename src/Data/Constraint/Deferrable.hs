@@ -30,8 +30,7 @@ import Control.Exception
 import Control.Monad
 import Data.Constraint
 import Data.Proxy
-import Data.Type.Equality
-import Data.Typeable
+import Data.Typeable (Typeable(..), cast)
 
 data UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving (Typeable, Show)
@@ -49,6 +48,11 @@ defer _ r = either (throw . UnsatisfiedConstraint) id $ deferEither (Proxy :: Pr
 
 deferred :: forall p. Deferrable p :- p
 deferred = Sub $ defer (Proxy :: Proxy p) Dict
+
+-- We use our own type equality rather than @Data.Type.Equality@ to allow building on GHC 7.6.
+data a :~: b where
+  Refl :: a :~: a
+    deriving Typeable
 
 instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of
