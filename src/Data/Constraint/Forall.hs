@@ -6,7 +6,7 @@
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE Unsafe #-}
 #if __GLASGOW_HASKELL__ >= 707
 {-# LANGUAGE RoleAnnotations #-}
 #endif
@@ -21,6 +21,8 @@
 -- Portability :  non-portable
 --
 -- This module uses a trick to provide quantification over constraints.
+--
+-- Sadly this approach has been subverted.
 ----------------------------------------------------------------------------
 
 module Data.Constraint.Forall
@@ -52,7 +54,6 @@ type ForallT (p :: * -> Constraint) (t :: (* -> *) -> * -> *) = (p (t F A), p (t
 type role F nominal
 type role M nominal
 #endif
-
 
 -- | instantiate a quantified constraint on kind @*@
 inst :: forall p a. Forall p :- p a
