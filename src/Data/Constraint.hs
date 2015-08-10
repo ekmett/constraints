@@ -71,7 +71,9 @@ import Control.Monad
 import Control.Category
 #endif
 import Control.Applicative
+#if __GLASGOW_HASKELL__ < 710
 import Data.Monoid
+#endif
 import Data.Complex
 import Data.Ratio
 #if __GLASGOW_HASKELL__ >= 707

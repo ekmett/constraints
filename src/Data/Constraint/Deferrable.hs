@@ -30,7 +30,7 @@ import Control.Exception
 import Control.Monad
 import Data.Constraint
 import Data.Proxy
-import Data.Typeable (Typeable(..), cast)
+import Data.Typeable (Typeable, cast)
 
 data UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving (Typeable, Show)

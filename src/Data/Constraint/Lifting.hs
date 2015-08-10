@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -39,7 +40,9 @@ import Control.Monad.Trans.Writer.Strict as Strict
 import Data.Binary
 import Data.Complex
 import Data.Constraint
+#if __GLASGOW_HASKELL__ < 710
 import Data.Foldable
+#endif
 import Data.Functor.Classes
 import Data.Functor.Compose as Functor
 import Data.Functor.Identity
@@ -47,9 +50,13 @@ import Data.Functor.Product as Functor
 import Data.Functor.Reverse as Functor
 import Data.Functor.Sum as Functor
 import Data.Hashable
+#if __GLASGOW_HASKELL__ < 710
 import Data.Monoid
+#endif
 import Data.Ratio
+#if __GLASGOW_HASKELL__ < 710
 import Data.Traversable
+#endif
 import GHC.Arr
 
 class Lifting p f where
