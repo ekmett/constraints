@@ -37,7 +37,7 @@ class Forall p where
 inst :: Forall p :- p a
 inst = Sub instantiate
 
-newtype Magic p r = Magic (Forall p => Dict (Forall p))
+newtype Magic p = Magic (Forall p => Dict (Forall p))
 
 forall :: (forall a. Dict (p a)) -> Dict (Forall p)
 forall p = unsafeCoerce (Magic Dict) p
@@ -48,7 +48,7 @@ class ForallT p t where
 instT :: ForallT p t :- p (t f a)
 instT = Sub instantiateT
 
-newtype MagicT p t r = MagicT (ForallT p t => Dict (ForallT p t))
+newtype MagicT p t = MagicT (ForallT p t => Dict (ForallT p t))
 
 forallT :: (forall f a. Dict (p (t f a))) -> Dict (ForallT p t)
 forallT p = unsafeCoerce (MagicT Dict) p
