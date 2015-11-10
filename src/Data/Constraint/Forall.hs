@@ -29,7 +29,7 @@ module Data.Constraint.Forall
   ) where
 
 import Data.Constraint
-import Data.Constraint.Unsafe
+import Unsafe.Coerce (unsafeCoerce)
 
 {- The basic trick of this module is to use "skolem" types as test candidates
  - for whether a class predicate holds, and if so assume that it holds for all
@@ -116,11 +116,11 @@ instance p (t (SkolemT1 p t) (SkolemT2 p t)) => ForallT_ (p :: k3 -> Constraint)
 
 -- | Instantiate a quantified @'Forall' p@ constraint at type @a@.
 inst :: forall p a. Forall p :- p a
-inst = trans (unsafeCoerceConstraint :: p (Skolem p) :- p a) (Sub Dict)
+inst = unsafeCoerce (Sub Dict :: Forall p :- p (Skolem p))
 
 -- | Instantiate a quantified @'ForallF' p f@ constraint at type @a@.
 instF :: forall p f a. ForallF p f :- p (f a)
-instF = trans (unsafeCoerceConstraint :: p (f (SkolemF p f)) :- p (f a)) (Sub Dict)
+instF = unsafeCoerce (Sub Dict :: ForallF p f :- p (f (SkolemF p f)))
 
 -- | Instantiate a quantified constraint on kind @* -> *@.
 -- This is now redundant since @'inst'@ became polykinded.
@@ -129,4 +129,4 @@ inst1 = inst
 
 -- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
 instT :: forall (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (f :: k1) (a :: k2). ForallT p t :- p (t f a)
-instT = trans (unsafeCoerceConstraint :: p (t (SkolemT1 p t) (SkolemT2 p t)) :- p (t f a)) (Sub Dict)
+instT = unsafeCoerce (Sub Dict :: ForallT p t :- p (t (SkolemT1 p t) (SkolemT2 p t)))
