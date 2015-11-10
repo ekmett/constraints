@@ -54,13 +54,11 @@ library
     build-depends:
       newtype >= 0.2 && < 0.3,
       tagged >= 0.2 && < 1
-  else
-    exposed-modules:
-      Data.Constraint.Forall
 
   exposed-modules:
     Data.Constraint
     Data.Constraint.Deferrable
+    Data.Constraint.Forall
     Data.Constraint.Lifting
     Data.Constraint.Unsafe
 
