@@ -95,22 +95,22 @@ type family SkolemT2 (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: k2
 -- which would be disastrous.
 
 -- | A representation of the quantified constraint @forall a. p a@.
-type family Forall (p :: k -> Constraint) :: Constraint where
-    Forall p = Forall_ p
+type family Forall (p :: k -> Constraint) :: Constraint
+type instance Forall p = Forall_ p
 class p (Skolem p) => Forall_ (p :: k -> Constraint)
 instance p (Skolem p) => Forall_ (p :: k -> Constraint)
 
 -- | A representation of the quantified constraint @forall a. p (f a)@.
-type family ForallF (p :: k2 -> Constraint) (f :: k1 -> k2) :: Constraint where
-    ForallF p f = ForallF_ p f
+type family ForallF (p :: k2 -> Constraint) (f :: k1 -> k2) :: Constraint
+type instance ForallF p f = ForallF_ p f
 class p (f (SkolemF p f)) => ForallF_ (p :: k2 -> Constraint) (f :: k1 -> k2)
 instance p (f (SkolemF p f)) => ForallF_ (p :: k2 -> Constraint) (f :: k1 -> k2)
 
 type Forall1 p = Forall p
 
 -- | A representation of the quantified constraint @forall f a. p (t f a)@.
-type family ForallT (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: Constraint where
-    ForallT p t = ForallT_ p t
+type family ForallT (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: Constraint
+type instance ForallT p t = ForallT_ p t
 class p (t (SkolemT1 p t) (SkolemT2 p t)) => ForallT_ (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
 instance p (t (SkolemT1 p t) (SkolemT2 p t)) => ForallT_ (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
 

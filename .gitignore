@@ -2,3 +2,4 @@ dist
 .git
 *.hs~
 *.swp
+*.cabal~
