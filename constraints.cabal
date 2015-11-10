@@ -17,7 +17,7 @@ description:
   This package provides a vocabulary for working with them.
 
 build-type:    Simple
-tested-with:   GHC == 7.8.3, GHC == 7.7.20131027, GHC == 7.7.20131025
+tested-with:   GHC == 7.8.4, GHC == 7.10.1, GHC == 7.10.2
 extra-source-files: README.markdown
 
 source-repository head
