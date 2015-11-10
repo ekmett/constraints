@@ -1,2 +1,4 @@
 dist
 .git
+*.hs~
+*.swp
