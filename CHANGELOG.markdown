@@ -1,3 +1,8 @@
+0.6
+---
+* Completely redesigned `Data.Constraint.Forall`. The old design is unsound and can be abused to define `unsafeCoerce`!
+  The new design requires closed type families, so this module now requires GHC 7.8+
+
 0.5.1
 -----
 * Added `Data.Constraint.Deferrable`.
