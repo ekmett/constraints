@@ -1,3 +1,7 @@
+0.6.1
+-----
+* Remove the need for closed type families from the new `Forall`.
+
 0.6
 ---
 * Completely redesigned `Data.Constraint.Forall`. The old design is unsound and can be abused to define `unsafeCoerce`!
