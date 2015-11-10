@@ -1,6 +1,6 @@
 name:          constraints
 category:      Constraints
-version:       0.5.2
+version:       0.6
 license:       BSD3
 cabal-version: >= 1.10
 license-file:  LICENSE
@@ -17,7 +17,7 @@ description:
   This package provides a vocabulary for working with them.
 
 build-type:    Simple
-tested-with:   GHC == 7.8.3, GHC == 7.7.20131027, GHC == 7.7.20131025, GHC == 7.6.3
+tested-with:   GHC == 7.8.3, GHC == 7.7.20131027, GHC == 7.7.20131025
 extra-source-files: README.markdown
 
 source-repository head
@@ -54,11 +54,13 @@ library
     build-depends:
       newtype >= 0.2 && < 0.3,
       tagged >= 0.2 && < 1
+  else
+    exposed-modules:
+      Data.Constraint.Forall
 
   exposed-modules:
     Data.Constraint
     Data.Constraint.Deferrable
-    Data.Constraint.Forall
     Data.Constraint.Lifting
     Data.Constraint.Unsafe
 
