@@ -58,6 +58,7 @@ module Data.Constraint
   , weaken1, weaken2, contract
   , (&&&), (***)
   , trans, refl
+  , Bottom
   , top, bottom
   -- * Dict is fully faithful
   , mapDict
@@ -295,13 +296,15 @@ top = Sub Dict
 class No where
   no :: Dict a
 
+type Bottom = No
+
 -- |
 -- A bad type coercion lets you derive any constraint you want.
 --
 -- These are the initial arrows of the category and @(() ~ Bool)@ is the initial object
 --
 -- This demonstrates the law of classical logic <http://en.wikipedia.org/wiki/Principle_of_explosion "ex falso quodlibet">
-bottom :: No :- a
+bottom :: Bottom :- a
 bottom = Sub no
 
 --------------------------------------------------------------------------------
