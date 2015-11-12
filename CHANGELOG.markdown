@@ -1,3 +1,7 @@
+0.7
+---
+* Found a nicer encoding of the initial object in the category of constraints using a [nullary constraint](https://ghc.haskell.org/trac/ghc/ticket/7642).
+
 0.6.1
 -----
 * Remove the need for closed type families from the new `Forall`.

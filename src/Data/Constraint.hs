@@ -292,12 +292,8 @@ f &&& g = Sub $ Dict \\ f \\ g
 top :: a :- ()
 top = Sub Dict
 
-type family Ex (a :: *) (c :: Constraint) :: Constraint
-type instance Ex () c = ()
-type instance Ex Bool c = c
-
-falso :: (() ~ a) :- Ex a c
-falso = Sub Dict
+class No where
+  no :: Dict a
 
 -- |
 -- A bad type coercion lets you derive any constraint you want.
@@ -305,8 +301,8 @@ falso = Sub Dict
 -- These are the initial arrows of the category and @(() ~ Bool)@ is the initial object
 --
 -- This demonstrates the law of classical logic <http://en.wikipedia.org/wiki/Principle_of_explosion "ex falso quodlibet">
-bottom :: (() ~ Bool) :- c
-bottom = falso
+bottom :: No :- a
+bottom = Sub no
 
 --------------------------------------------------------------------------------
 -- Dict is fully faithful
