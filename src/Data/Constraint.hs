@@ -58,7 +58,7 @@ module Data.Constraint
   , weaken1, weaken2, contract
   , (&&&), (***)
   , trans, refl
-  , Any
+  , Bottom
   , top, bottom
   -- * Dict is fully faithful
   , mapDict
@@ -293,14 +293,14 @@ f &&& g = Sub $ Dict \\ f \\ g
 top :: a :- ()
 top = Sub Dict
 
+-- | 'Any' inhabits every kind, including 'Constraint' but is uninhabited, making it impossible to define an instance.
+class Any => Bottom where
+  no :: Dict a
+
 -- |
--- A bad type coercion lets you derive any constraint you want.
---
--- 'Any' inhabits every kind, including 'Constraint' but is uninhabited.
---
 -- This demonstrates the law of classical logic <http://en.wikipedia.org/wiki/Principle_of_explosion "ex falso quodlibet">
-bottom :: Any :- a
-bottom = Sub undefined
+bottom :: Bottom :- a
+bottom = Sub no
 
 --------------------------------------------------------------------------------
 -- Dict is fully faithful
