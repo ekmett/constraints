@@ -86,8 +86,10 @@ import Unsafe.Coerce (unsafeCoerce)
 
 type family Skolem (p :: k -> Constraint) :: k
 type family SkolemF (p :: k2 -> Constraint) (f :: k1 -> k2) :: k1
-type family SkolemT1 (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: k1
-type family SkolemT2 (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: k2
+type family SkolemT1 (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4)
+    :: k1 -> k2
+type family SkolemT2 (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4)
+    :: k3
 
 -- The outer `Forall*` type families prevent GHC from giving a spurious
 -- superclass cycle error.
@@ -108,11 +110,15 @@ instance p (f (SkolemF p f)) => ForallF_ (p :: k2 -> Constraint) (f :: k1 -> k2)
 
 type Forall1 p = Forall p
 
--- | A representation of the quantified constraint @forall f a. p (t f a)@.
-type family ForallT (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: Constraint
+-- | A representation of the quantified constraint @forall f a. p (t f a)@,
+-- useful for transformers.  For backwards compatibility @f@ is required to
+-- be a type function.
+type family ForallT (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4) :: Constraint
 type instance ForallT p t = ForallT_ p t
-class p (t (SkolemT1 p t) (SkolemT2 p t)) => ForallT_ (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
-instance p (t (SkolemT1 p t) (SkolemT2 p t)) => ForallT_ (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
+class p (t (SkolemT1 p t) (SkolemT2 p t))
+    => ForallT_ (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4)
+instance p (t (SkolemT1 p t) (SkolemT2 p t))
+    => ForallT_ (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4)
 
 -- | Instantiate a quantified @'Forall' p@ constraint at type @a@.
 inst :: forall p a. Forall p :- p a
@@ -128,5 +134,6 @@ inst1 :: forall (p :: (* -> *) -> Constraint) (f :: * -> *). Forall p :- p f
 inst1 = inst
 
 -- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
-instT :: forall (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (f :: k1) (a :: k2). ForallT p t :- p (t f a)
+instT :: forall (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4)
+    (f :: k1 -> k2) (a :: k3). ForallT p t :- p (t f a)
 instT = unsafeCoerce (Sub Dict :: ForallT p t :- p (t (SkolemT1 p t) (SkolemT2 p t)))
