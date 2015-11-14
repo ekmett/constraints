@@ -58,6 +58,7 @@ module Data.Constraint
   , weaken1, weaken2, contract
   , (&&&), (***)
   , trans, refl
+  , Bottom
   , top, bottom
   -- * Dict is fully faithful
   , mapDict
@@ -79,7 +80,7 @@ import Data.Ratio
 #if __GLASGOW_HASKELL__ >= 707
 import Data.Data
 #endif
-import GHC.Prim (Constraint)
+import GHC.Prim (Constraint, Any)
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
@@ -292,21 +293,14 @@ f &&& g = Sub $ Dict \\ f \\ g
 top :: a :- ()
 top = Sub Dict
 
-type family Ex (a :: *) (c :: Constraint) :: Constraint
-type instance Ex () c = ()
-type instance Ex Bool c = c
-
-falso :: (() ~ a) :- Ex a c
-falso = Sub Dict
+-- | 'Any' inhabits every kind, including 'Constraint' but is uninhabited, making it impossible to define an instance.
+class Any => Bottom where
+  no :: Dict a
 
 -- |
--- A bad type coercion lets you derive any constraint you want.
---
--- These are the initial arrows of the category and @(() ~ Bool)@ is the initial object
---
 -- This demonstrates the law of classical logic <http://en.wikipedia.org/wiki/Principle_of_explosion "ex falso quodlibet">
-bottom :: (() ~ Bool) :- c
-bottom = falso
+bottom :: Bottom :- a
+bottom = Sub no
 
 --------------------------------------------------------------------------------
 -- Dict is fully faithful

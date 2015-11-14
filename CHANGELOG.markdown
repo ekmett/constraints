@@ -1,3 +1,16 @@
+0.7
+---
+* Found a nicer encoding of the initial object in the category of constraints using a [nullary constraint](https://ghc.haskell.org/trac/ghc/ticket/7642).
+
+0.6.1
+-----
+* Remove the need for closed type families from the new `Forall`.
+
+0.6
+---
+* Completely redesigned `Data.Constraint.Forall`. The old design is unsound and can be abused to define `unsafeCoerce`!
+  The new design requires closed type families, so this module now requires GHC 7.8+
+
 0.5.1
 -----
 * Added `Data.Constraint.Deferrable`.
