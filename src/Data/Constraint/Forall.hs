@@ -32,7 +32,7 @@ module Data.Constraint.Forall
   , ForallF, instF
   , Forall1, inst1
   , ForallT, instT
-  , ForallV, instV
+  , ForallV, InstV (instV)
   ) where
 
 import Data.Constraint
@@ -156,29 +156,31 @@ inst1 = inst
 -- | A representation of the quantified constraint
 -- @forall a1 a2 ... an . p a1 a2 ... an@, supporting a variable number of
 -- parameters.
-class ForallV' p => ForallV (p :: k)
-instance ForallV' p => ForallV p
+type family ForallV :: k -> Constraint
+type instance ForallV = ForallV_
 
-type family ForallV' (p :: k) :: Constraint
-type instance ForallV' (p :: Constraint) = p
-type instance ForallV' (p :: k -> Constraint) = Forall p
-type instance ForallV' (p :: k1 -> k2 -> k3) = ForallF ForallV p
+class ForallV' p => ForallV_ (p :: k)
+instance ForallV' p => ForallV_ p
 
 -- | Instantiate a quantified @'ForallV' p@ constraint as @c@, where
 -- @c ~ p a1 a2 ... an@.
 class InstV (p :: k) c | k c -> p where
+    type family ForallV' (p :: k) :: Constraint
     instV :: ForallV p :- c
 
 instance p ~ c => InstV (p :: Constraint) c where
+    type ForallV' (p :: Constraint) = p
     instV = Sub Dict
 
 -- Treating 1 argument specially rather than recursing as a bit of (premature?)
 -- optimization
 instance p a ~ c => InstV (p :: k -> Constraint) c where
+    type ForallV' (p :: k -> Constraint) = Forall p
     instV = Sub $ case inst :: Forall p :- c of
         Sub Dict -> Dict
 
 instance InstV (p a) c => InstV (p :: k1 -> k2 -> k3) c where
+    type ForallV' (p :: k1 -> k2 -> k3) = ForallF ForallV p
     instV = Sub $ case instF :: ForallF ForallV p :- ForallV (p a) of
         Sub Dict -> case instV :: ForallV (p a) :- c of
             Sub Dict -> Dict
