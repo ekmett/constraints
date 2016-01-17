@@ -18,6 +18,9 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RoleAnnotations #-}
 #endif
+#if __GLASGOW_HASKELL__ >= 800
+{-# LANGUAGE UndecidableSuperClasses #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint
@@ -370,7 +373,7 @@ instance Class () (Class b a) where cls = Sub Dict
 instance Class () (b :=> a) where cls = Sub Dict
 
 instance Class b a => () :=> Class b a where ins = Sub Dict
-instance (b :=> a) => () :=> b :=> a where ins = Sub Dict
+instance (b :=> a) => () :=> (b :=> a) where ins = Sub Dict
 
 instance Class () () where cls = Sub Dict
 instance () :=> () where ins = Sub Dict
