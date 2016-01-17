@@ -6,6 +6,9 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE Unsafe #-}
+#if __GLASGOW_HASKELL__ >= 800
+{-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint.Unsafe
