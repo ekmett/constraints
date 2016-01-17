@@ -80,7 +80,8 @@ import Data.Ratio
 #if __GLASGOW_HASKELL__ >= 707
 import Data.Data
 #endif
-import GHC.Prim (Constraint, Any)
+import GHC.Types (Constraint)
+import GHC.Prim (Any)
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
