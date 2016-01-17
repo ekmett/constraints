@@ -87,7 +87,7 @@ import Data.Data
 import GHC.Prim (Any, Constraint)
 #else
 import GHC.Types (Constraint)
-import GHC.Prim (Any)
+import qualified GHC.Prim as Prim
 #endif
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
@@ -302,7 +302,7 @@ top :: a :- ()
 top = Sub Dict
 
 -- | 'Any' inhabits every kind, including 'Constraint' but is uninhabited, making it impossible to define an instance.
-class Any => Bottom where
+class Prim.Any => Bottom where
   no :: Dict a
 
 -- |
