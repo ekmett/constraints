@@ -83,7 +83,7 @@ import Data.Ratio
 #if __GLASGOW_HASKELL__ >= 707
 import Data.Data
 #endif
-#if __GLASGOW_HASKELL__ < 710
+#if __GLASGOW_HASKELL__ <= 710
 import GHC.Prim (Any, Constraint)
 #else
 import GHC.Types (Constraint)
