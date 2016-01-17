@@ -1,8 +1,9 @@
-0.7.1
+0.8
 -----
 * GHC 8 compatibility
 * `transformers` 0.5 compatibility
 * `binary` 0.8 compatibility
+* Dropped support for GHC 7.6 in favor of a nicer Bottom representation.
 
 0.7
 ---
