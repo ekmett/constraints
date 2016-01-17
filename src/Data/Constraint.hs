@@ -84,11 +84,11 @@ import Data.Ratio
 import Data.Data
 #endif
 #if __GLASGOW_HASKELL__ <= 710
-import GHC.Prim (Any, Constraint)
+import GHC.Prim (Constraint)
 #else
 import GHC.Types (Constraint)
-import qualified GHC.Prim as Prim
 #endif
+import qualified GHC.Prim as Prim
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
