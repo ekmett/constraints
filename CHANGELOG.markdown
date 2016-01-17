@@ -1,3 +1,9 @@
+0.7.1
+-----
+* GHC 8 compatibility
+* `transformers` 0.5 compatibility
+* `binary` 0.8 compatibility
+
 0.7
 ---
 * Found a nicer encoding of the initial object in the category of constraints using a [nullary constraint](https://ghc.haskell.org/trac/ghc/ticket/7642).
