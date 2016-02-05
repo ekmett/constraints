@@ -18,6 +18,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RoleAnnotations #-}
 #endif
+#if __GLASGOW_HASKELL__ >= 800
+{-# LANGUAGE UndecidableSuperClasses #-}
+#endif
+#if __GLASGOW_HASKELL__ >= 708 && __GLASGOW_HASKELL__ < 710
+{-# LANGUAGE NullaryTypeClasses #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint
@@ -81,7 +87,12 @@ import Data.Ratio
 #if __GLASGOW_HASKELL__ >= 707
 import Data.Data
 #endif
-import GHC.Prim (Constraint, Any)
+#if __GLASGOW_HASKELL__ <= 710
+import GHC.Prim (Constraint)
+#else
+import GHC.Types (Constraint)
+#endif
+import qualified GHC.Prim as Prim
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
@@ -305,7 +316,7 @@ top :: a :- ()
 top = Sub Dict
 
 -- | 'Any' inhabits every kind, including 'Constraint' but is uninhabited, making it impossible to define an instance.
-class Any => Bottom where
+class Prim.Any => Bottom where
   no :: Dict a
 
 -- |
@@ -380,7 +391,7 @@ instance Class () (Class b a) where cls = Sub Dict
 instance Class () (b :=> a) where cls = Sub Dict
 
 instance Class b a => () :=> Class b a where ins = Sub Dict
-instance (b :=> a) => () :=> b :=> a where ins = Sub Dict
+instance (b :=> a) => () :=> (b :=> a) where ins = Sub Dict
 
 instance Class () () where cls = Sub Dict
 instance () :=> () where ins = Sub Dict
