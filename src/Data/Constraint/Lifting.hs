@@ -112,6 +112,17 @@ instance Foldable f => Lifting Foldable (Compose f) where lifting = Sub Dict
 instance Traversable f => Lifting Traversable (Compose f) where lifting = Sub Dict
 instance Applicative f => Lifting Applicative (Compose f) where lifting = Sub Dict
 instance Alternative f => Lifting Alternative (Compose f) where lifting = Sub Dict -- overconstrained
+
+#if MIN_VERSION_transformers(0,5,0)
+instance Show1 f => Lifting Show1 (Compose f) where lifting = Sub Dict
+instance Eq1 f => Lifting Eq1 (Compose f) where lifting = Sub Dict
+instance Ord1 f => Lifting Ord1 (Compose f) where lifting = Sub Dict
+instance Read1 f => Lifting Read1 (Compose f) where lifting = Sub Dict
+instance (Eq1 f, Eq1 g) => Lifting Eq (Compose f g) where lifting = Sub Dict
+instance (Ord1 f, Ord1 g) => Lifting Ord (Compose f g) where lifting = Sub Dict
+instance (Read1 f, Read1 g) => Lifting Read (Compose f g) where lifting = Sub Dict
+instance (Show1 f, Show1 g) => Lifting Show (Compose f g) where lifting = Sub Dict
+#else
 instance (Functor f, Show1 f) => Lifting Show1 (Compose f) where lifting = Sub Dict
 instance (Functor f, Eq1 f) => Lifting Eq1 (Compose f) where lifting = Sub Dict
 instance (Functor f, Ord1 f) => Lifting Ord1 (Compose f) where lifting = Sub Dict
@@ -120,6 +131,7 @@ instance (Functor f, Eq1 f, Eq1 g) => Lifting Eq (Compose f g) where lifting = S
 instance (Functor f, Ord1 f, Ord1 g) => Lifting Ord (Compose f g) where lifting = Sub Dict
 instance (Functor f, Read1 f, Read1 g) => Lifting Read (Compose f g) where lifting = Sub Dict
 instance (Functor f, Show1 f, Show1 g) => Lifting Show (Compose f g) where lifting = Sub Dict
+#endif
 
 instance Functor f => Lifting Functor (Functor.Product f) where lifting = Sub Dict
 instance Foldable f => Lifting Foldable (Functor.Product f) where lifting = Sub Dict

@@ -1,3 +1,10 @@
+0.8
+-----
+* GHC 8 compatibility
+* `transformers` 0.5 compatibility
+* `binary` 0.8 compatibility
+* Dropped support for GHC 7.6 in favor of a nicer Bottom representation.
+
 0.7
 ---
 * Found a nicer encoding of the initial object in the category of constraints using a [nullary constraint](https://ghc.haskell.org/trac/ghc/ticket/7642).
