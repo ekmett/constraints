@@ -306,7 +306,7 @@ top = Sub Dict
 
 -- | 'Any' inhabits every kind, including 'Constraint' but is uninhabited, making it impossible to define an instance.
 class Prim.Any => Bottom where
-  no :: Dict a
+  no :: a
 
 -- |
 -- This demonstrates the law of classical logic <http://en.wikipedia.org/wiki/Principle_of_explosion "ex falso quodlibet">
