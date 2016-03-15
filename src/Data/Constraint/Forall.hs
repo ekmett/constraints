@@ -129,13 +129,13 @@ instF = Sub $
     Sub Dict -> Dict
 
 -- Classes building up to ForallT
-class p (t a b) => R p t a b
+class p (t a b) => R (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (a :: k1) (b :: k2)
 instance p (t a b) => R p t a b
-class Forall (R p t a) => Q p t a
+class Forall (R p t a) => Q (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (a :: k1)
 instance Forall (R p t a) => Q p t a
 
 -- | A representation of the quantified constraint @forall f a. p (t f a)@.
-class Forall (Q p t) => ForallT p t
+class Forall (Q p t) => ForallT (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
 instance Forall (Q p t) => ForallT p t
 
 -- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
