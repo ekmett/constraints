@@ -15,7 +15,8 @@
 -- |
 -- Module      :  Data.Constraint.Forall
 -- Copyright   :  (C) 2011-2015 Edward Kmett,
---                (C) 2015 Ørjan Johansen
+--                (C) 2015 Ørjan Johansen,
+--                (C) 2016 David Feuer
 -- License     :  BSD-style (see the file LICENSE)
 --
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
@@ -38,6 +39,14 @@ import Unsafe.Coerce (unsafeCoerce)
 {- The basic trick of this module is to use "skolem" types as test candidates
  - for whether a class predicate holds, and if so assume that it holds for all
  - types, unsafely coercing the typeclass dictionary.
+ -
+ - The particular technique used to implement 'Forall' appears to have been
+ - discovered first by Nicolas Frisby and is
+ - <https://csks.wordpress.com/2012/10/22/safe-polykinded-universally-quantified-constraints-part-3-of-3/ discussed in some detail>
+ - on his blog.
+ -
+ - However, his discovery did not directly affect the development of this
+ - module.
  -
  - A previous version of this module used concrete, unexported types as the
  - skolems. This turned out to be unsound in the presence of type families.
@@ -85,17 +94,14 @@ import Unsafe.Coerce (unsafeCoerce)
  - extract it from `Forall p` in order to tie the knot.
  -}
 
--- the `Skolem*` type families represent skolem variables, do not export!
--- if GHC supports it, these might be made closed with no instances.
+-- The `Skolem` type family represents skolem variables; do not export!
+-- If GHC supports it, these might be made closed with no instances.
 
 type family Skolem (p :: k -> Constraint) :: k
-type family SkolemF (p :: k2 -> Constraint) (f :: k1 -> k2) :: k1
-type family SkolemT1 (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: k1
-type family SkolemT2 (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: k2
 
--- The outer `Forall*` type families prevent GHC from giving a spurious
+-- The outer `Forall` type family prevents GHC from giving a spurious
 -- superclass cycle error.
--- The inner `Forall*_` classes prevent the skolem from leaking to the user,
+-- The inner `Forall_` class prevents the skolem from leaking to the user,
 -- which would be disastrous.
 
 -- | A representation of the quantified constraint @forall a. p a@.
@@ -104,33 +110,43 @@ type instance Forall p = Forall_ p
 class p (Skolem p) => Forall_ (p :: k -> Constraint)
 instance p (Skolem p) => Forall_ (p :: k -> Constraint)
 
--- | A representation of the quantified constraint @forall a. p (f a)@.
-type family ForallF (p :: k2 -> Constraint) (f :: k1 -> k2) :: Constraint
-type instance ForallF p f = ForallF_ p f
-class p (f (SkolemF p f)) => ForallF_ (p :: k2 -> Constraint) (f :: k1 -> k2)
-instance p (f (SkolemF p f)) => ForallF_ (p :: k2 -> Constraint) (f :: k1 -> k2)
-
-type Forall1 p = Forall p
-
--- | A representation of the quantified constraint @forall f a. p (t f a)@.
-type family ForallT (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) :: Constraint
-type instance ForallT p t = ForallT_ p t
-class p (t (SkolemT1 p t) (SkolemT2 p t)) => ForallT_ (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
-instance p (t (SkolemT1 p t) (SkolemT2 p t)) => ForallT_ (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
-
 -- | Instantiate a quantified @'Forall' p@ constraint at type @a@.
 inst :: forall p a. Forall p :- p a
 inst = unsafeCoerce (Sub Dict :: Forall p :- p (Skolem p))
 
--- | Instantiate a quantified @'ForallF' p f@ constraint at type @a@.
-instF :: forall p f a. ForallF p f :- p (f a)
-instF = unsafeCoerce (Sub Dict :: ForallF p f :- p (f (SkolemF p f)))
+-- | Composition for constraints.
+class p (f a) => ComposeC (p :: k2 -> Constraint) (f :: k1 -> k2) (a :: k1)
+instance p (f a) => ComposeC p f a
 
+-- | A representation of the quantified constraint @forall a. p (f a)@.
+class Forall (ComposeC p f) => ForallF (p :: k2 -> Constraint) (f :: k1 -> k2)
+instance Forall (ComposeC p f) => ForallF p f
+
+-- | Instantiate a quantified @'ForallF' p f@ constraint at type @a@.
+instF :: forall p f a . ForallF p f :- p (f a)
+instF = Sub $
+  case inst :: Forall (ComposeC p f) :- ComposeC p f a of
+    Sub Dict -> Dict
+
+-- Classes building up to ForallT
+class p (t a b) => R p t a b
+instance p (t a b) => R p t a b
+class Forall (R p t a) => Q p t a
+instance Forall (R p t a) => Q p t a
+
+-- | A representation of the quantified constraint @forall f a. p (t f a)@.
+class Forall (Q p t) => ForallT p t
+instance Forall (Q p t) => ForallT p t
+
+-- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
+instT :: forall (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (f :: k1) (a :: k2). ForallT p t :- p (t f a)
+instT = Sub $
+  case inst :: Forall (Q p t) :- Q p t f of { Sub Dict ->
+  case inst :: Forall (R p t f) :- R p t f a of
+    Sub Dict -> Dict }
+
+type Forall1 p = Forall p
 -- | Instantiate a quantified constraint on kind @* -> *@.
 -- This is now redundant since @'inst'@ became polykinded.
 inst1 :: forall (p :: (* -> *) -> Constraint) (f :: * -> *). Forall p :- p f
 inst1 = inst
-
--- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
-instT :: forall (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (f :: k1) (a :: k2). ForallT p t :- p (t f a)
-instT = unsafeCoerce (Sub Dict :: ForallT p t :- p (t (SkolemT1 p t) (SkolemT2 p t)))
