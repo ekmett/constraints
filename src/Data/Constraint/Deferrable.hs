@@ -40,10 +40,10 @@ instance Exception UnsatisfiedConstraint
 -- | Allow an attempt at resolution of a constraint at a later time
 class Deferrable (p :: Constraint) where
   -- | Resolve a 'Deferrable' constraint with observable failure.
-  deferEither :: proxy p -> (p => r) -> Either String r
+  deferEither :: forall r proxy. proxy p -> (p => r) -> Either String r
 
 -- | Defer a constraint for later resolution in a context where we want to upgrade failure into an error
-defer :: forall p proxy r. Deferrable p => proxy p -> (p => r) -> r
+defer :: forall p r proxy. Deferrable p => proxy p -> (p => r) -> r
 defer _ r = either (throw . UnsatisfiedConstraint) id $ deferEither (Proxy :: Proxy p) r 
 
 deferred :: forall p. Deferrable p :- p
