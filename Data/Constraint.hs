@@ -138,9 +138,10 @@ infixr 9 :-
 --
 -- This relationship is captured in the ':-' entailment type here.
 --
--- Since @p ':-' p@ and entailment composes, ':-' forms the arrows of a 'Category'
--- of constraints. However, 'Category' only because sufficiently general to support this
--- instance in GHC 7.8, so prior to 7.8 this instance is unavailable.
+-- Since @p ':-' p@ and entailment composes, ':-' forms the arrows of a
+-- 'Category' of constraints. However, 'Category' only became sufficiently
+-- general to support this instance in GHC 7.8, so prior to 7.8 this instance
+-- is unavailable.
 --
 -- But due to the coherence of instance resolution in Haskell, this 'Category'
 -- has some very interesting properties. Notably, in the absence of
