@@ -91,7 +91,7 @@ import GHC.Prim (Constraint)
 #else
 import GHC.Types (Constraint)
 #endif
-import qualified GHC.Exts (Any)
+import qualified GHC.Exts as Exts (Any)
 
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
@@ -306,8 +306,8 @@ top :: a :- ()
 top = Sub Dict
 
 -- | 'Any' inhabits every kind, including 'Constraint' but is uninhabited, making it impossible to define an instance.
-class GHC.Exts.Any => Bottom where
-  no :: Dict a
+class Exts.Any => Bottom where
+  no :: a
 
 -- |
 -- This demonstrates the law of classical logic <http://en.wikipedia.org/wiki/Principle_of_explosion "ex falso quodlibet">
