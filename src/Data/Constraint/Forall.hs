@@ -167,7 +167,7 @@ instance ForallV' p => ForallV_ p
 -- | Instantiate a quantified @'ForallV' p@ constraint as @c@, where
 -- @c ~ p a1 a2 ... an@.
 class InstV (p :: k) c | k c -> p where
-    type family ForallV' (p :: k) :: Constraint
+    type ForallV' (p :: k) :: Constraint
     instV :: ForallV p :- c
 
 instance p ~ c => InstV (p :: Constraint) c where
