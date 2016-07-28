@@ -8,6 +8,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE PolyKinds #-}
 #if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE UndecidableSuperClasses #-}
@@ -33,6 +34,7 @@ module Data.Constraint.Forall
   , Forall1, inst1
   , ForallT, instT
   , ForallV, InstV (instV)
+  , forall
   ) where
 
 import Data.Constraint
@@ -185,3 +187,5 @@ instance InstV (p a) c => InstV (p :: k1 -> k2 -> k3) c where
         Sub Dict -> case instV :: ForallV (p a) :- c of
             Sub Dict -> Dict
 
+forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
+forall d = case d :: Dict (p (Skolem p)) of Dict -> Dict
