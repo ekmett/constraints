@@ -54,6 +54,9 @@ data a :~: b where
   Refl :: a :~: a
     deriving Typeable
 
+instance Deferrable () where
+  deferEither _ = Right
+
 instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of
     Just Refl -> Right r
