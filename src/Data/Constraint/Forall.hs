@@ -137,11 +137,11 @@ class Forall (R p t a) => Q (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (a :: 
 instance Forall (R p t a) => Q p t a
 
 -- | A representation of the quantified constraint @forall f a. p (t f a)@.
-class Forall (Q p t) => ForallT (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3)
+class Forall (Q p t) => ForallT (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4)
 instance Forall (Q p t) => ForallT p t
 
 -- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
-instT :: forall (p :: k3 -> Constraint) (t :: k1 -> k2 -> k3) (f :: k1) (a :: k2). ForallT p t :- p (t f a)
+instT :: forall (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4) (f :: k1 -> k2) (a :: k3). ForallT p t :- p (t f a)
 instT = Sub $
   case inst :: Forall (Q p t) :- Q p t f of { Sub Dict ->
   case inst :: Forall (R p t f) :- R p t f a of
