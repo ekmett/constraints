@@ -8,7 +8,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE Trustworthy #-}
-module Data.Constraint.TypeLits
+module Data.Constraint.Nat
   ( Min
   , Max
   , plusNat, timesNat, powNat, minNat, maxNat

@@ -65,6 +65,6 @@ library
 
   if impl(ghc >= 8)
     exposed-modules:
-      Data.Constraint.TypeLits
+      Data.Constraint.Nat
 
   ghc-options: -Wall
