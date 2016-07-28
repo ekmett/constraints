@@ -27,12 +27,14 @@ module Data.Constraint.Nat
   , powMonotone1, powMonotone2
   , minMonotone1, minMonotone2
   , maxMonotone1, maxMonotone2
+  , divMonotone1, divMonotone2
   , euclideanNat
   , plusMod, timesMod
   , modBound
   , dividesDef
   , timesDiv
   , eqLe, leEq, leId, leTrans
+  , leZero, zeroLe
   ) where
 
 import Data.Constraint
@@ -132,6 +134,12 @@ maxZero = axiom
 powZero :: forall n. Dict ((n ^ 0) ~ 1)
 powZero = axiom
 
+leZero :: forall a. (a <= 0) :- (a ~ 0)
+leZero = Sub axiom
+
+zeroLe :: forall a. Dict (0 <= a)
+zeroLe = axiom
+
 plusMonotone1 :: forall a b c. (a <= b) :- (a + c <= b + c)
 plusMonotone1 = Sub axiom
 
@@ -143,6 +151,12 @@ powMonotone1 = Sub axiom
 
 powMonotone2 :: forall a b c. (b <= c) :- ((a^b) <= (a^c))
 powMonotone2 = Sub axiom
+
+divMonotone1 :: forall a b c. (a <= b) :- (Div a c <= Div b c)
+divMonotone1 = Sub axiom
+
+divMonotone2 :: forall a b c. (b <= c) :- (Div a c <= Div a b)
+divMonotone2 = Sub axiom
 
 timesMonotone1 :: forall a b c. (a <= b) :- (a * c <= b * c)
 timesMonotone1 = Sub axiom
