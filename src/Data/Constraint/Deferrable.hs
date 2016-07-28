@@ -48,7 +48,7 @@ data UnsatisfiedConstraint = UnsatisfiedConstraint String
 instance Exception UnsatisfiedConstraint
 
 -- | Allow an attempt at resolution of a constraint at a later time
-class Deferrable (p :: Constraint) where
+class Deferrable p where
   -- | Resolve a 'Deferrable' constraint with observable failure.
   deferEither :: proxy p -> (p => r) -> Either String r
 
@@ -61,11 +61,11 @@ deferred = Sub $ defer (Proxy :: Proxy p) Dict
 
 #if __GLASGOW_HASKELL__ >= 800
 --- | A version of 'defer' that uses visible type application in place of a 'Proxy'.
-defer_ :: forall (p :: Constraint) r. Deferrable p => (p => r) -> r
+defer_ :: forall p r. Deferrable p => (p => r) -> r
 defer_ = defer @p Proxy
 
 --- | A version of 'deferEither' that uses visible type application in place of a 'Proxy'.
-deferEither_ :: forall (p :: Constraint) r. Deferrable p => (p => r) -> Either String r
+deferEither_ :: forall p r. Deferrable p => (p => r) -> Either String r
 deferEither_ = deferEither @p Proxy
 #endif
 
