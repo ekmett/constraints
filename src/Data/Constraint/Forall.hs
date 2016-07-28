@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -31,6 +32,7 @@ module Data.Constraint.Forall
   , ForallF, instF
   , Forall1, inst1
   , ForallT, instT
+  , ForallV, instV
   ) where
 
 import Data.Constraint
@@ -150,3 +152,34 @@ type Forall1 p = Forall p
 -- This is now redundant since @'inst'@ became polykinded.
 inst1 :: forall (p :: (* -> *) -> Constraint) (f :: * -> *). Forall p :- p f
 inst1 = inst
+
+-- | A representation of the quantified constraint
+-- @forall a1 a2 ... an . p a1 a2 ... an@, supporting a variable number of
+-- parameters.
+class ForallV' p => ForallV (p :: k)
+instance ForallV' p => ForallV p
+
+type family ForallV' (p :: k) :: Constraint
+type instance ForallV' (p :: Constraint) = p
+type instance ForallV' (p :: k -> Constraint) = Forall p
+type instance ForallV' (p :: k1 -> k2 -> k3) = ForallF ForallV p
+
+-- | Instantiate a quantified @'ForallV' p@ constraint as @c@, where
+-- @c ~ p a1 a2 ... an@.
+class InstV (p :: k) c | k c -> p where
+    instV :: ForallV p :- c
+
+instance p ~ c => InstV (p :: Constraint) c where
+    instV = Sub Dict
+
+-- Treating 1 argument specially rather than recursing as a bit of (premature?)
+-- optimization
+instance p a ~ c => InstV (p :: k -> Constraint) c where
+    instV = Sub $ case inst :: Forall p :- c of
+        Sub Dict -> Dict
+
+instance InstV (p a) c => InstV (p :: k1 -> k2 -> k3) c where
+    instV = Sub $ case instF :: ForallF ForallV p :- ForallV (p a) of
+        Sub Dict -> case instV :: ForallV (p a) :- c of
+            Sub Dict -> Dict
+
