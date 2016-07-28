@@ -78,7 +78,7 @@ showTypeRep :: forall t. Typeable t => Proxy t -> String
 showTypeRep _ = show (typeOf (undefined :: t))
 
 instance Deferrable () where
-  deferEither _ = Right
+  deferEither _ r = Right r
 
 instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of
