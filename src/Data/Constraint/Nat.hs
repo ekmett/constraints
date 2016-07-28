@@ -4,22 +4,34 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE Trustworthy #-}
 module Data.Constraint.Nat
-  ( Min
-  , Max
-  , plusNat, timesNat, powNat, minNat, maxNat
-  , plusZero, timesZero, timesOne, powZero, powOne, maxZero, minZero
-  , plusAssociates, timesAssociates, minAssociates, maxAssociates
-  , plusCommutes, timesCommutes, minCommutes, maxCommutes
-  , plusDistributesOverTimes, timesDistributesOverPow
+  ( Min, Max, Lcm, Gcd, Divides, Div, Mod
+  , plusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat
+  , plusZero, timesZero, timesOne, powZero, powOne, maxZero, minZero, gcdZero, gcdOne, lcmZero, lcmOne
+  , plusAssociates, timesAssociates, minAssociates, maxAssociates, gcdAssociates, lcmAssociates
+  , plusCommutes, timesCommutes, minCommutes, maxCommutes, gcdCommutes, lcmCommutes
+  , plusDistributesOverTimes, timesDistributesOverPow, timesDistributesOverGcd, timesDistributesOverLcm
   , minDistributesOverPlus, minDistributesOverTimes, minDistributesOverPow1, minDistributesOverPow2, minDistributesOverMax
   , maxDistributesOverPlus, maxDistributesOverTimes, maxDistributesOverPow1, maxDistributesOverPow2, maxDistributesOverMin
-  , minIsIdempotent, maxIsIdempotent
-  , plusIsCancellative
+  , gcdDistributesOverLcm, lcmDistributesOverGcd
+  , minIsIdempotent, maxIsIdempotent, lcmIsIdempotent, gcdIsIdempotent
+  , plusIsCancellative, timesIsCancellative
+  , dividesPlus, dividesTimes, dividesMin, dividesMax, dividesPow, dividesGcd, dividesLcm
+  , plusMonotone1, plusMonotone2
+  , timesMonotone1, timesMonotone2
+  , powMonotone1, powMonotone2
+  , minMonotone1, minMonotone2
+  , maxMonotone1, maxMonotone2
+  , euclideanNat
+  , plusMod, timesMod
+  , modBound
+  , dividesDef
+  , timesDiv
   , eqLe, leEq, leId, leTrans
   ) where
 
@@ -28,9 +40,14 @@ import Data.Proxy
 import GHC.TypeLits
 import Unsafe.Coerce
 
-type family Min (n :: Nat) (m :: Nat) :: Nat where
+type family Min :: Nat -> Nat -> Nat where
+type family Max :: Nat -> Nat -> Nat where
+type family Div :: Nat -> Nat -> Nat where
+type family Mod :: Nat -> Nat -> Nat where
+type family Gcd :: Nat -> Nat -> Nat where
+type family Lcm :: Nat -> Nat -> Nat where
 
-type family Max (n :: Nat) (m :: Nat) :: Nat where
+type Divides n m = n ~ Gcd n m
 
 newtype Magic n r = Magic (KnownNat n => r)
 
@@ -46,6 +63,36 @@ axiomLe = axiom
 eqLe :: (a ~ b) :- (a <= b)
 eqLe = Sub Dict
 
+dividesGcd :: forall a b c. (Divides a b, Divides a c) :- Divides a (Gcd b c)
+dividesGcd = Sub axiom
+
+dividesLcm :: forall a b c. (Divides a c, Divides b c) :- Divides (Lcm a b) c
+dividesLcm = Sub axiom
+
+gcdCommutes :: forall a b. Dict (Gcd a b ~ Gcd b a)
+gcdCommutes = axiom
+
+lcmCommutes :: forall a b. Dict (Lcm a b ~ Lcm b a)
+lcmCommutes = axiom
+
+gcdZero :: forall a. Dict (Gcd 0 a ~ a)
+gcdZero = axiom
+
+gcdOne :: forall a. Dict (Gcd 1 a ~ 1)
+gcdOne = axiom
+
+lcmZero :: forall a. Dict (Lcm 0 a ~ 0)
+lcmZero = axiom
+
+lcmOne :: forall a. Dict (Lcm 1 a ~ a)
+lcmOne = axiom
+
+gcdNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Gcd n m)
+gcdNat = magic gcd
+
+lcmNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Lcm n m)
+lcmNat = magic lcm
+
 plusNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n + m)
 plusNat = magic (+)
 
@@ -60,6 +107,12 @@ timesNat = magic (*)
 
 powNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n ^ m)
 powNat = magic (^)
+
+divNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Div n m)
+divNat = Sub $ case magic @n @m div of Sub r -> r
+
+modNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Mod n m)
+modNat = Sub $ case magic @n @m mod of Sub r -> r
 
 plusZero :: forall n. Dict ((n + 0) ~ n)
 plusZero = axiom
@@ -79,8 +132,50 @@ maxZero = axiom
 powZero :: forall n. Dict ((n ^ 0) ~ 1)
 powZero = axiom
 
+plusMonotone1 :: forall a b c. (a <= b) :- (a + c <= b + c)
+plusMonotone1 = Sub axiom
+
+plusMonotone2 :: forall a b c. (b <= c) :- (a + b <= a + c)
+plusMonotone2 = Sub axiom
+
+powMonotone1 :: forall a b c. (a <= b) :- ((a^c) <= (b^c))
+powMonotone1 = Sub axiom
+
+powMonotone2 :: forall a b c. (b <= c) :- ((a^b) <= (a^c))
+powMonotone2 = Sub axiom
+
+timesMonotone1 :: forall a b c. (a <= b) :- (a * c <= b * c)
+timesMonotone1 = Sub axiom
+
+timesMonotone2 :: forall a b c. (b <= c) :- (a * b <= a * c)
+timesMonotone2 = Sub axiom
+
+minMonotone1 :: forall a b c. (a <= b) :- (Min a c <= Min b c)
+minMonotone1 = Sub axiom
+
+minMonotone2 :: forall a b c. (b <= c) :- (Min a b <= Min a c)
+minMonotone2 = Sub axiom
+
+maxMonotone1 :: forall a b c. (a <= b) :- (Max a c <= Max b c)
+maxMonotone1 = Sub axiom
+
+maxMonotone2 :: forall a b c. (b <= c) :- (Max a b <= Max a c)
+maxMonotone2 = Sub axiom
+
 powOne :: forall n. Dict ((n ^ 1) ~ n)
 powOne = axiom
+
+plusMod :: forall a b c. (1 <= c) :- (Mod (a + b) c ~ Mod (Mod a c + Mod b c) c)
+plusMod = Sub axiom
+
+timesMod :: forall a b c. (1 <= c) :- (Mod (a * b) c ~ Mod (Mod a c * Mod b c) c)
+timesMod = Sub axiom
+
+modBound :: forall m n. (1 <= n) :- (Mod m n <= n)
+modBound = Sub axiom
+
+euclideanNat :: (1 <= c) :- (a ~ (c * Div a c + Mod a c))
+euclideanNat = Sub axiom
 
 plusCommutes :: forall n m. Dict ((m + n) ~ (n + m))
 plusCommutes = axiom
@@ -106,11 +201,23 @@ minAssociates = axiom
 maxAssociates :: forall n m o. Dict (Max (Max m n) o ~ Max m (Max n o))
 maxAssociates = axiom
 
+gcdAssociates :: forall a b c. Dict (Gcd (Gcd a b) c  ~ Gcd a (Gcd b c))
+gcdAssociates = axiom
+
+lcmAssociates :: forall a b c. Dict (Lcm (Lcm a b) c ~ Lcm a (Lcm b c))
+lcmAssociates = axiom
+
 minIsIdempotent :: forall n. Dict (Min n n ~ n)
 minIsIdempotent = axiom
 
 maxIsIdempotent :: forall n. Dict (Max n n ~ n)
 maxIsIdempotent = axiom
+
+gcdIsIdempotent :: forall n. Dict (Gcd n n ~ n)
+gcdIsIdempotent = axiom
+
+lcmIsIdempotent :: forall n. Dict (Lcm n n ~ n)
+lcmIsIdempotent = axiom
 
 minDistributesOverPlus :: forall n m o. Dict ((n + Min m o) ~ Min (n + m) (n + o))
 minDistributesOverPlus = axiom
@@ -148,8 +255,44 @@ plusDistributesOverTimes = axiom
 timesDistributesOverPow  :: forall n m o. Dict ((n ^ (m + o)) ~ (n ^ m * n ^ o))
 timesDistributesOverPow = axiom
 
+timesDistributesOverGcd :: forall n m o. Dict ((n * Gcd m o) ~ Gcd (n * m) (n * o))
+timesDistributesOverGcd = axiom
+
+timesDistributesOverLcm :: forall n m o. Dict ((n * Lcm m o) ~ Lcm (n * m) (n * o))
+timesDistributesOverLcm = axiom
+
 plusIsCancellative :: forall n m o. ((n + m) ~ (n + o)) :- (m ~ o)
 plusIsCancellative = Sub axiom
+
+timesIsCancellative :: forall n m o. (1 <= n, (n * m) ~ (n * o)) :- (m ~ o)
+timesIsCancellative = Sub axiom
+
+gcdDistributesOverLcm :: forall a b c. Dict (Gcd (Lcm a b) c ~ Lcm (Gcd a c) (Gcd b c))
+gcdDistributesOverLcm = axiom
+
+lcmDistributesOverGcd :: forall a b c. Dict (Lcm (Gcd a b) c ~ Gcd (Lcm a c) (Lcm b c))
+lcmDistributesOverGcd = axiom
+
+dividesPlus :: (Divides a b, Divides a c) :- Divides a (b + c)
+dividesPlus = Sub axiom
+
+dividesTimes :: (Divides a b, Divides a c) :- Divides a (b * c)
+dividesTimes = Sub axiom
+
+dividesMin :: (Divides a b, Divides a c) :- Divides a (Min b c)
+dividesMin = Sub axiom
+
+dividesMax :: (Divides a b, Divides a c) :- Divides a (Max b c)
+dividesMax = Sub axiom
+
+dividesDef :: forall a b. Divides a b :- ((a * Div b a) ~ a)
+dividesDef = Sub axiom
+
+dividesPow :: (1 <= n, Divides a b) :- Divides a (b^n)
+dividesPow = Sub axiom
+
+timesDiv :: forall a b. Dict ((a * Div b a) <= a)
+timesDiv = axiom
 
 -- (<=) is an internal category in the category of constraints.
 
