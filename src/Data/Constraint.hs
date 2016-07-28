@@ -63,6 +63,7 @@ module Data.Constraint
   , (:-)(Sub)
   , (\\)
   , weaken1, weaken2, contract
+  , strengthen1, strengthen2
   , (&&&), (***)
   , trans, refl
   , Bottom
@@ -291,6 +292,12 @@ weaken1 = Sub Dict
 -- The category of constraints is Cartesian. We can forget information.
 weaken2 :: (a, b) :- b
 weaken2 = Sub Dict
+
+strengthen1 :: Dict b -> a :- c -> a :- (b,c)
+strengthen1 d e = unmapDict (const d) &&& e
+
+strengthen2 :: Dict b -> a :- c -> a :- (c,b)
+strengthen2 d e = e &&& unmapDict (const d)
 
 -- | Contracting a constraint / diagonal morphism
 --
