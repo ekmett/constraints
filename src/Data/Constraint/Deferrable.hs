@@ -31,7 +31,7 @@ import Control.Exception
 import Control.Monad
 import Data.Constraint
 import Data.Proxy
-import Data.Typeable (Typeable, cast)
+import Data.Typeable (Typeable, cast, typeOf)
 
 data UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving (Typeable, Show)
@@ -41,7 +41,7 @@ instance Exception UnsatisfiedConstraint
 -- | Allow an attempt at resolution of a constraint at a later time
 class Deferrable (p :: Constraint) where
   -- | Resolve a 'Deferrable' constraint with observable failure.
-  deferEither :: forall r proxy. proxy p -> (p => r) -> Either String r
+  deferEither :: proxy p -> (p => r) -> Either String r
 
 -- | Defer a constraint for later resolution in a context where we want to upgrade failure into an error
 defer :: forall p r proxy. Deferrable p => proxy p -> (p => r) -> r
@@ -55,13 +55,17 @@ data a :~: b where
   Refl :: a :~: a
     deriving Typeable
 
+showTypeRep :: forall t. Typeable t => Proxy t -> String
+showTypeRep _ = show (typeOf (undefined :: t))
+
 instance Deferrable () where
   deferEither _ = Right
 
 instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of
     Just Refl -> Right r
-    Nothing -> Left "deferred type equality: type mismatch"
+    Nothing   -> Left $
+      "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy a) ++ "'"
 
 instance (Deferrable a, Deferrable b) => Deferrable (a, b) where
   deferEither _ r = join $ deferEither (Proxy :: Proxy a) $ deferEither (Proxy :: Proxy b) r
