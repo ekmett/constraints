@@ -62,11 +62,11 @@ deferred = Sub $ defer (Proxy :: Proxy p) Dict
 #if __GLASGOW_HASKELL__ >= 800
 --- | A version of 'defer' that uses visible type application in place of a 'Proxy'.
 defer_ :: forall p r. Deferrable p => (p => r) -> r
-defer_ = defer @p Proxy
+defer_ r = defer @p Proxy r
 
 --- | A version of 'deferEither' that uses visible type application in place of a 'Proxy'.
 deferEither_ :: forall p r. Deferrable p => (p => r) -> Either String r
-deferEither_ = deferEither @p Proxy
+deferEither_ r = deferEither @p Proxy r
 #endif
 
 -- We use our own type equality rather than @Data.Type.Equality@ to allow building on GHC 7.6.
