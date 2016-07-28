@@ -7,6 +7,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
+#if __GLASGOW_HASKELL__ >= 800
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+#endif
+
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint.Deferrable
@@ -25,6 +30,10 @@ module Data.Constraint.Deferrable
   , Deferrable(..)
   , defer
   , deferred
+#if __GLASGOW_HASKELL__ >= 800
+  , defer_
+  , deferEither_
+#endif
   ) where
 
 import Control.Exception
@@ -49,6 +58,16 @@ defer _ r = either (throw . UnsatisfiedConstraint) id $ deferEither (Proxy :: Pr
 
 deferred :: forall p. Deferrable p :- p
 deferred = Sub $ defer (Proxy :: Proxy p) Dict
+
+#if __GLASGOW_HASKELL__ >= 800
+--- | A version of 'defer' that uses visible type application in place of a 'Proxy'.
+defer_ :: forall (p :: Constraint) r. Deferrable p => (p => r) -> r
+defer_ = defer @p Proxy
+
+--- | A version of 'deferEither' that uses visible type application in place of a 'Proxy'.
+deferEither_ :: forall (p :: Constraint) r. Deferrable p => (p => r) -> Either String r
+deferEither_ = deferEither @p Proxy
+#endif
 
 -- We use our own type equality rather than @Data.Type.Equality@ to allow building on GHC 7.6.
 data a :~: b where
