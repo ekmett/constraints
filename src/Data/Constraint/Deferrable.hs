@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE ConstraintKinds #-}
@@ -5,6 +6,9 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+#if __GLASGOW_HASKELL__ >= 800
+{-# LANGUAGE TypeApplications #-}
+#endif
 
 -----------------------------------------------------------------------------
 -- |
@@ -40,19 +44,31 @@ instance Exception UnsatisfiedConstraint
 -- | Allow an attempt at resolution of a constraint at a later time
 class Deferrable (p :: Constraint) where
   -- | Resolve a 'Deferrable' constraint with observable failure.
-  deferEither :: proxy p -> (p => r) -> Either String r
+  deferEither :: forall r proxy. proxy p -> (p => r) -> Either String r
 
 -- | Defer a constraint for later resolution in a context where we want to upgrade failure into an error
-defer :: forall proxy p r. Deferrable p => proxy p -> (p => r) -> r
+defer :: forall p r proxy. Deferrable p => proxy p -> (p => r) -> r
 defer _ r = either (throw . UnsatisfiedConstraint) id $ deferEither (Proxy :: Proxy p) r 
 
 deferred :: forall p. Deferrable p :- p
 deferred = Sub $ defer (Proxy :: Proxy p) Dict
 
+#if __GLASGOW_HASKELL__ >= 800
+-- | Functions that don't require a proxy argument.
+theDefer :: forall (p :: Constraint) r. Deferrable p => (p => r) -> r
+theDefer = defer @p Proxy
+
+theDeferEither :: forall (p :: Constraint) r. Deferrable p => (p => r) -> Either String r
+theDeferEither = deferEither @p Proxy
+#endif
+
 -- We use our own type equality rather than @Data.Type.Equality@ to allow building on GHC 7.6.
 data a :~: b where
   Refl :: a :~: a
     deriving Typeable
+
+instance Deferrable () where
+  deferEither _ = Right
 
 instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of

@@ -58,6 +58,7 @@ module Data.Constraint
     Constraint
   -- * Dictionary
   , Dict(Dict)
+  , withDict
   -- * Entailment
   , (:-)(Sub)
   , (\\)
@@ -134,6 +135,16 @@ dictDataType = mkDataType "Data.Constraint.Dict" [dictConstr]
 deriving instance Eq (Dict a)
 deriving instance Ord (Dict a)
 deriving instance Show (Dict a)
+
+-- | From a 'Dict', takes a value in an environment where the instance
+-- witnessed by the 'Dict' is in scope, and evaluates it.
+--
+-- Essentially a deconstruction of a 'Dict' into its continuation-style
+-- form.
+--
+withDict :: Dict a -> (a => r) -> r
+withDict d r = case d of
+                 Dict -> r
 
 infixr 9 :-
 
