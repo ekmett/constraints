@@ -63,4 +63,8 @@ library
     Data.Constraint.Lifting
     Data.Constraint.Unsafe
 
+  if impl(ghc >= 7.10)
+    exposed-modules:
+      Data.Constraint.TypeLits
+
   ghc-options: -Wall
