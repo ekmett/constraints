@@ -51,7 +51,6 @@ import Data.Type.Equality ((:~:)(Refl))
 #endif
 
 #if __GLASGOW_HASKELL__ >= 800
-import Data.Kind (type (*))
 import GHC.Types (type (~~))
 #endif
 
@@ -87,6 +86,7 @@ deferEither_ r = deferEither @p Proxy r
 data a :~: b where
   Refl :: a :~: a
     deriving Typeable
+    -- 7.10 is missing Typeable here, orphan?
 #endif
 
 #if __GLASGOW_HASKELL__ >= 800
