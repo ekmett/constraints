@@ -6,10 +6,12 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE PolyKinds #-}
 
 #if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeInType #-}
 #endif
 
 -----------------------------------------------------------------------------
@@ -33,14 +35,25 @@ module Data.Constraint.Deferrable
 #if __GLASGOW_HASKELL__ >= 800
   , defer_
   , deferEither_
+  , (:~~:)(HRefl)
 #endif
+  , (:~:)(Refl)
   ) where
 
 import Control.Exception
 import Control.Monad
 import Data.Constraint
 import Data.Proxy
-import Data.Typeable (Typeable, cast, typeOf)
+import Data.Typeable (Typeable, cast, typeRep)
+
+#if __GLASGOW_HASKELL__ >= 708
+import Data.Type.Equality ((:~:)(Refl))
+#endif
+
+#if __GLASGOW_HASKELL__ >= 800
+import Data.Kind (type (*))
+import GHC.Types (type (~~))
+#endif
 
 data UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving (Typeable, Show)
@@ -69,22 +82,42 @@ deferEither_ :: forall p r. Deferrable p => (p => r) -> Either String r
 deferEither_ r = deferEither @p Proxy r
 #endif
 
+#if __GLASGOW_HASKELL__ < 708
 -- We use our own type equality rather than @Data.Type.Equality@ to allow building on GHC 7.6.
 data a :~: b where
   Refl :: a :~: a
     deriving Typeable
+#endif
 
-showTypeRep :: forall t. Typeable t => Proxy t -> String
-showTypeRep _ = show (typeOf (undefined :: t))
+#if __GLASGOW_HASKELL__ >= 800
+data (a :: i) :~~: (b :: j) where
+  HRefl :: a :~~: a
+    deriving Typeable
+#endif
+
+showTypeRep :: Typeable t => Proxy t -> String
+showTypeRep = show . typeRep
 
 instance Deferrable () where
   deferEither _ r = Right r
 
+#if __GLASGOW_HASKELL__ < 800
 instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
+#else
+instance (Typeable k, Typeable (a :: k), Typeable b) => Deferrable (a ~ b) where
+#endif
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of
     Just Refl -> Right r
     Nothing   -> Left $
       "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy a) ++ "'"
+
+#if __GLASGOW_HASKELL__ >= 800
+instance (Typeable i, Typeable j, Typeable (a :: i), Typeable (b :: j)) => Deferrable (a ~~ b) where
+  deferEither _ r = case cast (HRefl :: a :~~: a) :: Maybe (a :~~: b) of
+    Just HRefl -> Right r
+    Nothing   -> Left $
+      "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy a) ++ "'"
+#endif
 
 instance (Deferrable a, Deferrable b) => Deferrable (a, b) where
   deferEither _ r = join $ deferEither (Proxy :: Proxy a) $ deferEither (Proxy :: Proxy b) r
