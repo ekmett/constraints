@@ -7,7 +7,9 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE PolyKinds #-}
--- | This module is only available on GHC 8.0 or later.
+-- | Utilities for working with 'KnownSymbol' constraints.
+--
+-- This module is only available on GHC 8.0 or later.
 module Data.Constraint.Symbol
   ( type (++)
   , type Take

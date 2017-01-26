@@ -9,7 +9,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE Trustworthy #-}
--- | This module is only available on GHC 8.0 or later.
+-- | Utilities for working with 'KnownNat' constraints.
+--
+-- This module is only available on GHC 8.0 or later.
 module Data.Constraint.Nat
   ( Min, Max, Lcm, Gcd, Divides, Div, Mod
   , plusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat

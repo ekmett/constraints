@@ -1,3 +1,26 @@
+0.9
+---
+* Changes to `Data.Constraint`:
+  * Add `strengthen1` and `strengthen2`
+* Changes to `Data.Constraint.Deferrable`:
+  * Add a `Deferrable ()` instance
+  * The `Deferrable (a ~ b)` instance now shows the `TypeRep`s of `a` and `b`
+    when a type mismatch error is thrown
+  * Add `defer_` and `deferEither_`, counterparts to `defer` and `deferEither`
+    which do not require proxy arguments
+  * Enable `PolyKinds`. This allows the `Deferrable (a ~ b` instance to be
+    polykinded on all supported versions of GHC _except_ 7.10, where the kinds
+    must be `*` due to an old GHC bug
+  * Introduce a heterogeneous equality type `(:~~:)`, and use it to define a
+    `Deferrable (a ~~ b)` instance on GHC 8.0 or later
+* Changes to `Data.Constraint.Forall`:
+  * Implement `ForallF` and `ForallT` in terms of `Forall`
+  * Add `ForallV` and `InstV` (supporting a variable number of parameters)
+  * Add a `forall` combinator
+* Introduce `Data.Constraint.Nat` and `Data.Constraint.Symbol`, which contain
+  utilities for working with `KnownNat` and `KnownSymbol` constraints,
+  respectively. These modules are only available on GHC 8.0 or later.
+
 0.8
 -----
 * GHC 8 compatibility
