@@ -1,6 +1,8 @@
 constraints
 ===========
 
+[![Hackage](https://img.shields.io/hackage/v/constraints.svg)](https://hackage.haskell.org/package/constraints) [![Build Status](https://secure.travis-ci.org/ekmett/constraints.png?branch=master)](http://travis-ci.org/ekmett/constraints)
+
 This package provides data types and classes for manipulating the 'ConstraintKinds' exposed by GHC in 7.4.
 
 Contact Information
