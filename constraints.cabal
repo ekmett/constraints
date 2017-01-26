@@ -17,7 +17,7 @@ description:
   This package provides a vocabulary for working with them.
 
 build-type:    Simple
-tested-with:   GHC == 7.6.3, GHC == 7.8.4, GHC == 7.10.1, GHC == 7.10.2
+tested-with:   GHC == 7.8.4, GHC == 7.10.1, GHC == 7.10.2
 extra-source-files: README.markdown
                   , CHANGELOG.markdown
 
@@ -50,11 +50,6 @@ library
     mtl >= 2 && < 2.3,
     transformers >= 0.2 && < 0.6,
     transformers-compat >= 0.4 && < 1
-
-  if impl(ghc < 7.8)
-    build-depends:
-      newtype >= 0.2 && < 0.3,
-      tagged >= 0.2 && < 1
 
   exposed-modules:
     Data.Constraint

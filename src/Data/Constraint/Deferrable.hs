@@ -45,10 +45,7 @@ import Control.Monad
 import Data.Constraint
 import Data.Proxy
 import Data.Typeable (Typeable, cast, typeRep)
-
-#if __GLASGOW_HASKELL__ >= 708
 import Data.Type.Equality ((:~:)(Refl))
-#endif
 
 #if __GLASGOW_HASKELL__ >= 800
 import GHC.Types (type (~~))
@@ -66,30 +63,30 @@ class Deferrable p where
 
 -- | Defer a constraint for later resolution in a context where we want to upgrade failure into an error
 defer :: forall p r proxy. Deferrable p => proxy p -> (p => r) -> r
-defer _ r = either (throw . UnsatisfiedConstraint) id $ deferEither (Proxy :: Proxy p) r 
+defer _ r = either (throw . UnsatisfiedConstraint) id $ deferEither (Proxy :: Proxy p) r
 
 deferred :: forall p. Deferrable p :- p
 deferred = Sub $ defer (Proxy :: Proxy p) Dict
 
 #if __GLASGOW_HASKELL__ >= 800
---- | A version of 'defer' that uses visible type application in place of a 'Proxy'.
+-- | A version of 'defer' that uses visible type application in place of a 'Proxy'.
+--
+-- Only available on GHC 8.0 or later.
 defer_ :: forall p r. Deferrable p => (p => r) -> r
 defer_ r = defer @p Proxy r
 
---- | A version of 'deferEither' that uses visible type application in place of a 'Proxy'.
+-- | A version of 'deferEither' that uses visible type application in place of a 'Proxy'.
+--
+-- Only available on GHC 8.0 or later.
 deferEither_ :: forall p r. Deferrable p => (p => r) -> Either String r
 deferEither_ r = deferEither @p Proxy r
 #endif
 
-#if __GLASGOW_HASKELL__ < 708
--- We use our own type equality rather than @Data.Type.Equality@ to allow building on GHC 7.6.
-data a :~: b where
-  Refl :: a :~: a
-    deriving Typeable
-    -- 7.10 is missing Typeable here, orphan?
-#endif
-
 #if __GLASGOW_HASKELL__ >= 800
+-- | Kind heterogeneous propositional equality. Like '(:~:)', @a :~~: b@ is
+-- inhabited by a terminating value if and only if @a@ is the same type as @b@.
+--
+-- Only available on GHC 8.0 or later.
 data (a :: i) :~~: (b :: j) where
   HRefl :: a :~~: a
     deriving Typeable
@@ -101,10 +98,16 @@ showTypeRep = show . typeRep
 instance Deferrable () where
   deferEither _ r = Right r
 
-#if __GLASGOW_HASKELL__ < 800
-instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
-#else
+-- | Deferrable homogeneous equality constraints.
+--
+-- Note that due to a GHC bug (https://ghc.haskell.org/trac/ghc/ticket/10343),
+-- using this instance on GHC 7.10 will only work with @*@-kinded types.
+#if __GLASGOW_HASKELL__ >= 800
 instance (Typeable k, Typeable (a :: k), Typeable b) => Deferrable (a ~ b) where
+#elif __GLASGOW_HASKELL__ == 710
+instance (Typeable a, Typeable b) => Deferrable ((a :: *) ~ (b :: *)) where
+#else
+instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
 #endif
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of
     Just Refl -> Right r
@@ -112,6 +115,9 @@ instance (Typeable k, Typeable (a :: k), Typeable b) => Deferrable (a ~ b) where
       "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy a) ++ "'"
 
 #if __GLASGOW_HASKELL__ >= 800
+-- | Deferrable heterogenous equality constraints.
+--
+-- Only available on GHC 8.0 or later.
 instance (Typeable i, Typeable j, Typeable (a :: i), Typeable (b :: j)) => Deferrable (a ~~ b) where
   deferEither _ r = case cast (HRefl :: a :~~: a) :: Maybe (a :~~: b) of
     Just HRefl -> Right r

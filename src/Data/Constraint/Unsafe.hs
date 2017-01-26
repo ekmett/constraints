@@ -32,20 +32,9 @@ module Data.Constraint.Unsafe
 
 import Control.Applicative
 import Control.Monad
+import Data.Coerce
 import Data.Constraint
 import Unsafe.Coerce
-
-#if __GLASGOW_HASKELL__ >= 708
-
-import Data.Coerce
-
-#else
-
-import Control.Newtype
-
-type Coercible = Newtype
-
-#endif
 
 -- | Coerce a dictionary unsafely from one type to another
 unsafeCoerceConstraint :: a :- b

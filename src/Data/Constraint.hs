@@ -1,10 +1,13 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeOperators #-}
@@ -13,11 +16,6 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE CPP #-}
-#if __GLASGOW_HASKELL__ >= 707
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE RoleAnnotations #-}
-#endif
 #if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE UndecidableSuperClasses #-}
 #endif
@@ -75,26 +73,17 @@ module Data.Constraint
   , Class(..)
   , (:=>)(..)
   ) where
-import Control.Monad
-#if __GLASGOW_HASKELL__ >= 707
-import Control.Category
-#endif
 import Control.Applicative
+import Control.Category
+import Control.Monad
 #if __GLASGOW_HASKELL__ < 710
 import Data.Monoid
 #endif
 import Data.Complex
 import Data.Ratio
-#if __GLASGOW_HASKELL__ >= 707
 import Data.Data
-#endif
-#if __GLASGOW_HASKELL__ <= 710
-import GHC.Prim (Constraint)
-#else
-import GHC.Types (Constraint)
-#endif
 import qualified GHC.Exts as Exts (Any)
-
+import GHC.Exts (Constraint)
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
@@ -114,7 +103,6 @@ import qualified GHC.Exts as Exts (Any)
 --
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
-#if __GLASGOW_HASKELL__ >= 707
   deriving Typeable
 
 
@@ -131,7 +119,6 @@ dictConstr = mkConstr dictDataType "Dict" [] Prefix
 
 dictDataType :: DataType
 dictDataType = mkDataType "Data.Constraint.Dict" [dictConstr]
-#endif
 
 deriving instance Eq (Dict a)
 deriving instance Ord (Dict a)
@@ -204,7 +191,6 @@ infixr 9 :-
 -- library is sensible and can't break any assumptions on the behalf of
 -- library authors.
 newtype a :- b = Sub (a => Dict b)
-#if __GLASGOW_HASKELL__ >= 707
   deriving Typeable
 
 type role (:-) nominal nominal
@@ -232,7 +218,6 @@ subDataType = mkDataType "Data.Constraint.:-" [subConstr]
 instance Category (:-) where
   id  = refl
   (.) = trans
-#endif
 
 -- | Assumes 'IncoherentInstances' doesn't exist.
 instance Eq (a :- b) where
@@ -351,9 +336,7 @@ mapDict p Dict = case p of Sub q -> q
 unmapDict :: (Dict a -> Dict b) -> a :- b
 unmapDict f = Sub (f Dict)
 
-#if __GLASGOW_HASKELL__ >= 707
 type role Dict nominal
-#endif
 
 --------------------------------------------------------------------------------
 -- Reflection

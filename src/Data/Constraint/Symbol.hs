@@ -7,7 +7,8 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE PolyKinds #-}
-module Data.Constraint.Symbol 
+-- | This module is only available on GHC 8.0 or later.
+module Data.Constraint.Symbol
   ( type (++)
   , type Take
   , type Drop
