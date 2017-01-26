@@ -172,7 +172,7 @@ infixr 9 :-
 -- What are the two ways?
 --
 -- Well, we can go from @'Ord' a ':-' 'Eq' a@ via the
--- superclass relationship, and them from @'Eq' a ':-' 'Eq' [a]@ via the
+-- superclass relationship, and then from @'Eq' a ':-' 'Eq' [a]@ via the
 -- instance, or we can go from @'Ord' a ':-' 'Ord' [a]@ via the instance
 -- then from @'Ord' [a] ':-' 'Eq' [a]@ through the superclass relationship
 -- and this diagram by definition must \"commute\".
