@@ -48,16 +48,16 @@ type family Length :: Symbol -> Nat where
 
 -- implementation details
 
-newtype Magic n r = Magic (KnownSymbol n => r)
+newtype Magic n = Magic (KnownSymbol n => Dict (KnownSymbol n))
 
 magicNSS :: forall n m o. (Int -> String -> String) -> (KnownNat n, KnownSymbol m) :- KnownSymbol o
-magicNSS f = Sub $ unsafeCoerce (Magic id) (fromIntegral (natVal (Proxy :: Proxy n)) `f` symbolVal (Proxy :: Proxy m))
+magicNSS f = Sub $ unsafeCoerce (Magic Dict) (fromIntegral (natVal (Proxy :: Proxy n)) `f` symbolVal (Proxy :: Proxy m))
 
 magicSSS :: forall n m o. (String -> String -> String) -> (KnownSymbol n, KnownSymbol m) :- KnownSymbol o
-magicSSS f = Sub $ unsafeCoerce (Magic id) (symbolVal (Proxy :: Proxy n) `f` symbolVal (Proxy :: Proxy m))
+magicSSS f = Sub $ unsafeCoerce (Magic Dict) (symbolVal (Proxy :: Proxy n) `f` symbolVal (Proxy :: Proxy m))
 
 magicSN :: forall a n. (String -> Int) -> KnownSymbol a :- KnownNat n
-magicSN f = Sub $ unsafeCoerce (Magic id) (toInteger (f (symbolVal (Proxy :: Proxy a))))
+magicSN f = Sub $ unsafeCoerce (Magic Dict) (toInteger (f (symbolVal (Proxy :: Proxy a))))
 
 axiom :: forall a b. Dict (a ~ b)
 axiom = unsafeCoerce (Dict :: Dict (a ~ a))
