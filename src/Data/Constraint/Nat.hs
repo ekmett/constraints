@@ -54,10 +54,10 @@ type family Lcm :: Nat -> Nat -> Nat where
 
 type Divides n m = n ~ Gcd n m
 
-newtype Magic n r = Magic (KnownNat n => r)
+newtype Magic n = Magic (KnownNat n => Dict (KnownNat n))
 
 magic :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
-magic f = Sub $ unsafeCoerce (Magic id) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
+magic f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
 
 axiom :: forall a b. Dict (a ~ b)
 axiom = unsafeCoerce (Dict :: Dict (a ~ a))
