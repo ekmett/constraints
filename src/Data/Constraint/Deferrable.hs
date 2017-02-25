@@ -112,7 +112,7 @@ instance (Typeable a, Typeable b) => Deferrable (a ~ b) where
   deferEither _ r = case cast (Refl :: a :~: a) :: Maybe (a :~: b) of
     Just Refl -> Right r
     Nothing   -> Left $
-      "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy a) ++ "'"
+      "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy b) ++ "'"
 
 #if __GLASGOW_HASKELL__ >= 800
 -- | Deferrable heterogenous equality constraints.
@@ -122,7 +122,7 @@ instance (Typeable i, Typeable j, Typeable (a :: i), Typeable (b :: j)) => Defer
   deferEither _ r = case cast (HRefl :: a :~~: a) :: Maybe (a :~~: b) of
     Just HRefl -> Right r
     Nothing   -> Left $
-      "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy a) ++ "'"
+      "deferred type equality: type mismatch between `" ++ showTypeRep (Proxy :: Proxy a) ++ "’ and `"  ++ showTypeRep (Proxy :: Proxy b) ++ "'"
 #endif
 
 instance (Deferrable a, Deferrable b) => Deferrable (a, b) where

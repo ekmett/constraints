@@ -2,6 +2,8 @@ next
 ----
 * Correct an improper use of `unsafeCoerce` in the internals of
   `Data.Constraint.Nat` and `Data.Constraint.Symbol`
+* Correctly identify the mismatched types when you defer an unsatisfiable
+  equality constraint through `Data.Constraint.Deferrable`
 
 0.9
 ---
