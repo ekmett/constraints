@@ -51,6 +51,10 @@ import Data.Type.Equality ((:~:)(Refl))
 import GHC.Types (type (~~))
 #endif
 
+#if __GLASGOW_HASKELL__ >= 801
+import Data.Type.Equality ((:~~:)(HRefl))
+#endif
+
 data UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving (Typeable, Show)
 
@@ -82,7 +86,7 @@ deferEither_ :: forall p r. Deferrable p => (p => r) -> Either String r
 deferEither_ r = deferEither @p Proxy r
 #endif
 
-#if __GLASGOW_HASKELL__ >= 800
+#if __GLASGOW_HASKELL__ >= 800 && __GLASGOW_HASKELL__ < 801
 -- | Kind heterogeneous propositional equality. Like '(:~:)', @a :~~: b@ is
 -- inhabited by a terminating value if and only if @a@ is the same type as @b@.
 --

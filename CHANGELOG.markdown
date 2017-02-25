@@ -4,6 +4,8 @@ next
   `Data.Constraint.Nat` and `Data.Constraint.Symbol`
 * Correctly identify the mismatched types when you defer an unsatisfiable
   equality constraint through `Data.Constraint.Deferrable`
+* Re-export the `(:~~:)` defined in `base` from `Data.Constraint.Deferred` with
+  GHC 8.2 or later
 
 0.9
 ---
