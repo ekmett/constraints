@@ -1,3 +1,8 @@
+next
+----
+* Correct an improper use of `unsafeCoerce` in the internals of
+  `Data.Constraint.Nat` and `Data.Constraint.Symbol`
+
 0.9
 ---
 * Changes to `Data.Constraint`:
