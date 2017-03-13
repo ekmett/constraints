@@ -1,11 +1,16 @@
-next
-----
+0.9.1
+-----
 * Correct an improper use of `unsafeCoerce` in the internals of
   `Data.Constraint.Nat` and `Data.Constraint.Symbol`
 * Correctly identify the mismatched types when you defer an unsatisfiable
   equality constraint through `Data.Constraint.Deferrable`
 * Re-export the `(:~~:)` defined in `base` from `Data.Constraint.Deferred` with
   GHC 8.2 or later
+* Add several new `(:=>)` instances for `Bits`, `Identity`, `Const`, `Natural`,
+  `IO`, and `Word`.
+* Modernize some existing `Class` and `(:=>)` instances to reflect the fact
+  that `Applicative` is now a superclass of `Monad` on recent versions of
+  `base`.
 
 0.9
 ---
