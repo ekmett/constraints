@@ -1,3 +1,7 @@
+next
+----
+* Fix the type signature of `maxCommutes`
+
 0.9.1
 -----
 * Correct an improper use of `unsafeCoerce` in the internals of
