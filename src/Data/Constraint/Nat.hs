@@ -203,7 +203,7 @@ timesCommutes = axiom
 minCommutes :: forall n m. Dict (Min m n ~ Min n m)
 minCommutes = axiom
 
-maxCommutes :: forall n m. Dict (Min m n ~ Min n m)
+maxCommutes :: forall n m. Dict (Max m n ~ Max n m)
 maxCommutes = axiom
 
 plusAssociates :: forall n m o. Dict (((m + n) + o) ~ (m + (n + o)))
