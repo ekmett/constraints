@@ -48,6 +48,7 @@ library
     ghc-prim,
     hashable >= 1.2 && < 1.3,
     mtl >= 2 && < 2.3,
+    template-haskell,
     transformers >= 0.2 && < 0.6,
     transformers-compat >= 0.4 && < 1
 
@@ -56,6 +57,7 @@ library
     Data.Constraint.Deferrable
     Data.Constraint.Forall
     Data.Constraint.Lifting
+    Data.Constraint.TH
     Data.Constraint.Unsafe
 
   if impl(ghc >= 8)
