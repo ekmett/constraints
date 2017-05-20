@@ -48,16 +48,20 @@ type family Length :: Symbol -> Nat where
 
 -- implementation details
 
-newtype Magic n = Magic (KnownSymbol n => Dict (KnownSymbol n))
+setKnownSymbol :: forall n. String -> Dict (KnownSymbol n)
+setKnownSymbol x = case someSymbolVal x of
+                    SomeSymbol (_ :: Proxy sn) -> unsafeCoerce $ (Dict :: Dict (KnownSymbol sn))
 
-magicNSS :: forall n m o. (Int -> String -> String) -> (KnownNat n, KnownSymbol m) :- KnownSymbol o
-magicNSS f = Sub $ unsafeCoerce (Magic Dict) (fromIntegral (natVal (Proxy :: Proxy n)) `f` symbolVal (Proxy :: Proxy m))
+deriveKnownSymbolNSS :: forall n m o. (Int -> String -> String) -> (KnownNat n, KnownSymbol m) :- KnownSymbol o
+deriveKnownSymbolNSS f = Sub $ setKnownSymbol (fromIntegral (natVal (Proxy :: Proxy n)) `f` symbolVal (Proxy :: Proxy m))
 
-magicSSS :: forall n m o. (String -> String -> String) -> (KnownSymbol n, KnownSymbol m) :- KnownSymbol o
-magicSSS f = Sub $ unsafeCoerce (Magic Dict) (symbolVal (Proxy :: Proxy n) `f` symbolVal (Proxy :: Proxy m))
+deriveKnownSymbolSSS :: forall n m o. (String -> String -> String) -> (KnownSymbol n, KnownSymbol m) :- KnownSymbol o
+deriveKnownSymbolSSS f = Sub $ setKnownSymbol (symbolVal (Proxy :: Proxy n) `f` symbolVal (Proxy :: Proxy m))
 
-magicSN :: forall a n. (String -> Int) -> KnownSymbol a :- KnownNat n
-magicSN f = Sub $ unsafeCoerce (Magic Dict) (toInteger (f (symbolVal (Proxy :: Proxy a))))
+deriveKnownNatSN :: forall a n. (String -> Int) -> KnownSymbol a :- KnownNat n
+deriveKnownNatSN f = Sub $ case someNatVal (toInteger (f (symbolVal (Proxy :: Proxy a)))) of
+                            Just (SomeNat (_ :: Proxy sn)) -> unsafeCoerce $ (Dict :: Dict (KnownNat sn))
+                            Nothing -> error "Negative natural-numbers are naturally not allowed."
 
 axiom :: forall a b. Dict (a ~ b)
 axiom = unsafeCoerce (Dict :: Dict (a ~ a))
@@ -65,7 +69,7 @@ axiom = unsafeCoerce (Dict :: Dict (a ~ a))
 -- axioms and operations
 
 appendSymbol :: (KnownSymbol a, KnownSymbol b) :- KnownSymbol (a ++ b)
-appendSymbol = magicSSS (++)
+appendSymbol = deriveKnownSymbolSSS (++)
 
 appendUnit1 :: forall a. Dict (("" ++ a) ~ a)
 appendUnit1 = axiom
@@ -77,16 +81,16 @@ appendAssociates :: forall a b c. Dict (((a ++ b) ++ c) ~ (a ++ (b ++ c)))
 appendAssociates = axiom
 
 takeSymbol :: forall n a. (KnownNat n, KnownSymbol a) :- KnownSymbol (Take n a)
-takeSymbol = magicNSS take
+takeSymbol = deriveKnownSymbolNSS take
 
 dropSymbol :: forall n a. (KnownNat n, KnownSymbol a) :- KnownSymbol (Drop n a)
-dropSymbol = magicNSS drop
+dropSymbol = deriveKnownSymbolNSS drop
 
 takeAppendDrop :: forall n a. Dict (Take n a ++ Drop n a ~ a)
 takeAppendDrop = axiom
 
 lengthSymbol :: forall a. KnownSymbol a :- KnownNat (Length a)
-lengthSymbol = magicSN length
+lengthSymbol = deriveKnownNatSN length
 
 takeLength :: forall n a. (Length a <= n) :- (Take n a ~ a)
 takeLength = Sub axiom
