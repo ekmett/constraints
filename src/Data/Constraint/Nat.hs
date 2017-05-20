@@ -120,13 +120,13 @@ modNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Mod n m)
 modNat = Sub $ case magic @n @m mod of Sub r -> r
 
 plusZero :: forall n. Dict ((n + 0) ~ n)
-plusZero = axiom
+plusZero = Dict
 
 timesZero :: forall n. Dict ((n * 0) ~ 0)
-timesZero = axiom
+timesZero = Dict
 
 timesOne :: forall n. Dict ((n * 1) ~ n)
-timesOne = axiom
+timesOne = Dict
 
 minZero :: forall n. Dict (Min n 0 ~ 0)
 minZero = axiom
@@ -135,13 +135,13 @@ maxZero :: forall n. Dict (Max n 0 ~ n)
 maxZero = axiom
 
 powZero :: forall n. Dict ((n ^ 0) ~ 1)
-powZero = axiom
+powZero = Dict
 
 leZero :: forall a. (a <= 0) :- (a ~ 0)
 leZero = Sub axiom
 
 zeroLe :: forall a. Dict (0 <= a)
-zeroLe = axiom
+zeroLe = Dict
 
 plusMonotone1 :: forall a b c. (a <= b) :- (a + c <= b + c)
 plusMonotone1 = Sub axiom
@@ -206,16 +206,16 @@ minCommutes = axiom
 maxCommutes :: forall n m. Dict (Max m n ~ Max n m)
 maxCommutes = axiom
 
-plusAssociates :: forall n m o. Dict (((m + n) + o) ~ (m + (n + o)))
+plusAssociates :: forall m n o. Dict (((m + n) + o) ~ (m + (n + o)))
 plusAssociates = axiom
 
-timesAssociates :: forall n m o. Dict (((m * n) * o) ~ (m * (n * o)))
+timesAssociates :: forall m n o. Dict (((m * n) * o) ~ (m * (n * o)))
 timesAssociates = axiom
 
-minAssociates :: forall n m o. Dict (Min (Min m n) o ~ Min m (Min n o))
+minAssociates :: forall m n o. Dict (Min (Min m n) o ~ Min m (Min n o))
 minAssociates = axiom
 
-maxAssociates :: forall n m o. Dict (Max (Max m n) o ~ Max m (Max n o))
+maxAssociates :: forall m n o. Dict (Max (Max m n) o ~ Max m (Max n o))
 maxAssociates = axiom
 
 gcdAssociates :: forall a b c. Dict (Gcd (Gcd a b) c  ~ Gcd a (Gcd b c))
