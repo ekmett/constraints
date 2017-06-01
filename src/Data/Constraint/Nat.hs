@@ -14,7 +14,7 @@
 -- This module is only available on GHC 8.0 or later.
 module Data.Constraint.Nat
   ( Min, Max, Lcm, Gcd, Divides, Div, Mod
-  , plusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat
+  , plusNat, minusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat
   , plusZero, timesZero, timesOne, powZero, powOne, maxZero, minZero, gcdZero, gcdOne, lcmZero, lcmOne
   , plusAssociates, timesAssociates, minAssociates, maxAssociates, gcdAssociates, lcmAssociates
   , plusCommutes, timesCommutes, minCommutes, maxCommutes, gcdCommutes, lcmCommutes
@@ -60,10 +60,14 @@ type family Lcm (m::Nat) (n::Nat) :: Nat where
 
 type Divides n m = n ~ Gcd n m
 
-newtype Magic n = Magic (KnownNat n => Dict (KnownNat n))
 
-magic :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
-magic f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
+setKnownNat :: forall n. Integer -> Dict (KnownNat n)
+setKnownNat x = case someNatVal x of
+                    Just (SomeNat (_ :: Proxy sn)) -> unsafeCoerce $ (Dict :: Dict (KnownNat sn))
+                    Nothing -> error "Negative natural-numbers are naturally not allowed."
+
+deriveKnownNat :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
+deriveKnownNat f = Sub $ setKnownNat (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
 
 axiom :: forall a b. Dict (a ~ b)
 axiom = unsafeCoerce (Dict :: Dict (a ~ a))
@@ -99,31 +103,34 @@ lcmOne :: forall a. Dict (Lcm 1 a ~ a)
 lcmOne = axiom
 
 gcdNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Gcd n m)
-gcdNat = magic gcd
+gcdNat = deriveKnownNat gcd
 
 lcmNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Lcm n m)
-lcmNat = magic lcm
+lcmNat = deriveKnownNat lcm
 
 plusNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n + m)
-plusNat = magic (+)
+plusNat = deriveKnownNat (+)
+
+minusNat :: forall n m. (KnownNat n, KnownNat m, m<=n) :- KnownNat (n - m)
+minusNat = Sub $ case deriveKnownNat @n @m (-) of Sub r -> r
 
 minNat   :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Min n m)
-minNat = magic min
+minNat = deriveKnownNat min
 
 maxNat   :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Max n m)
-maxNat = magic max
+maxNat = deriveKnownNat max
 
 timesNat  :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n * m)
-timesNat = magic (*)
+timesNat = deriveKnownNat (*)
 
 powNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n ^ m)
-powNat = magic (^)
+powNat = deriveKnownNat (^)
 
 divNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Div n m)
-divNat = Sub $ case magic @n @m div of Sub r -> r
+divNat = Sub $ case deriveKnownNat @n @m div of Sub r -> r
 
 modNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Mod n m)
-modNat = Sub $ case magic @n @m mod of Sub r -> r
+modNat = Sub $ case deriveKnownNat @n @m mod of Sub r -> r
 
 plusZero :: forall n. Dict ((n + 0) ~ n)
 plusZero = Dict
