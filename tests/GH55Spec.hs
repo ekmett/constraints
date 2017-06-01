@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
@@ -6,10 +7,12 @@
 {-# LANGUAGE TypeOperators #-}
 module GH55Spec (main, spec) where
 
+import Test.Hspec
+
+#if __GLASGOW_HASKELL__ >= 800
 import Data.Constraint
 import Data.Constraint.Nat
 import GHC.TypeLits
-import Test.Hspec
 
 newtype GF (n :: Nat) = GF Integer deriving (Eq, Show)
 
@@ -37,10 +40,14 @@ bar (a :: GF m) b = foo a b - foo b a \\ Sub @() (lcmIsIdempotent @m) \\ lcmNat 
 z :: GF 5
 z = bar x y
 
-main :: IO ()
-main = hspec spec
-
 spec :: Spec
-spec = describe "GH #55" $
+spec = describe "GH #53" $
          it "should normalize Lcm m m" $
            z `shouldBe` (GF 0 :: GF (Lcm 5 5))
+#else
+spec :: Spec
+spec = return ()
+#endif
+
+main :: IO ()
+main = hspec spec
