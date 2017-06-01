@@ -3,8 +3,12 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
+
+#if __GLASGOW_HASKELL__ >= 800
+{-# LANGUAGE TypeApplications #-}
+#endif
+
 module GH55Spec (main, spec) where
 
 import Test.Hspec
