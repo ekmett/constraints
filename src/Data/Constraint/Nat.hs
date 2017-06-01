@@ -45,12 +45,18 @@ import Data.Proxy
 import GHC.TypeLits
 import Unsafe.Coerce
 
-type family Min :: Nat -> Nat -> Nat where
-type family Max :: Nat -> Nat -> Nat where
-type family Div :: Nat -> Nat -> Nat where
-type family Mod :: Nat -> Nat -> Nat where
-type family Gcd :: Nat -> Nat -> Nat where
-type family Lcm :: Nat -> Nat -> Nat where
+type family Min (m::Nat) (n::Nat) :: Nat where
+    Min m m = m
+type family Max (m::Nat) (n::Nat) :: Nat where
+    Max m m = m
+type family Div (m::Nat) (n::Nat) :: Nat where
+    Div m 1 = m
+type family Mod (m::Nat) (n::Nat) :: Nat where
+    Mod 0 m = 0
+type family Gcd (m::Nat) (n::Nat) :: Nat where
+    Gcd m m = m
+type family Lcm (m::Nat) (n::Nat) :: Nat where
+   Lcm m m = m
 
 type Divides n m = n ~ Gcd n m
 
@@ -225,16 +231,16 @@ lcmAssociates :: forall a b c. Dict (Lcm (Lcm a b) c ~ Lcm a (Lcm b c))
 lcmAssociates = axiom
 
 minIsIdempotent :: forall n. Dict (Min n n ~ n)
-minIsIdempotent = axiom
+minIsIdempotent = Dict
 
 maxIsIdempotent :: forall n. Dict (Max n n ~ n)
-maxIsIdempotent = axiom
+maxIsIdempotent = Dict
 
 gcdIsIdempotent :: forall n. Dict (Gcd n n ~ n)
-gcdIsIdempotent = axiom
+gcdIsIdempotent = Dict
 
 lcmIsIdempotent :: forall n. Dict (Lcm n n ~ n)
-lcmIsIdempotent = axiom
+lcmIsIdempotent = Dict
 
 minDistributesOverPlus :: forall n m o. Dict ((n + Min m o) ~ Min (n + m) (n + o))
 minDistributesOverPlus = axiom
