@@ -75,6 +75,7 @@ module Data.Constraint
   ) where
 import Control.Applicative
 import Control.Category
+import Control.DeepSeq
 import Control.Monad
 #if __GLASGOW_HASKELL__ < 710
 import Data.Monoid
@@ -131,6 +132,9 @@ dictDataType = mkDataType "Data.Constraint.Dict" [dictConstr]
 deriving instance Eq (Dict a)
 deriving instance Ord (Dict a)
 deriving instance Show (Dict a)
+
+instance NFData (Dict c) where
+  rnf Dict = ()
 
 -- | From a 'Dict', takes a value in an environment where the instance
 -- witnessed by the 'Dict' is in scope, and evaluates it.
@@ -237,6 +241,9 @@ instance Ord (a :- b) where
 
 instance Show (a :- b) where
   showsPrec d _ = showParen (d > 10) $ showString "Sub Dict"
+
+instance a => NFData (a :- b) where
+  rnf (Sub Dict) = ()
 
 infixl 1 \\ -- required comment
 
