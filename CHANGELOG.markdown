@@ -1,6 +1,7 @@
 next
 ----
 * Fix the type signature of `maxCommutes`
+* Add `NFData` instances for `Dict` and `(:-)`
 
 0.9.1
 -----
