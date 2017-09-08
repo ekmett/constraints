@@ -1,5 +1,11 @@
 next
 ----
+* Adapt to the `Semigroup`–`Monoid` Proposal (introduced in `base-4.11`):
+  * Add a `Semigroup` instance for `Dict`
+  * Add the appropriate `(:=>)` instances involving `Semigroup`, and change the
+    `Class () (Monoid a)` instance to `Class (Semigroup a) (Monoid a)` when
+    `base` is recent enough
+  * Add the appropriate `Lifting(2)` instances involving `Semigroup`
 * Fix the type signature of `maxCommutes`
 * Add `NFData` instances for `Dict` and `(:-)`
 
