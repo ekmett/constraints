@@ -82,6 +82,7 @@ import Data.Monoid
 #endif
 import Data.Complex
 import Data.Ratio
+import Data.Semigroup
 import Data.Data
 import qualified GHC.Exts as Exts (Any)
 import GHC.Exts (Constraint)
@@ -625,8 +626,27 @@ instance RealFloat a :=> RealFloat (Identity a) where ins = Sub Dict
 instance RealFloat a :=> RealFloat (Const a b) where ins = Sub Dict
 #endif
 
+-- Semigroup
+instance Class () (Semigroup a) where cls = Sub Dict
+instance () :=> Semigroup () where ins = Sub Dict
+instance () :=> Semigroup Ordering where ins = Sub Dict
+instance () :=> Semigroup [a] where ins = Sub Dict
+instance Semigroup a :=> Semigroup (Maybe a) where ins = Sub Dict
+instance (Semigroup a, Semigroup b) :=> Semigroup (a, b) where ins = Sub Dict
+instance Semigroup a :=> Semigroup (Const a b) where ins = Sub Dict
+#if MIN_VERSION_base(4,9,0)
+instance Semigroup a :=> Semigroup (Identity a) where ins = Sub Dict
+#endif
+#if MIN_VERSION_base(4,10,0)
+instance Semigroup a :=> Semigroup (IO a) where ins = Sub Dict
+#endif
+
 -- Monoid
+#if MIN_VERSION_base(4,11,0)
+instance Class (Semigroup a) (Monoid a) where cls = Sub Dict
+#else
 instance Class () (Monoid a) where cls = Sub Dict
+#endif
 instance () :=> Monoid () where ins = Sub Dict
 instance () :=> Monoid Ordering where ins = Sub Dict
 instance () :=> Monoid [a] where ins = Sub Dict
@@ -635,8 +655,6 @@ instance (Monoid a, Monoid b) :=> Monoid (a, b) where ins = Sub Dict
 instance Monoid a :=> Monoid (Const a b) where ins = Sub Dict
 #if MIN_VERSION_base(4,9,0)
 instance Monoid a :=> Monoid (Identity a) where ins = Sub Dict
-#endif
-#if MIN_VERSION_base(4,9,0)
 instance Monoid a :=> Monoid (IO a) where ins = Sub Dict
 #endif
 
@@ -707,7 +725,13 @@ instance a => Bounded (Dict a) where
 instance a :=> Read (Dict a) where ins = Sub Dict
 deriving instance a => Read (Dict a)
 
+instance () :=> Semigroup (Dict a) where ins = Sub Dict
+instance Semigroup (Dict a) where
+  Dict <> Dict = Dict
+
 instance a :=> Monoid (Dict a) where ins = Sub Dict
 instance a => Monoid (Dict a) where
-  mappend Dict Dict = Dict
+#if !(MIN_VERSION_base(4,11,0))
+  mappend = (<>)
+#endif
   mempty = Dict

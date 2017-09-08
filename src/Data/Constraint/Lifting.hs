@@ -9,7 +9,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
 {-# OPTIONS_GHC -fno-warn-deprecations #-}
-module Data.Constraint.Lifting 
+module Data.Constraint.Lifting
   ( Lifting(..)
   , Lifting2(..)
   ) where
@@ -54,6 +54,9 @@ import Data.Hashable
 import Data.Monoid
 #endif
 import Data.Ratio
+#if !(MIN_VERSION_base(4,11,0))
+import Data.Semigroup
+#endif
 #if __GLASGOW_HASKELL__ < 710
 import Data.Traversable
 #endif
@@ -77,6 +80,7 @@ instance Lifting Read Maybe where lifting = Sub Dict
 instance Lifting Hashable Maybe where lifting = Sub Dict
 instance Lifting Binary Maybe where lifting = Sub Dict
 instance Lifting NFData Maybe where lifting = Sub Dict
+instance Lifting Semigroup Maybe where lifting = Sub Dict
 instance Lifting Monoid Maybe where lifting = Sub Dict
 
 instance Lifting Eq Ratio where lifting = Sub Dict
@@ -85,7 +89,7 @@ instance Lifting Eq Ratio where lifting = Sub Dict
 instance Lifting Eq Complex where lifting = Sub Dict
 instance Lifting Read Complex where lifting = Sub Dict
 instance Lifting Show Complex where lifting = Sub Dict
-
+instance Lifting Semigroup ((->) a) where lifting = Sub Dict
 instance Lifting Monoid ((->) a) where lifting = Sub Dict
 
 instance Eq a => Lifting Eq (Either a) where lifting = Sub Dict
@@ -103,6 +107,7 @@ instance Read a => Lifting Read ((,) a) where lifting = Sub Dict
 instance Hashable a => Lifting Hashable ((,) a) where lifting = Sub Dict
 instance Binary a => Lifting Binary ((,) a) where lifting = Sub Dict
 instance NFData a => Lifting NFData ((,) a) where lifting = Sub Dict
+instance Semigroup a => Lifting Semigroup ((,) a) where lifting = Sub Dict
 instance Monoid a => Lifting Monoid ((,) a) where lifting = Sub Dict
 instance Bounded a => Lifting Bounded ((,) a) where lifting = Sub Dict
 instance Ix a => Lifting Ix ((,) a) where lifting = Sub Dict
@@ -434,6 +439,7 @@ instance Lifting2 Read (,) where lifting2 = Sub Dict
 instance Lifting2 Hashable (,) where lifting2 = Sub Dict
 instance Lifting2 Binary (,) where lifting2 = Sub Dict
 instance Lifting2 NFData (,) where lifting2 = Sub Dict
+instance Lifting2 Semigroup (,) where lifting2 = Sub Dict
 instance Lifting2 Monoid (,) where lifting2 = Sub Dict
 instance Lifting2 Bounded (,) where lifting2 = Sub Dict
 instance Lifting2 Ix (,) where lifting2 = Sub Dict
