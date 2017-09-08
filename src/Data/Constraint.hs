@@ -77,9 +77,6 @@ import Control.Applicative
 import Control.Category
 import Control.DeepSeq
 import Control.Monad
-#if __GLASGOW_HASKELL__ < 710
-import Data.Monoid
-#endif
 import Data.Complex
 import Data.Ratio
 import Data.Semigroup
