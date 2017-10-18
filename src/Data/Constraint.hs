@@ -455,6 +455,7 @@ instance () :=> Show () where ins = Sub Dict
 instance () :=> Show Bool where ins = Sub Dict
 instance () :=> Show Ordering where ins = Sub Dict
 instance () :=> Show Char where ins = Sub Dict
+instance () :=> Show Int where ins = Sub Dict
 instance Show a :=> Show (Complex a) where ins = Sub Dict
 instance Show a :=> Show [a] where ins = Sub Dict
 instance Show a :=> Show (Maybe a) where ins = Sub Dict
@@ -476,6 +477,7 @@ instance () :=> Read () where ins = Sub Dict
 instance () :=> Read Bool where ins = Sub Dict
 instance () :=> Read Ordering where ins = Sub Dict
 instance () :=> Read Char where ins = Sub Dict
+instance () :=> Read Int where ins = Sub Dict
 instance Read a :=> Read (Complex a) where ins = Sub Dict
 instance Read a :=> Read [a] where ins = Sub Dict
 instance Read a :=> Read (Maybe a) where ins = Sub Dict
