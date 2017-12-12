@@ -6,6 +6,8 @@ next
     `Class () (Monoid a)` instance to `Class (Semigroup a) (Monoid a)` when
     `base` is recent enough
   * Add the appropriate `Lifting(2)` instances involving `Semigroup`
+* `Data.Constraint.Nat` now reexports the `Div` and `Mod` type families from
+  `GHC.TypeLits` on `base-4.11` or later
 * Fix the type signature of `maxCommutes`
 * Add `NFData` instances for `Dict` and `(:-)`
 
