@@ -64,7 +64,7 @@ module Data.Constraint
   , strengthen1, strengthen2
   , (&&&), (***)
   , trans, refl
-  , Bottom
+  , Bottom(no)
   , top, bottom
   -- * Dict is fully faithful
   , mapDict
