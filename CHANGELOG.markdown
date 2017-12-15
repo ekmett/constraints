@@ -9,6 +9,7 @@ next
 * `Data.Constraint.Nat` now reexports the `Div` and `Mod` type families from
   `GHC.TypeLits` on `base-4.11` or later
 * Fix the type signature of `maxCommutes`
+* Export the `no` method of `Bottom`
 * Add `NFData` instances for `Dict` and `(:-)`
 
 0.9.1
