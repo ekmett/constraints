@@ -73,6 +73,7 @@ test-suite spec
   main-is: Spec.hs
   other-modules: GH55Spec
   ghc-options: -Wall -threaded -rtsopts
+  build-tool-depends: hspec-discover:hspec-discover >= 2
   build-depends:
     base >= 4.7 && < 5,
     constraints,
