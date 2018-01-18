@@ -1,4 +1,4 @@
-next
+0.10
 ----
 * Adapt to the `Semigroup`–`Monoid` Proposal (introduced in `base-4.11`):
   * Add a `Semigroup` instance for `Dict`
