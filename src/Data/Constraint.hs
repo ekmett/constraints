@@ -79,7 +79,9 @@ import Control.DeepSeq
 import Control.Monad
 import Data.Complex
 import Data.Ratio
+#if !MIN_VERSION_base(4,11,0)
 import Data.Semigroup
+#endif
 import Data.Data
 import qualified GHC.Exts as Exts (Any)
 import GHC.Exts (Constraint)
