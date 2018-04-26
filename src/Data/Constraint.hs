@@ -42,7 +42,7 @@
 --
 -- The need for this extension was first publicized in the paper
 --
--- <http://research.microsoft.com/pubs/67439/gmap3.pdf Scrap your boilerplate with class: extensible generic functions>
+-- <https://www.microsoft.com/en-us/research/wp-content/uploads/2016/07/gmap3.pdf Scrap your boilerplate with class: extensible generic functions>
 --
 -- by Ralf Lämmel and Simon Peyton Jones in 2005, which shoehorned all the
 -- things they needed into a custom 'Sat' typeclass.
