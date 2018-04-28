@@ -152,6 +152,15 @@ leZero = Sub axiom
 zeroLe :: forall a. Dict (0 <= a)
 zeroLe = Dict
 
+plusMinusInverse1 :: forall n m. Dict (((m + n) - n) ~ m)
+plusMinusInverse1 = axiom
+
+plusMinusInverse2 :: forall n m. (m <= n) :- (((m + n) - m) ~ n)
+plusMinusInverse2 = Sub axiom
+
+plusMinusInverse3 :: forall n m. (n <= m) :- (((m - n) + n) ~ m)
+plusMinusInverse3 = Sub axiom
+
 plusMonotone1 :: forall a b c. (a <= b) :- (a + c <= b + c)
 plusMonotone1 = Sub axiom
 
