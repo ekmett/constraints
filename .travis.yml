@@ -49,7 +49,7 @@ matrix:
     # env: TEST=--disable-tests BENCH=--disable-benchmarks
       addons: {apt: {packages: [ghc-ppa-tools,cabal-install-2.2,ghc-7.10.3], sources: [hvr-ghc]}}
     - compiler: "ghc-7.8.4"
-      env: NOINSTALLEDCONSTRAINTS=true
+    # env: TEST=--disable-tests BENCH=--disable-benchmarks
       addons: {apt: {packages: [ghc-ppa-tools,cabal-install-2.2,ghc-7.8.4], sources: [hvr-ghc]}}
     - compiler: "ghc-head"
       env: GHCHEAD=true
