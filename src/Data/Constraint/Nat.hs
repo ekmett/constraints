@@ -42,6 +42,7 @@ module Data.Constraint.Nat
   , timesDiv
   , eqLe, leEq, leId, leTrans
   , leZero, zeroLe
+  , plusMinusInverse1, plusMinusInverse2, plusMinusInverse3
   ) where
 
 import Data.Constraint

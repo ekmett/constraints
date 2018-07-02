@@ -1,6 +1,7 @@
 next [????.??.??]
 -----------------
 * Allow building with GHC 8.6.
+* Add three axioms about `(+)` and `(-)` to `Data.Constraint.Nat`.
 
 0.10
 ----
