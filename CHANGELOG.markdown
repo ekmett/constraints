@@ -1,3 +1,7 @@
+next [????.??.??]
+-----------------
+* Allow building with GHC 8.6.
+
 0.10
 ----
 * Adapt to the `Semigroup`–`Monoid` Proposal (introduced in `base-4.11`):
