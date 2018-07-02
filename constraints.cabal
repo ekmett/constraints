@@ -1,6 +1,6 @@
 name:          constraints
 category:      Constraints
-version:       0.10
+version:       0.10.1
 license:       BSD2
 cabal-version: >= 1.10
 license-file:  LICENSE
