@@ -56,10 +56,11 @@ module Data.Constraint
     Constraint
   -- * Dictionary
   , Dict(Dict)
+  , HasDict(..)
   , withDict
+  , (\\)
   -- * Entailment
   , (:-)(Sub)
-  , (\\)
   , weaken1, weaken2, contract
   , strengthen1, strengthen2
   , (&&&), (***)
@@ -93,6 +94,9 @@ import Numeric.Natural (Natural)
 #if !MIN_VERSION_base(4,8,0)
 import Data.Word (Word)
 #endif
+import Data.Coerce (Coercible)
+import Data.Type.Coercion(Coercion(..))
+import Data.Type.Equality((:~:)(..))
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
@@ -136,15 +140,45 @@ deriving instance Show (Dict a)
 instance NFData (Dict c) where
   rnf Dict = ()
 
+-- | Witnesses that a value of type @e@ contains evidence of the constraint @c@.
+--
+-- Mainly intended to allow ('\\') to be overloaded, since it's a useful operator.
+class HasDict c e | e -> c where
+  evidence :: e -> Dict c
+
+instance HasDict a (Dict a) where
+  evidence = Prelude.id
+
+instance a => HasDict b (a :- b) where
+  evidence (Sub x) = x
+
+instance HasDict (Coercible a b) (Coercion a b) where
+  evidence Coercion = Dict
+
+instance HasDict (a ~ b) (a :~: b) where
+  evidence Refl = Dict
+
 -- | From a 'Dict', takes a value in an environment where the instance
 -- witnessed by the 'Dict' is in scope, and evaluates it.
 --
 -- Essentially a deconstruction of a 'Dict' into its continuation-style
 -- form.
 --
-withDict :: Dict a -> (a => r) -> r
-withDict d r = case d of
+-- Can also be used to deconstruct an entailment, @a ':-' b@, using a context @a@.
+--
+-- @
+-- withDict :: 'Dict' c -> (c => r) -> r
+-- withDict :: a => (a ':-' c) -> (c => r) -> r
+-- @
+withDict :: HasDict c e => e -> (c => r) -> r
+withDict d r = case evidence d of
                  Dict -> r
+
+infixl 1 \\ -- required comment
+
+-- | Operator version of 'withDict', with the arguments flipped
+(\\) :: HasDict c e => (c => r) -> e -> r
+r \\ d = withDict d r
 
 infixr 9 :-
 
@@ -244,12 +278,6 @@ instance Show (a :- b) where
 
 instance a => NFData (a :- b) where
   rnf (Sub Dict) = ()
-
-infixl 1 \\ -- required comment
-
--- | Given that @a :- b@, derive something that needs a context @b@, using the context @a@
-(\\) :: a => (b => r) -> (a :- b) -> r
-r \\ Sub Dict = r
 
 --------------------------------------------------------------------------------
 -- Constraints form a Category
