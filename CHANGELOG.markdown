@@ -1,3 +1,10 @@
+next [????.??.??]
+-----------------
+* Introduce a `HasDict` type class for types that witness evidence of
+  constraints, such as `Dict`, `(:-)`, `Coercion`, and `(:~:)`.
+* Generalize the types of `withDict` and `(\\)` to be polymorphic over
+  any `HasDict` instance.
+
 0.10.1 [2018.07.02]
 -------------------
 * Allow building with GHC 8.6.
