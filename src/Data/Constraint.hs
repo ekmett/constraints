@@ -96,7 +96,9 @@ import Data.Word (Word)
 #endif
 import Data.Coerce (Coercible)
 import Data.Type.Coercion(Coercion(..))
-import Data.Type.Equality((:~:)(..))
+#if MIN_VERSION_base(4,10,0)
+import Data.Type.Equality ((:~~:)(..), type (~~))
+#endif
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
@@ -157,6 +159,11 @@ instance HasDict (Coercible a b) (Coercion a b) where
 
 instance HasDict (a ~ b) (a :~: b) where
   evidence Refl = Dict
+
+#if MIN_VERSION_base(4,10,0)
+instance HasDict (a ~~ b) (a :~~: b) where
+  evidence HRefl = Dict
+#endif
 
 -- | From a 'Dict', takes a value in an environment where the instance
 -- witnessed by the 'Dict' is in scope, and evaluates it.
