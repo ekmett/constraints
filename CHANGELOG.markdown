@@ -1,7 +1,8 @@
 next [????.??.??]
 -----------------
 * Introduce a `HasDict` type class for types that witness evidence of
-  constraints, such as `Dict`, `(:-)`, `Coercion`, `(:~:)`, and `(:~~:)`.
+  constraints, such as `Dict`, `(:-)`, `Coercion`, `(:~:)`, `(:~~:)`, and
+  `TypeRep`.
 * Generalize the types of `withDict` and `(\\)` to be polymorphic over
   any `HasDict` instance.
 

@@ -16,7 +16,11 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE CPP #-}
+#if __GLASGOW_HASKELL__ >= 706
+{-# LANGUAGE PolyKinds #-}
+#endif
 #if __GLASGOW_HASKELL__ >= 800
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 #endif
 #if __GLASGOW_HASKELL__ >= 708 && __GLASGOW_HASKELL__ < 710
@@ -79,11 +83,14 @@ import Control.Category
 import Control.DeepSeq
 import Control.Monad
 import Data.Complex
+#if __GLASGOW_HASKELL__ >= 800 && __GLASGOW_HASKELL__ < 806
+import Data.Kind
+#endif
 import Data.Ratio
 #if !MIN_VERSION_base(4,11,0)
 import Data.Semigroup
 #endif
-import Data.Data
+import Data.Data hiding (TypeRep)
 import qualified GHC.Exts as Exts (Any)
 import GHC.Exts (Constraint)
 import Data.Bits (Bits)
@@ -98,6 +105,7 @@ import Data.Coerce (Coercible)
 import Data.Type.Coercion(Coercion(..))
 #if MIN_VERSION_base(4,10,0)
 import Data.Type.Equality ((:~~:)(..), type (~~))
+import Type.Reflection (TypeRep, typeRepKind, withTypeable)
 #endif
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
@@ -163,6 +171,9 @@ instance HasDict (a ~ b) (a :~: b) where
 #if MIN_VERSION_base(4,10,0)
 instance HasDict (a ~~ b) (a :~~: b) where
   evidence HRefl = Dict
+
+instance HasDict (Typeable k, Typeable a) (TypeRep (a :: k)) where
+  evidence tr = withTypeable tr $ withTypeable (typeRepKind tr) Dict
 #endif
 
 -- | From a 'Dict', takes a value in an environment where the instance
