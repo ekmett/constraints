@@ -18,8 +18,8 @@
 -- This module is only available on GHC 8.0 or later.
 module Data.Constraint.Nat
   ( Min, Max, Lcm, Gcd, Divides, Div, Mod
-  , plusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat
-  , plusZero, timesZero, timesOne, powZero, powOne, maxZero, minZero, gcdZero, gcdOne, lcmZero, lcmOne
+  , plusNat, minusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat
+  , plusZero, minusZero, timesZero, timesOne, powZero, powOne, maxZero, minZero, gcdZero, gcdOne, lcmZero, lcmOne
   , plusAssociates, timesAssociates, minAssociates, maxAssociates, gcdAssociates, lcmAssociates
   , plusCommutes, timesCommutes, minCommutes, maxCommutes, gcdCommutes, lcmCommutes
   , plusDistributesOverTimes, timesDistributesOverPow, timesDistributesOverGcd, timesDistributesOverLcm
@@ -114,6 +114,9 @@ lcmNat = magic lcm
 plusNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n + m)
 plusNat = magic (+)
 
+minusNat :: forall n m. (KnownNat n, KnownNat m, m <= n) :- KnownNat (n - m)
+minusNat = Sub $ case magic @n @m (-) of Sub r -> r
+
 minNat   :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Min n m)
 minNat = magic min
 
@@ -134,6 +137,9 @@ modNat = Sub $ case magic @n @m mod of Sub r -> r
 
 plusZero :: forall n. Dict ((n + 0) ~ n)
 plusZero = Dict
+
+minusZero :: forall n. Dict ((n - 0) ~ n)
+minusZero = Dict
 
 timesZero :: forall n. Dict ((n * 0) ~ 0)
 timesZero = Dict
