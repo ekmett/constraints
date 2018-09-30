@@ -115,7 +115,7 @@ plusNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n + m)
 plusNat = magic (+)
 
 minusNat :: forall n m. (KnownNat n, KnownNat m, m <= n) :- KnownNat (n - m)
-minusNat = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) - natVal (Proxy :: Proxy m))
+minusNat = Sub $ case magic @n @m (-) of Sub r -> r
 
 minNat   :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Min n m)
 minNat = magic min
