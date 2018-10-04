@@ -11,6 +11,7 @@
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UnicodeSyntax #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE Rank2Types #-}
@@ -65,6 +66,7 @@ module Data.Constraint
   , (\\)
   -- * Entailment
   , (:-)(Sub)
+  , type (⊢)
   , weaken1, weaken2, contract
   , strengthen1, strengthen2
   , (&&&), (***)
@@ -199,6 +201,9 @@ infixl 1 \\ -- required comment
 r \\ d = withDict d r
 
 infixr 9 :-
+infixr 9 ⊢
+
+type (⊢) = (:-)
 
 -- | This is the type of entailment.
 --
