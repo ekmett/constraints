@@ -59,6 +59,7 @@ library
 
   exposed-modules:
     Data.Constraint
+    Data.Constraint.Compose
     Data.Constraint.Deferrable
     Data.Constraint.Forall
     Data.Constraint.Lifting
