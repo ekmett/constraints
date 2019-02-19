@@ -330,13 +330,13 @@ dividesMin = Sub axiom
 dividesMax :: (Divides a b, Divides a c) :- Divides a (Max b c)
 dividesMax = Sub axiom
 
-dividesDef :: forall a b. Divides a b :- ((a * Div b a) ~ a)
+dividesDef :: forall a b. Divides a b :- ((a * Div b a) ~ b)
 dividesDef = Sub axiom
 
 dividesPow :: (1 <= n, Divides a b) :- Divides a (b^n)
 dividesPow = Sub axiom
 
-timesDiv :: forall a b. Dict ((a * Div b a) <= a)
+timesDiv :: forall a b. Dict ((a * Div b a) <= b)
 timesDiv = axiom
 
 -- (<=) is an internal category in the category of constraints.
