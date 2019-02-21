@@ -49,7 +49,7 @@ next [????.??.??]
     when a type mismatch error is thrown
   * Add `defer_` and `deferEither_`, counterparts to `defer` and `deferEither`
     which do not require proxy arguments
-  * Enable `PolyKinds`. This allows the `Deferrable (a ~ b` instance to be
+  * Enable `PolyKinds`. This allows the `Deferrable (a ~ b)` instance to be
     polykinded on all supported versions of GHC _except_ 7.10, where the kinds
     must be `*` due to an old GHC bug
   * Introduce a heterogeneous equality type `(:~~:)`, and use it to define a
