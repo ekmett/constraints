@@ -40,6 +40,12 @@ module Data.Constraint.Forall
 import Data.Constraint
 import Unsafe.Coerce (unsafeCoerce)
 
+#if __GLASGOW_HASKELL__ >= 806
+# define KVS(kvs) kvs
+#else
+# define KVS(kvs)
+#endif
+
 {- The basic trick of this module is to use "skolem" types as test candidates
  - for whether a class predicate holds, and if so assume that it holds for all
  - types, unsafely coercing the typeclass dictionary.
@@ -143,7 +149,7 @@ class Forall (Q p t) => ForallT (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -
 instance Forall (Q p t) => ForallT p t
 
 -- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
-instT :: forall (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4) (f :: k1 -> k2) (a :: k3). ForallT p t :- p (t f a)
+instT :: forall KVS(k1 k2 k3 k4) (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4) (f :: k1 -> k2) (a :: k3). ForallT p t :- p (t f a)
 instT = Sub $
   case inst :: Forall (Q p t) :- Q p t f of { Sub Dict ->
   case inst :: Forall (R p t f) :- R p t f a of
