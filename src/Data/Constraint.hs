@@ -106,7 +106,7 @@ import Data.Word (Word)
 import Data.Coerce (Coercible)
 import Data.Type.Coercion(Coercion(..))
 #if MIN_VERSION_base(4,10,0)
-import Data.Type.Equality ((:~~:)(..), type (~~))
+import Data.Type.Equality (type (~~))
 import Type.Reflection (TypeRep, typeRepKind, withTypeable)
 #endif
 
