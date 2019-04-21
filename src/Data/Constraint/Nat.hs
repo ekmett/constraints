@@ -10,6 +10,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE UndecidableInstances #-}
 #if __GLASGOW_HASKELL__ >= 805
 {-# LANGUAGE NoStarIsType #-}
 #endif
@@ -47,13 +48,14 @@ module Data.Constraint.Nat
 
 import Data.Constraint
 import Data.Proxy
+import Data.Type.Bool
 import GHC.TypeLits
 import Unsafe.Coerce
 
 type family Min (m::Nat) (n::Nat) :: Nat where
-    Min m m = m
+    Min m n = If (n <=? m) n m
 type family Max (m::Nat) (n::Nat) :: Nat where
-    Max m m = m
+    Max m n = If (n <=? m) m n
 #if !(MIN_VERSION_base(4,11,0))
 type family Div (m::Nat) (n::Nat) :: Nat where
     Div m 1 = m
@@ -148,10 +150,10 @@ timesOne :: forall n. Dict ((n * 1) ~ n)
 timesOne = Dict
 
 minZero :: forall n. Dict (Min n 0 ~ 0)
-minZero = axiom
+minZero = Dict
 
 maxZero :: forall n. Dict (Max n 0 ~ n)
-maxZero = axiom
+maxZero = Dict
 
 powZero :: forall n. Dict ((n ^ 0) ~ 1)
 powZero = Dict
