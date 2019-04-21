@@ -5,6 +5,12 @@ next [????.??.??]
   `TypeRep`.
 * Generalize the types of `withDict` and `(\\)` to be polymorphic over
   any `HasDict` instance.
+* Add `type (⊢) = (:-)`.
+* Fix unsafe mistakes in the statements of `dividesDef` and `timesDiv` in
+  `Data.Constraint.Nat`.
+* Make the implementations of `Min` and `Max` reduce on more inputs in
+  `Data.Constraint.Nat`.
+* Add `minusNat` and `minusZero` functions to `Data.Constraint.Nat`.
 
 0.10.1 [2018.07.02]
 -------------------
