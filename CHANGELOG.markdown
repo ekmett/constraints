@@ -1,4 +1,4 @@
-next [????.??.??]
+0.11 [2019.05.10]
 -----------------
 * Introduce a `HasDict` type class for types that witness evidence of
   constraints, such as `Dict`, `(:-)`, `Coercion`, `(:~:)`, `(:~~:)`, and
@@ -11,6 +11,7 @@ next [????.??.??]
 * Make the implementations of `Min` and `Max` reduce on more inputs in
   `Data.Constraint.Nat`.
 * Add `minusNat` and `minusZero` functions to `Data.Constraint.Nat`.
+* Support `hashable-1.3.*` and `semigroups-0.19.*`.
 
 0.10.1 [2018.07.02]
 -------------------
