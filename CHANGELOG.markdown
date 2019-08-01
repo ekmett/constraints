@@ -1,3 +1,7 @@
+next [????.??.??]
+-----------------
+* Make `Data.Constraint.Deferrable.UnsatisfiedConstraint` a newtype.
+
 0.11 [2019.05.10]
 -----------------
 * Introduce a `HasDict` type class for types that witness evidence of
