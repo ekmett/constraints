@@ -55,7 +55,7 @@ import GHC.Types (type (~~))
 import Data.Type.Equality ((:~~:)(HRefl))
 #endif
 
-data UnsatisfiedConstraint = UnsatisfiedConstraint String
+newtype UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving (Typeable, Show)
 
 instance Exception UnsatisfiedConstraint
