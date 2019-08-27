@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+0.11.1 [2019.08.27]
+-------------------
 * Make `Data.Constraint.Deferrable.UnsatisfiedConstraint` a newtype.
 
 0.11 [2019.05.10]
