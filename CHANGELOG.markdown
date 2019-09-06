@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+0.11.2 [2019.09.06]
+-------------------
 * Depend on the `type-equality` compatibility library so that `(:~~:)` may be
   used when compiling this library with GHC 8.0. This avoids having to redefine
   `(:~~:)` directly in the internals of `constraints` itself.
