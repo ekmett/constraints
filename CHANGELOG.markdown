@@ -1,3 +1,9 @@
+next [????.??.??]
+-----------------
+* Depend on the `type-equality` compatibility library so that `(:~~:)` may be
+  used when compiling this library with GHC 8.0. This avoids having to redefine
+  `(:~~:)` directly in the internals of `constraints` itself.
+
 0.11.1 [2019.08.27]
 -------------------
 * Make `Data.Constraint.Deferrable.UnsatisfiedConstraint` a newtype.

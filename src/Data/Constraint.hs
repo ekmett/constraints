@@ -105,8 +105,11 @@ import Data.Word (Word)
 #endif
 import Data.Coerce (Coercible)
 import Data.Type.Coercion(Coercion(..))
-#if MIN_VERSION_base(4,10,0)
+#if MIN_VERSION_base(4,9,0)
 import Data.Type.Equality (type (~~))
+import qualified Data.Type.Equality.Hetero as Hetero
+#endif
+#if MIN_VERSION_base(4,10,0)
 import Type.Reflection (TypeRep, typeRepKind, withTypeable)
 #endif
 
@@ -170,10 +173,12 @@ instance HasDict (Coercible a b) (Coercion a b) where
 instance HasDict (a ~ b) (a :~: b) where
   evidence Refl = Dict
 
-#if MIN_VERSION_base(4,10,0)
-instance HasDict (a ~~ b) (a :~~: b) where
-  evidence HRefl = Dict
+#if MIN_VERSION_base(4,9,0)
+instance HasDict (a ~~ b) (a Hetero.:~~: b) where
+  evidence Hetero.HRefl = Dict
+#endif
 
+#if MIN_VERSION_base(4,10,0)
 instance HasDict (Typeable k, Typeable a) (TypeRep (a :: k)) where
   evidence tr = withTypeable tr $ withTypeable (typeRepKind tr) Dict
 #endif
