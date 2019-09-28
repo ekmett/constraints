@@ -208,6 +208,7 @@ r \\ d = withDict d r
 infixr 9 :-
 infixr 9 ⊢
 
+-- | Type entailment, as written with a single character.
 type (⊢) = (:-)
 
 -- | This is the type of entailment.
