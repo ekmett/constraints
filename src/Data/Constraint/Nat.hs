@@ -323,7 +323,7 @@ lcmDistributesOverGcd = axiom
 dividesPlus :: (Divides a b, Divides a c) :- Divides a (b + c)
 dividesPlus = Sub axiom
 
-dividesTimes :: (Divides a b, Divides a c) :- Divides a (b * c)
+dividesTimes :: Divides a b :- Divides a (b * c)
 dividesTimes = Sub axiom
 
 dividesMin :: (Divides a b, Divides a c) :- Divides a (Min b c)
