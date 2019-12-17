@@ -1,3 +1,12 @@
+next [????.??.??]
+-----------------
+* Relax the type signature for `divideTimes`:
+
+  ```diff
+  -dividesTimes :: (Divides a b, Divides a c) :- Divides a (b * c)
+  +dividesTimes ::  Divides a b               :- Divides a (b * c)
+  ```
+
 0.11.2 [2019.09.06]
 -------------------
 * Depend on the `type-equality` compatibility library so that `(:~~:)` may be
