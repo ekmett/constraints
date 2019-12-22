@@ -332,7 +332,7 @@ dividesMin = Sub axiom
 dividesMax :: (Divides a b, Divides a c) :- Divides a (Max b c)
 dividesMax = Sub axiom
 
-dividesDef :: forall a b. Divides a b :- ((a * Div b a) ~ b)
+dividesDef :: forall a b. Divides a b :- (Mod b a ~ 0)
 dividesDef = Sub axiom
 
 dividesPow :: (1 <= n, Divides a b) :- Divides a (b^n)
