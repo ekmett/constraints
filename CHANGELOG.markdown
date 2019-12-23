@@ -1,10 +1,17 @@
-next [????.??.??]
+0.12 [????.??.??]
 -----------------
 * Relax the type signature for `divideTimes`:
 
   ```diff
   -dividesTimes :: (Divides a b, Divides a c) :- Divides a (b * c)
   +dividesTimes ::  Divides a b               :- Divides a (b * c)
+  ```
+
+* Simplify the type signature of `dividesDef`:
+
+  ```diff
+  -dividesDef :: forall a b. Divides a b :- ((a * Div b a) ~ b)
+  +dividesDef :: forall a b. Divides a b :- (Mod b a ~ 0)
   ```
 
 0.11.2 [2019.09.06]
