@@ -14,6 +14,15 @@
   +dividesDef :: forall a b. Divides a b :- (Mod b a ~ 0)
   ```
 
+  The original type of `diviesDef` can be (partially) recovered by defining
+  it in terms of the new `dividesDef`:
+
+  ```hs
+  dividesDef' :: forall a b. (1 <= a, Divides a b) :- ((a * Div b a) ~ b)
+  dividesDef' = Sub $ case (dividesDef @a @b, euclideanNat @a @b) of
+    (Sub Dict, Sub Dict) -> Dict
+  ```
+
 0.11.2 [2019.09.06]
 -------------------
 * Depend on the `type-equality` compatibility library so that `(:~~:)` may be
