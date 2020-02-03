@@ -1,4 +1,4 @@
-0.12 [????.??.??]
+0.12 [2020.02.03]
 -----------------
 * Relax the type signature for `divideTimes`:
 
