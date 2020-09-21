@@ -13,6 +13,9 @@
 #if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE UndecidableSuperClasses #-}
 #endif
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint.Forall
@@ -35,10 +38,17 @@ module Data.Constraint.Forall
   , ForallT, instT
   , ForallV, InstV (instV)
   , forall
+  , forallF
+  , forallT
   ) where
 
 import Data.Constraint
+#if __GLASGOW_HASKELL__ >= 806
+import GHC.Exts (magicDict)
+import Data.Proxy (Proxy (..))
+#else
 import Unsafe.Coerce (unsafeCoerce)
+#endif
 
 #if __GLASGOW_HASKELL__ >= 806
 # define KVS(kvs) kvs
@@ -104,11 +114,6 @@ import Unsafe.Coerce (unsafeCoerce)
  - extract it from `Forall p` in order to tie the knot.
  -}
 
--- The `Skolem` type family represents skolem variables; do not export!
--- If GHC supports it, these might be made closed with no instances.
-
-type family Skolem (p :: k -> Constraint) :: k
-
 -- The outer `Forall` type family prevents GHC from giving a spurious
 -- superclass cycle error.
 -- The inner `Forall_` class prevents the skolem from leaking to the user,
@@ -117,12 +122,28 @@ type family Skolem (p :: k -> Constraint) :: k
 -- | A representation of the quantified constraint @forall a. p a@.
 type family Forall (p :: k -> Constraint) :: Constraint
 type instance Forall p = Forall_ p
+#if __GLASGOW_HASKELL__ >= 806
+class Forall_ (p :: k -> Constraint) where
+  payload :: Dict (p a)
+instance (forall a. p a) => Forall_ p where
+  payload = Dict
+#else
+-- The `Skolem` type family represents skolem variables; do not export!
+-- If GHC supports it, these might be made closed with no instances.
+
+type family Skolem (p :: k -> Constraint) :: k
+
 class p (Skolem p) => Forall_ (p :: k -> Constraint)
 instance p (Skolem p) => Forall_ (p :: k -> Constraint)
+#endif
 
 -- | Instantiate a quantified @'Forall' p@ constraint at type @a@.
 inst :: forall p a. Forall p :- p a
+#if __GLASGOW_HASKELL__ >= 806
+inst = Sub payload
+#else
 inst = unsafeCoerce (Sub Dict :: Forall p :- p (Skolem p))
+#endif
 
 -- | Composition for constraints.
 class p (f a) => ComposeC (p :: k2 -> Constraint) (f :: k1 -> k2) (a :: k1)
@@ -194,4 +215,32 @@ instance InstV (p a) c => InstV (p :: k1 -> k2 -> k3) c where
             Sub Dict -> Dict
 
 forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
+#if __GLASGOW_HASKELL__ >= 806
+-- This is terribly sad. GHC doesn't offer any nice
+-- introduction rules for quantified constraints.
+-- This hack seems to work; I hope it's actually safe.
+forall d = withForall (\_ -> Dict) d (Proxy :: Proxy p)
+data WrapD p b = WrapD (Forall p => Proxy p -> b)
+withForall
+  :: (Forall p              => Proxy p -> b)
+  -> (forall a. Dict (p a)) -> Proxy p -> b
+withForall f x y = magicDict (WrapD f) x y
+#else
 forall d = case d :: Dict (p (Skolem p)) of Dict -> Dict
+#endif
+
+forallF :: forall p f. (forall a. Dict (p (f a))) -> Dict (ForallF p f)
+forallF d =
+  case forall ((case d :: Dict (p (f x)) of Dict -> Dict) 
+      :: forall x. Dict (ComposeC p f x))
+    of Dict -> Dict
+
+forallRQ :: forall p t a. (forall b. Dict (R p t a b)) -> Dict (Q p t a)
+forallRQ d = case forall d :: Dict (Forall (R p t a)) of Dict -> Dict
+
+forallQT :: forall t p. (forall a. Dict (Q p t a)) -> Dict (ForallT p t)
+forallQT d = case forall d of Dict -> Dict
+
+forallT :: forall p t. (forall f a. Dict (p (t f a))) -> Dict (ForallT p t)
+forallT d = forallQT $ forallRQ ((case d :: Dict (p (t a b)) of Dict -> Dict)
+               :: forall a b. Dict (R p t a b))
