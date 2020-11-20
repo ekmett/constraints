@@ -27,6 +27,9 @@
 #if __GLASGOW_HASKELL__ >= 708 && __GLASGOW_HASKELL__ < 710
 {-# LANGUAGE NullaryTypeClasses #-}
 #endif
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE QuantifiedConstraints #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint
@@ -71,6 +74,9 @@ module Data.Constraint
   , strengthen1, strengthen2
   , (&&&), (***)
   , trans, refl
+#if __GLASGOW_HASKELL__ >= 806
+  , implied
+#endif
   , Bottom(no)
   , top, bottom
   -- * Dict is fully faithful
@@ -323,6 +329,18 @@ trans f g = Sub $ Dict \\ f \\ g
 -- If we view @(':-')@ as a Constraint-indexed category, then this is 'id'
 refl :: a :- a
 refl = Sub Dict
+
+--------------------------------------------------------------------------------
+-- QuantifiedConstraints
+--------------------------------------------------------------------------------
+
+#if __GLASGOW_HASKELL__ >= 806
+-- | Convert a quantified constraint into an entailment.
+--
+-- Only available on GHC 8.6 or later.
+implied :: forall a b. (a => b) => a :- b
+implied = Sub (Dict :: Dict b)
+#endif
 
 --------------------------------------------------------------------------------
 -- (,) is a Bifunctor
