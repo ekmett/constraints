@@ -7,11 +7,13 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE CPP #-}
 -- | Utilities for working with 'KnownSymbol' constraints.
 --
 -- This module is only available on GHC 8.0 or later.
 module Data.Constraint.Symbol
-  ( type (++)
+  ( type AppendSymbol
+  , type (++)
   , type Take
   , type Drop
   , type Length
@@ -41,7 +43,14 @@ import Data.Proxy
 import GHC.TypeLits
 import Unsafe.Coerce
 
-type family (++) :: Symbol -> Symbol -> Symbol where
+#if !(MIN_VERSION_base(4,10,0))
+type family AppendSymbol (m :: Symbol) (n :: Symbol) :: Symbol
+#endif
+
+-- | An infix synonym for 'AppendSymbol'.
+type (m :: Symbol) ++ (n :: Symbol) = AppendSymbol m n
+infixr 5 ++
+
 type family Take :: Nat -> Symbol -> Symbol where
 type family Drop :: Nat -> Symbol -> Symbol where
 type family Length :: Symbol -> Nat where
@@ -64,16 +73,26 @@ axiom = unsafeCoerce (Dict :: Dict (a ~ a))
 
 -- axioms and operations
 
-appendSymbol :: (KnownSymbol a, KnownSymbol b) :- KnownSymbol (a ++ b)
+appendSymbol :: (KnownSymbol a, KnownSymbol b) :- KnownSymbol (AppendSymbol a b)
 appendSymbol = magicSSS (++)
 
-appendUnit1 :: forall a. Dict (("" ++ a) ~ a)
-appendUnit1 = axiom
+appendUnit1 :: forall a. Dict (AppendSymbol "" a ~ a)
+appendUnit1 =
+#if MIN_VERSION_base(4,10,0)
+  Dict
+#else
+  axiom
+#endif
 
-appendUnit2 :: forall a. Dict ((a ++ "") ~ a)
-appendUnit2 = axiom
+appendUnit2 :: forall a. Dict (AppendSymbol a "" ~ a)
+appendUnit2 =
+#if MIN_VERSION_base(4,10,0)
+  Dict
+#else
+  axiom
+#endif
 
-appendAssociates :: forall a b c. Dict (((a ++ b) ++ c) ~ (a ++ (b ++ c)))
+appendAssociates :: forall a b c. Dict (AppendSymbol (AppendSymbol a b) c ~ AppendSymbol a (AppendSymbol b c))
 appendAssociates = axiom
 
 takeSymbol :: forall n a. (KnownNat n, KnownSymbol a) :- KnownSymbol (Take n a)
@@ -82,7 +101,7 @@ takeSymbol = magicNSS take
 dropSymbol :: forall n a. (KnownNat n, KnownSymbol a) :- KnownSymbol (Drop n a)
 dropSymbol = magicNSS drop
 
-takeAppendDrop :: forall n a. Dict (Take n a ++ Drop n a ~ a)
+takeAppendDrop :: forall n a. Dict (AppendSymbol (Take n a) (Drop n a) ~ a)
 takeAppendDrop = axiom
 
 lengthSymbol :: forall a. KnownSymbol a :- KnownNat (Length a)

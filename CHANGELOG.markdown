@@ -1,3 +1,28 @@
+0.13 [????.??.??]
+-----------------
+* `Data.Constraint.Symbol` now reexports the `GHC.TypeLits.AppendSymbol` type
+  family from recent versions of `base` (or, on old versions of `base`, it
+  defines a backwards-compatibile version of `AppendSymbol`). The existing
+  `(++)` type family for `Data.Constraint.Symbol` is now a synonym for
+  `AppendSymbol`.
+
+  This is technically a breaking change, as `(++)` was previously defined like
+  so:
+
+  ```hs
+  type family (++) :: Symbol -> Symbol -> Symbol
+  ```
+
+  This meant that `(++)` could be partially applied. However, for compatibility
+  with the way that `AppendSymbol` is defined, `(++)` is now defined like so:
+
+  ```hs
+  type m ++ n = AppendSymbol m n
+  ```
+
+  As a result, `(++)` can no longer be partially applied.
+* Make the `(++)` type family in `Data.Constraint.Symbol` be `infixr 5`.
+
 0.12 [2020.02.03]
 -----------------
 * Relax the type signature for `divideTimes`:
