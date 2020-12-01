@@ -22,6 +22,9 @@
 
   As a result, `(++)` can no longer be partially applied.
 * Make the `(++)` type family in `Data.Constraint.Symbol` be `infixr 5`.
+* Add `implied :: (a => b) -> (a :- b)` to `Data.Constraint`, which converts
+  a quantified constraint into an entailment. This is only available when
+  compiled with GHC 8.6 or later.
 
 0.12 [2020.02.03]
 -----------------
