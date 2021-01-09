@@ -48,6 +48,8 @@ library
     Rank2Types,
     GADTs
 
+  ghc-options: -fconstraint-solver-iterations=0
+
   build-depends:
     base >= 4.7 && < 5,
     binary >= 0.7.1 && < 0.9,
