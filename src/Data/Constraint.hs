@@ -130,7 +130,7 @@ import Type.Reflection (TypeRep, typeRepKind, withTypeable)
 -- captures a dictionary that proves we have an:
 --
 -- @
--- instance 'Eq' 'Int
+-- instance 'Eq' 'Int'
 -- @
 --
 -- Pattern matching on the 'Dict' constructor will bring this instance into scope.
