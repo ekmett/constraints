@@ -1,4 +1,4 @@
-0.13 [????.??.??]
+0.13 [2021.02.17]
 -----------------
 * `Data.Constraint.Symbol` now reexports the `GHC.TypeLits.AppendSymbol` type
   family from recent versions of `base` (or, on old versions of `base`, it
