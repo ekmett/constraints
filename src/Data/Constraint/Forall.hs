@@ -7,16 +7,21 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE PolyKinds #-}
 #if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE UndecidableSuperClasses #-}
 #endif
+{-# LANGUAGE Trustworthy #-}
+#if __GLASGOW_HASKELL__ >= 806
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE GADTs #-}
+#endif
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Constraint.Forall
--- Copyright   :  (C) 2011-2015 Edward Kmett,
+-- Copyright   :  (C) 2011-2021 Edward Kmett,
 --                (C) 2015 Ørjan Johansen,
 --                (C) 2016 David Feuer
 -- License     :  BSD-style (see the file LICENSE)
@@ -40,11 +45,29 @@ module Data.Constraint.Forall
 import Data.Constraint
 import Unsafe.Coerce (unsafeCoerce)
 
+
 #if __GLASGOW_HASKELL__ >= 806
 # define KVS(kvs) kvs
+
+class (forall a. p a) => Forall (p :: k -> Constraint)
+instance (forall a. p a) => Forall (p :: k -> Constraint)
+
+-- | Instantiate a quantified @'Forall' p@ constraint at type @a@.
+inst :: forall p a. Forall p :- p a
+inst = Sub Dict
+
+data Dict1 p where
+  Dict1 :: (forall a. p a) => Dict1 p
+
+forallish :: forall p. Dict1 p -> Dict (Forall p)
+forallish Dict1 = Dict
+
+forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
+forall d = forallish (unsafeCoerce d)
+
 #else
+
 # define KVS(kvs)
-#endif
 
 {- The basic trick of this module is to use "skolem" types as test candidates
  - for whether a class predicate holds, and if so assume that it holds for all
@@ -109,6 +132,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 type family Skolem (p :: k -> Constraint) :: k
 
+
 -- The outer `Forall` type family prevents GHC from giving a spurious
 -- superclass cycle error.
 -- The inner `Forall_` class prevents the skolem from leaking to the user,
@@ -123,6 +147,11 @@ instance p (Skolem p) => Forall_ (p :: k -> Constraint)
 -- | Instantiate a quantified @'Forall' p@ constraint at type @a@.
 inst :: forall p a. Forall p :- p a
 inst = unsafeCoerce (Sub Dict :: Forall p :- p (Skolem p))
+
+forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
+forall d = case d :: Dict (p (Skolem p)) of Dict -> Dict
+
+#endif
 
 -- | Composition for constraints.
 class p (f a) => ComposeC (p :: k2 -> Constraint) (f :: k1 -> k2) (a :: k1)
@@ -193,5 +222,3 @@ instance InstV (p a) c => InstV (p :: k1 -> k2 -> k3) c where
         Sub Dict -> case instV :: ForallV (p a) :- c of
             Sub Dict -> Dict
 
-forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
-forall d = case d :: Dict (p (Skolem p)) of Dict -> Dict
