@@ -1,3 +1,7 @@
+0.14 [unreleased]
+-----------------
+* `Data.Constraint.Forall` uses `QuantifiedConstraints` on GHC 8.6+
+
 0.13 [2021.02.17]
 -----------------
 * `Data.Constraint.Symbol` now reexports the `GHC.TypeLits.AppendSymbol` type
