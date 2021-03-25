@@ -9,8 +9,6 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE CPP #-}
 -- | Utilities for working with 'KnownSymbol' constraints.
---
--- This module is only available on GHC 8.0 or later.
 module Data.Constraint.Symbol
   ( type AppendSymbol
   , type (++)
@@ -43,10 +41,6 @@ import Data.Proxy
 import GHC.TypeLits
 import Unsafe.Coerce
 
-#if !(MIN_VERSION_base(4,10,0))
-type family AppendSymbol (m :: Symbol) (n :: Symbol) :: Symbol
-#endif
-
 -- | An infix synonym for 'AppendSymbol'.
 type (m :: Symbol) ++ (n :: Symbol) = AppendSymbol m n
 infixr 5 ++
@@ -77,20 +71,10 @@ appendSymbol :: (KnownSymbol a, KnownSymbol b) :- KnownSymbol (AppendSymbol a b)
 appendSymbol = magicSSS (++)
 
 appendUnit1 :: forall a. Dict (AppendSymbol "" a ~ a)
-appendUnit1 =
-#if MIN_VERSION_base(4,10,0)
-  Dict
-#else
-  axiom
-#endif
+appendUnit1 = Dict
 
 appendUnit2 :: forall a. Dict (AppendSymbol a "" ~ a)
-appendUnit2 =
-#if MIN_VERSION_base(4,10,0)
-  Dict
-#else
-  axiom
-#endif
+appendUnit2 = Dict
 
 appendAssociates :: forall a b c. Dict (AppendSymbol (AppendSymbol a b) c ~ AppendSymbol a (AppendSymbol b c))
 appendAssociates = axiom

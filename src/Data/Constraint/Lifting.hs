@@ -40,9 +40,6 @@ import Control.Monad.Trans.Writer.Strict as Strict
 import Data.Binary
 import Data.Complex
 import Data.Constraint
-#if __GLASGOW_HASKELL__ < 710
-import Data.Foldable
-#endif
 import Data.Functor.Classes
 import Data.Functor.Compose as Functor
 import Data.Functor.Identity
@@ -50,16 +47,7 @@ import Data.Functor.Product as Functor
 import Data.Functor.Reverse as Functor
 import Data.Functor.Sum as Functor
 import Data.Hashable
-#if __GLASGOW_HASKELL__ < 710
-import Data.Monoid
-#endif
 import Data.Ratio
-#if !(MIN_VERSION_base(4,11,0))
-import Data.Semigroup
-#endif
-#if __GLASGOW_HASKELL__ < 710
-import Data.Traversable
-#endif
 import GHC.Arr
 
 class Lifting p f where
@@ -118,7 +106,6 @@ instance Traversable f => Lifting Traversable (Compose f) where lifting = Sub Di
 instance Applicative f => Lifting Applicative (Compose f) where lifting = Sub Dict
 instance Alternative f => Lifting Alternative (Compose f) where lifting = Sub Dict -- overconstrained
 
-#if MIN_VERSION_transformers(0,5,0)
 instance Show1 f => Lifting Show1 (Compose f) where lifting = Sub Dict
 instance Eq1 f => Lifting Eq1 (Compose f) where lifting = Sub Dict
 instance Ord1 f => Lifting Ord1 (Compose f) where lifting = Sub Dict
@@ -127,16 +114,6 @@ instance (Eq1 f, Eq1 g) => Lifting Eq (Compose f g) where lifting = Sub Dict
 instance (Ord1 f, Ord1 g) => Lifting Ord (Compose f g) where lifting = Sub Dict
 instance (Read1 f, Read1 g) => Lifting Read (Compose f g) where lifting = Sub Dict
 instance (Show1 f, Show1 g) => Lifting Show (Compose f g) where lifting = Sub Dict
-#else
-instance (Functor f, Show1 f) => Lifting Show1 (Compose f) where lifting = Sub Dict
-instance (Functor f, Eq1 f) => Lifting Eq1 (Compose f) where lifting = Sub Dict
-instance (Functor f, Ord1 f) => Lifting Ord1 (Compose f) where lifting = Sub Dict
-instance (Functor f, Read1 f) => Lifting Read1 (Compose f) where lifting = Sub Dict
-instance (Functor f, Eq1 f, Eq1 g) => Lifting Eq (Compose f g) where lifting = Sub Dict
-instance (Functor f, Ord1 f, Ord1 g) => Lifting Ord (Compose f g) where lifting = Sub Dict
-instance (Functor f, Read1 f, Read1 g) => Lifting Read (Compose f g) where lifting = Sub Dict
-instance (Functor f, Show1 f, Show1 g) => Lifting Show (Compose f g) where lifting = Sub Dict
-#endif
 
 instance Functor f => Lifting Functor (Functor.Product f) where lifting = Sub Dict
 instance Foldable f => Lifting Foldable (Functor.Product f) where lifting = Sub Dict

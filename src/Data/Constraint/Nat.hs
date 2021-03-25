@@ -11,9 +11,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE UndecidableInstances #-}
-#if __GLASGOW_HASKELL__ >= 805
 {-# LANGUAGE NoStarIsType #-}
-#endif
 -- | Utilities for working with 'KnownNat' constraints.
 --
 -- This module is only available on GHC 8.0 or later.
@@ -56,12 +54,6 @@ type family Min (m::Nat) (n::Nat) :: Nat where
     Min m n = If (n <=? m) n m
 type family Max (m::Nat) (n::Nat) :: Nat where
     Max m n = If (n <=? m) m n
-#if !(MIN_VERSION_base(4,11,0))
-type family Div (m::Nat) (n::Nat) :: Nat where
-    Div m 1 = m
-type family Mod (m::Nat) (n::Nat) :: Nat where
-    Mod 0 m = 0
-#endif
 type family Gcd (m::Nat) (n::Nat) :: Nat where
     Gcd m m = m
 type family Lcm (m::Nat) (n::Nat) :: Nat where
