@@ -9,18 +9,13 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE PolyKinds #-}
-#if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE UndecidableSuperClasses #-}
-#endif
 {-# LANGUAGE Trustworthy #-}
-#if __GLASGOW_HASKELL__ >= 806
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE GADTs #-}
-#endif
------------------------------------------------------------------------------
+
 -- |
--- Module      :  Data.Constraint.Forall
 -- Copyright   :  (C) 2011-2021 Edward Kmett,
 --                (C) 2015 Ørjan Johansen,
 --                (C) 2016 David Feuer
@@ -31,7 +26,6 @@
 -- Portability :  non-portable
 --
 -- This module uses a trick to provide quantification over constraints.
-----------------------------------------------------------------------------
 
 module Data.Constraint.Forall
   ( Forall, inst
@@ -44,10 +38,6 @@ module Data.Constraint.Forall
 
 import Data.Constraint
 import Unsafe.Coerce (unsafeCoerce)
-
-
-#if __GLASGOW_HASKELL__ >= 806
-# define KVS(kvs) kvs
 
 class (forall a. p a) => Forall (p :: k -> Constraint)
 instance (forall a. p a) => Forall (p :: k -> Constraint)
@@ -64,94 +54,6 @@ forallish Dict1 = Dict
 
 forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
 forall d = forallish (unsafeCoerce d)
-
-#else
-
-# define KVS(kvs)
-
-{- The basic trick of this module is to use "skolem" types as test candidates
- - for whether a class predicate holds, and if so assume that it holds for all
- - types, unsafely coercing the typeclass dictionary.
- -
- - The particular technique used to implement 'Forall' appears to have been
- - discovered first by Nicolas Frisby and is
- - <https://csks.wordpress.com/2012/10/22/safe-polykinded-universally-quantified-constraints-part-3-of-3/ discussed in some detail>
- - on his blog.
- -
- - However, his discovery did not directly affect the development of this
- - module.
- -
- - A previous version of this module used concrete, unexported types as the
- - skolems. This turned out to be unsound in the presence of type families.
- - There were 3 somewhat distinct issues:
- -
- - 1. Using closed type families, it is possible to test whether two concrete
- - types are equal, even if one of them is not directly importable.
- -
- - 2. Using just open type families, it is possible to test "at least 2 of
- - these n+1 types are equal", thus using the pigeonhole principle to thwart
- - any scheme based on having only a finite number of shared skolem types.
- -
- - 3. Using just pattern matching of types by unification, it is possible
- - to extract the skolem types from the application the `Forall p` expands
- - to. (Although type families are probably still needed to exploit this.)
- -
- - András Kovács and Ørjan Johansen independently realized that skolems
- - themselves made as type family applications can be used to solve the first
- - two problems (and discovered the third problem in the process). As a bonus,
- - the resulting code is easy to make polykinded.
- -
- - Problem 1 is solved by making the type family have no instances, forcing
- - GHC to make no assumption about what type a skolem is.
- -
- - Problem 2 is solved by parametrizing the skolem on the predicate tested
- - for. (This is a known trick in predicate logic.)
- -
- - Problem 3 is solved by making the `Forall p` application expand to a type
- - class, and have the *actual* test constraint be a superclass constraint on
- - that type class, thus preventing the user directly accessing it.
- -
- - An unfortunate side effect of the new method is that it tends to trigger
- - spurious errors from GHC test for cycles in superclass constraints. András
- - Kovács discovered that these can be silenced by yet another use of a type
- - family.
- -
- - David Feuer points out a remaining doubt about the soundness of this scheme:
- - GHC *does* know that the skolems created from a single predicate `p` are
- - equal. This could in theory apply even if the skolems come from two
- - *distinct* invocations of `Forall p`.
- -
- - However, we don't know any way of bringing two such skolems in contact with
- - each other to create an actual exploit. It would seem to require `p` to
- - already contain its own skolem, despite there being (hopefully) no way to
- - extract it from `Forall p` in order to tie the knot.
- -}
-
--- The `Skolem` type family represents skolem variables; do not export!
--- If GHC supports it, these might be made closed with no instances.
-
-type family Skolem (p :: k -> Constraint) :: k
-
-
--- The outer `Forall` type family prevents GHC from giving a spurious
--- superclass cycle error.
--- The inner `Forall_` class prevents the skolem from leaking to the user,
--- which would be disastrous.
-
--- | A representation of the quantified constraint @forall a. p a@.
-type family Forall (p :: k -> Constraint) :: Constraint
-type instance Forall p = Forall_ p
-class p (Skolem p) => Forall_ (p :: k -> Constraint)
-instance p (Skolem p) => Forall_ (p :: k -> Constraint)
-
--- | Instantiate a quantified @'Forall' p@ constraint at type @a@.
-inst :: forall p a. Forall p :- p a
-inst = unsafeCoerce (Sub Dict :: Forall p :- p (Skolem p))
-
-forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
-forall d = case d :: Dict (p (Skolem p)) of Dict -> Dict
-
-#endif
 
 -- | Composition for constraints.
 class p (f a) => ComposeC (p :: k2 -> Constraint) (f :: k1 -> k2) (a :: k1)
@@ -178,7 +80,7 @@ class Forall (Q p t) => ForallT (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -
 instance Forall (Q p t) => ForallT p t
 
 -- | Instantiate a quantified @'ForallT' p t@ constraint at types @f@ and @a@.
-instT :: forall KVS(k1 k2 k3 k4) (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4) (f :: k1 -> k2) (a :: k3). ForallT p t :- p (t f a)
+instT :: forall k1 k2 k3 k4 (p :: k4 -> Constraint) (t :: (k1 -> k2) -> k3 -> k4) (f :: k1 -> k2) (a :: k3). ForallT p t :- p (t f a)
 instT = Sub $
   case inst :: Forall (Q p t) :- Q p t f of { Sub Dict ->
   case inst :: Forall (R p t f) :- R p t f a of
@@ -202,23 +104,23 @@ instance ForallV' p => ForallV_ p
 -- | Instantiate a quantified @'ForallV' p@ constraint as @c@, where
 -- @c ~ p a1 a2 ... an@.
 class InstV (p :: k) c | k c -> p where
-    type ForallV' (p :: k) :: Constraint
-    instV :: ForallV p :- c
+  type ForallV' (p :: k) :: Constraint
+  instV :: ForallV p :- c
 
 instance p ~ c => InstV (p :: Constraint) c where
-    type ForallV' (p :: Constraint) = p
-    instV = Sub Dict
+  type ForallV' (p :: Constraint) = p
+  instV = Sub Dict
 
 -- Treating 1 argument specially rather than recursing as a bit of (premature?)
 -- optimization
 instance p a ~ c => InstV (p :: k -> Constraint) c where
-    type ForallV' (p :: k -> Constraint) = Forall p
-    instV = Sub $ case inst :: Forall p :- c of
-        Sub Dict -> Dict
+  type ForallV' (p :: k -> Constraint) = Forall p
+  instV = Sub $ case inst :: Forall p :- c of
+    Sub Dict -> Dict
 
 instance InstV (p a) c => InstV (p :: k1 -> k2 -> k3) c where
-    type ForallV' (p :: k1 -> k2 -> k3) = ForallF ForallV p
-    instV = Sub $ case instF :: ForallF ForallV p :- ForallV (p a) of
-        Sub Dict -> case instV :: ForallV (p a) :- c of
-            Sub Dict -> Dict
+  type ForallV' (p :: k1 -> k2 -> k3) = ForallF ForallV p
+  instV = Sub $ case instF :: ForallF ForallV p :- ForallV (p a) of
+    Sub Dict -> case instV :: ForallV (p a) :- c of
+      Sub Dict -> Dict
 

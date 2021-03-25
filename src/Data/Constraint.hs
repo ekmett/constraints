@@ -1,41 +1,31 @@
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE RoleAnnotations #-}
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE UnicodeSyntax #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE Trustworthy #-}
-{-# LANGUAGE Rank2Types #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE CPP #-}
-#if __GLASGOW_HASKELL__ >= 706
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE PolyKinds #-}
-#endif
-#if __GLASGOW_HASKELL__ >= 800
-{-# LANGUAGE TypeInType #-}
-{-# LANGUAGE UndecidableSuperClasses #-}
-#endif
-#if __GLASGOW_HASKELL__ >= 708 && __GLASGOW_HASKELL__ < 710
-{-# LANGUAGE NullaryTypeClasses #-}
-#endif
-#if __GLASGOW_HASKELL__ >= 806
 {-# LANGUAGE QuantifiedConstraints #-}
-#endif
------------------------------------------------------------------------------
+{-# LANGUAGE Rank2Types #-}
+{-# LANGUAGE RoleAnnotations #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses #-}
+{-# LANGUAGE UnicodeSyntax #-}
+
 -- |
--- Module      :  Data.Constraint
 -- Copyright   :  (C) 2011-2015 Edward Kmett,
 -- License     :  BSD-style (see the file LICENSE)
---
 -- Maintainer  :  Edward Kmett <ekmett@gmail.com>
 -- Stability   :  experimental
 -- Portability :  non-portable
@@ -57,7 +47,7 @@
 --
 -- With @ConstraintKinds@ we can put into code a lot of tools for manipulating
 -- these new types without such awkward workarounds.
-----------------------------------------------------------------------------
+
 module Data.Constraint
   (
   -- * The Kind of Constraints
@@ -70,13 +60,13 @@ module Data.Constraint
   -- * Entailment
   , (:-)(Sub)
   , type (⊢)
+  , type (|-)
+  , type (&)
   , weaken1, weaken2, contract
   , strengthen1, strengthen2
   , (&&&), (***)
   , trans, refl
-#if __GLASGOW_HASKELL__ >= 806
   , implied
-#endif
   , Bottom(no)
   , top, bottom
   -- * Dict is fully faithful
@@ -91,33 +81,18 @@ import Control.Category
 import Control.DeepSeq
 import Control.Monad
 import Data.Complex
-#if __GLASGOW_HASKELL__ >= 800 && __GLASGOW_HASKELL__ < 806
-import Data.Kind
-#endif
 import Data.Ratio
-#if !MIN_VERSION_base(4,11,0)
-import Data.Semigroup
-#endif
 import Data.Data hiding (TypeRep)
 import qualified GHC.Exts as Exts (Any)
 import GHC.Exts (Constraint)
 import Data.Bits (Bits)
 import Data.Functor.Identity (Identity)
-#if MIN_VERSION_base(4,8,0)
 import Numeric.Natural (Natural)
-#endif
-#if !MIN_VERSION_base(4,8,0)
-import Data.Word (Word)
-#endif
 import Data.Coerce (Coercible)
 import Data.Type.Coercion(Coercion(..))
-#if MIN_VERSION_base(4,9,0)
 import Data.Type.Equality (type (~~))
 import qualified Data.Type.Equality.Hetero as Hetero
-#endif
-#if MIN_VERSION_base(4,10,0)
 import Type.Reflection (TypeRep, typeRepKind, withTypeable)
-#endif
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
@@ -139,7 +114,12 @@ data Dict :: Constraint -> * where
   Dict :: a => Dict a
   deriving Typeable
 
+deriving stock instance (Typeable p, p) => Data (Dict p)
+deriving stock instance Eq (Dict a)
+deriving stock instance Ord (Dict a)
+deriving stock instance Show (Dict a)
 
+{-
 instance (Typeable p, p) => Data (Dict p) where
   gfoldl _ z Dict = z Dict
   toConstr _ = dictConstr
@@ -153,10 +133,8 @@ dictConstr = mkConstr dictDataType "Dict" [] Prefix
 
 dictDataType :: DataType
 dictDataType = mkDataType "Data.Constraint.Dict" [dictConstr]
+-}
 
-deriving instance Eq (Dict a)
-deriving instance Ord (Dict a)
-deriving instance Show (Dict a)
 
 instance NFData (Dict c) where
   rnf Dict = ()
@@ -179,15 +157,11 @@ instance HasDict (Coercible a b) (Coercion a b) where
 instance HasDict (a ~ b) (a :~: b) where
   evidence Refl = Dict
 
-#if MIN_VERSION_base(4,9,0)
 instance HasDict (a ~~ b) (a Hetero.:~~: b) where
   evidence Hetero.HRefl = Dict
-#endif
 
-#if MIN_VERSION_base(4,10,0)
 instance HasDict (Typeable k, Typeable a) (TypeRep (a :: k)) where
   evidence tr = withTypeable tr $ withTypeable (typeRepKind tr) Dict
-#endif
 
 -- | From a 'Dict', takes a value in an environment where the instance
 -- witnessed by the 'Dict' is in scope, and evaluates it.
@@ -272,28 +246,10 @@ type (⊢) = (:-)
 -- library is sensible and can't break any assumptions on the behalf of
 -- library authors.
 newtype a :- b = Sub (a => Dict b)
-  deriving Typeable
 
 type role (:-) nominal nominal
 
--- TODO: _proper_ Data for @(p ':-' q)@ requires @(:-)@ to be cartesian _closed_.
---
--- This is admissable, but not present by default
-
--- constraint should be instance (Typeable p, Typeable q, p |- q) => Data (p :- q)
-instance (Typeable p, Typeable q, p, q) => Data (p :- q) where
-  gfoldl _ z (Sub Dict) = z (Sub Dict)
-  toConstr _ = subConstr
-  gunfold _ z c = case constrIndex c of
-    1 -> z (Sub Dict)
-    _ -> error "gunfold"
-  dataTypeOf _ = subDataType
-
-subConstr :: Constr
-subConstr = mkConstr dictDataType "Sub" [] Prefix
-
-subDataType :: DataType
-subDataType = mkDataType "Data.Constraint.:-" [subConstr]
+deriving stock instance (Typeable p, Typeable q, p, p => q) => Data (p :- q)
 
 -- | Possible since GHC 7.8, when 'Category' was made polykinded.
 instance Category (:-) where
@@ -334,17 +290,41 @@ refl = Sub Dict
 -- QuantifiedConstraints
 --------------------------------------------------------------------------------
 
-#if __GLASGOW_HASKELL__ >= 806
 -- | Convert a quantified constraint into an entailment.
---
--- Only available on GHC 8.6 or later.
 implied :: forall a b. (a => b) => a :- b
 implied = Sub (Dict :: Dict b)
-#endif
+
+-- | The internal hom for the category of constraints.
+--
+-- This version can be passed around inside Dict, whereas (a => b) is impredicative
+--
+-- @
+-- foo :: Dict (Ord a => Eq a)
+-- foo = Dict
+-- @
+--
+-- fails to typecheck due to the lack of impredicative polymorphism, but
+--
+-- @
+-- foo :: Dict (Ord a |- Eq a)
+-- foo = Dict
+-- @
+--
+-- typechecks just fine.
+
+class (p => q) => p |- q
+instance (p => q) => p |- q
+
 
 --------------------------------------------------------------------------------
 -- (,) is a Bifunctor
 --------------------------------------------------------------------------------
+
+-- | due to the hack for the kind of @(,)@ in the current version of GHC we can't actually
+-- make instances for @(,) :: Constraint -> Constraint -> Constraint@, but we can define
+-- an equivalent type, that converts back and forth to @(,)@, and lets you hang instances.
+class (p,q) => p & q
+instance (p,q) => p & q
 
 -- | due to the hack for the kind of @(,)@ in the current version of GHC we can't actually
 -- make instances for @(,) :: Constraint -> Constraint -> Constraint@, but @(,)@ is a
@@ -498,10 +478,8 @@ instance () :=> Eq (Dict a) where ins = Sub Dict
 instance () :=> Eq (a :- b) where ins = Sub Dict
 instance () :=> Eq Word where ins = Sub Dict
 instance Eq a :=> Eq (Identity a) where ins = Sub Dict
-#if MIN_VERSION_base(4,8,0)
 instance Eq a :=> Eq (Const a b) where ins = Sub Dict
 instance () :=> Eq Natural where ins = Sub Dict
-#endif
 
 -- Ord
 instance Class (Eq a) (Ord a) where cls = Sub Dict
@@ -521,10 +499,8 @@ instance () :=> Ord (Dict a) where ins = Sub Dict
 instance () :=> Ord (a :- b) where ins = Sub Dict
 instance () :=> Ord Word where ins = Sub Dict
 instance Ord a :=> Ord (Identity a) where ins = Sub Dict
-#if MIN_VERSION_base(4,8,0)
 instance Ord a :=> Ord (Const a b) where ins = Sub Dict
 instance () :=> Ord Natural where ins = Sub Dict
-#endif
 
 -- Show
 instance Class () (Show a) where cls = Sub Dict
@@ -543,10 +519,8 @@ instance () :=> Show (Dict a) where ins = Sub Dict
 instance () :=> Show (a :- b) where ins = Sub Dict
 instance () :=> Show Word where ins = Sub Dict
 instance Show a :=> Show (Identity a) where ins = Sub Dict
-#if MIN_VERSION_base(4,8,0)
 instance Show a :=> Show (Const a b) where ins = Sub Dict
 instance () :=> Show Natural where ins = Sub Dict
-#endif
 
 -- Read
 instance Class () (Read a) where cls = Sub Dict
@@ -563,10 +537,8 @@ instance (Read a, Read b) :=> Read (Either a b) where ins = Sub Dict
 instance (Integral a, Read a) :=> Read (Ratio a) where ins = Sub Dict
 instance () :=> Read Word where ins = Sub Dict
 instance Read a :=> Read (Identity a) where ins = Sub Dict
-#if MIN_VERSION_base(4,8,0)
 instance Read a :=> Read (Const a b) where ins = Sub Dict
 instance () :=> Read Natural where ins = Sub Dict
-#endif
 
 -- Enum
 instance Class () (Enum a) where cls = Sub Dict
@@ -580,13 +552,9 @@ instance () :=> Enum Float where ins = Sub Dict
 instance () :=> Enum Double where ins = Sub Dict
 instance Integral a :=> Enum (Ratio a) where ins = Sub Dict
 instance () :=> Enum Word where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Enum a :=> Enum (Identity a) where ins = Sub Dict
 instance Enum a :=> Enum (Const a b) where ins = Sub Dict
-#endif
-#if MIN_VERSION_base(4,8,0)
 instance () :=> Enum Natural where ins = Sub Dict
-#endif
 
 -- Bounded
 instance Class () (Bounded a) where cls = Sub Dict
@@ -597,10 +565,8 @@ instance () :=> Bounded Int where ins = Sub Dict
 instance () :=> Bounded Char where ins = Sub Dict
 instance (Bounded a, Bounded b) :=> Bounded (a,b) where ins = Sub Dict
 instance () :=> Bounded Word where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Bounded a :=> Bounded (Identity a) where ins = Sub Dict
 instance Bounded a :=> Bounded (Const a b) where ins = Sub Dict
-#endif
 
 -- Num
 instance Class () (Num a) where cls = Sub Dict
@@ -611,13 +577,9 @@ instance () :=> Num Double where ins = Sub Dict
 instance RealFloat a :=> Num (Complex a) where ins = Sub Dict
 instance Integral a :=> Num (Ratio a) where ins = Sub Dict
 instance () :=> Num Word where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Num a :=> Num (Identity a) where ins = Sub Dict
 instance Num a :=> Num (Const a b) where ins = Sub Dict
-#endif
-#if MIN_VERSION_base(4,8,0)
 instance () :=> Num Natural where ins = Sub Dict
-#endif
 
 -- Real
 instance Class (Num a, Ord a) (Real a) where cls = Sub Dict
@@ -627,26 +589,18 @@ instance () :=> Real Float where ins = Sub Dict
 instance () :=> Real Double where ins = Sub Dict
 instance Integral a :=> Real (Ratio a) where ins = Sub Dict
 instance () :=> Real Word where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Real a :=> Real (Identity a) where ins = Sub Dict
 instance Real a :=> Real (Const a b) where ins = Sub Dict
-#endif
-#if MIN_VERSION_base(4,8,0)
 instance () :=> Real Natural where ins = Sub Dict
-#endif
 
 -- Integral
 instance Class (Real a, Enum a) (Integral a) where cls = Sub Dict
 instance () :=> Integral Int where ins = Sub Dict
 instance () :=> Integral Integer where ins = Sub Dict
 instance () :=> Integral Word where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Integral a :=> Integral (Identity a) where ins = Sub Dict
 instance Integral a :=> Integral (Const a b) where ins = Sub Dict
-#endif
-#if MIN_VERSION_base(4,8,0)
 instance () :=> Integral Natural where ins = Sub Dict
-#endif
 
 -- Bits
 instance Class (Eq a) (Bits a) where cls = Sub Dict
@@ -654,13 +608,9 @@ instance () :=> Bits Bool where ins = Sub Dict
 instance () :=> Bits Int where ins = Sub Dict
 instance () :=> Bits Integer where ins = Sub Dict
 instance () :=> Bits Word where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Bits a :=> Bits (Identity a) where ins = Sub Dict
 instance Bits a :=> Bits (Const a b) where ins = Sub Dict
-#endif
-#if MIN_VERSION_base(4,8,0)
 instance () :=> Bits Natural where ins = Sub Dict
-#endif
 
 -- Fractional
 instance Class (Num a) (Fractional a) where cls = Sub Dict
@@ -668,39 +618,31 @@ instance () :=> Fractional Float where ins = Sub Dict
 instance () :=> Fractional Double where ins = Sub Dict
 instance RealFloat a :=> Fractional (Complex a) where ins = Sub Dict
 instance Integral a :=> Fractional (Ratio a) where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Fractional a :=> Fractional (Identity a) where ins = Sub Dict
 instance Fractional a :=> Fractional (Const a b) where ins = Sub Dict
-#endif
 
 -- Floating
 instance Class (Fractional a) (Floating a) where cls = Sub Dict
 instance () :=> Floating Float where ins = Sub Dict
 instance () :=> Floating Double where ins = Sub Dict
 instance RealFloat a :=> Floating (Complex a) where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Floating a :=> Floating (Identity a) where ins = Sub Dict
 instance Floating a :=> Floating (Const a b) where ins = Sub Dict
-#endif
 
 -- RealFrac
 instance Class (Real a, Fractional a) (RealFrac a) where cls = Sub Dict
 instance () :=> RealFrac Float where ins = Sub Dict
 instance () :=> RealFrac Double where ins = Sub Dict
 instance Integral a :=> RealFrac (Ratio a) where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance RealFrac a :=> RealFrac (Identity a) where ins = Sub Dict
 instance RealFrac a :=> RealFrac (Const a b) where ins = Sub Dict
-#endif
 
 -- RealFloat
 instance Class (RealFrac a, Floating a) (RealFloat a) where cls = Sub Dict
 instance () :=> RealFloat Float where ins = Sub Dict
 instance () :=> RealFloat Double where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance RealFloat a :=> RealFloat (Identity a) where ins = Sub Dict
 instance RealFloat a :=> RealFloat (Const a b) where ins = Sub Dict
-#endif
 
 -- Semigroup
 instance Class () (Semigroup a) where cls = Sub Dict
@@ -710,29 +652,19 @@ instance () :=> Semigroup [a] where ins = Sub Dict
 instance Semigroup a :=> Semigroup (Maybe a) where ins = Sub Dict
 instance (Semigroup a, Semigroup b) :=> Semigroup (a, b) where ins = Sub Dict
 instance Semigroup a :=> Semigroup (Const a b) where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Semigroup a :=> Semigroup (Identity a) where ins = Sub Dict
-#endif
-#if MIN_VERSION_base(4,10,0)
 instance Semigroup a :=> Semigroup (IO a) where ins = Sub Dict
-#endif
 
 -- Monoid
-#if MIN_VERSION_base(4,11,0)
 instance Class (Semigroup a) (Monoid a) where cls = Sub Dict
-#else
-instance Class () (Monoid a) where cls = Sub Dict
-#endif
 instance () :=> Monoid () where ins = Sub Dict
 instance () :=> Monoid Ordering where ins = Sub Dict
 instance () :=> Monoid [a] where ins = Sub Dict
 instance Monoid a :=> Monoid (Maybe a) where ins = Sub Dict
 instance (Monoid a, Monoid b) :=> Monoid (a, b) where ins = Sub Dict
 instance Monoid a :=> Monoid (Const a b) where ins = Sub Dict
-#if MIN_VERSION_base(4,9,0)
 instance Monoid a :=> Monoid (Identity a) where ins = Sub Dict
 instance Monoid a :=> Monoid (IO a) where ins = Sub Dict
-#endif
 
 -- Functor
 instance Class () (Functor f) where cls = Sub Dict
@@ -764,11 +696,7 @@ instance () :=> Alternative Maybe where ins = Sub Dict
 instance MonadPlus m :=> Alternative (WrappedMonad m) where ins = Sub Dict
 
 -- Monad
-#if MIN_VERSION_base(4,8,0)
 instance Class (Applicative f) (Monad f) where cls = Sub Dict
-#else
-instance Class () (Monad f) where cls = Sub Dict
-#endif
 instance () :=> Monad [] where ins = Sub Dict
 instance () :=> Monad ((->) a) where ins = Sub Dict
 instance () :=> Monad (Either a) where ins = Sub Dict
@@ -776,11 +704,7 @@ instance () :=> Monad IO where ins = Sub Dict
 instance () :=> Monad Identity where ins = Sub Dict
 
 -- MonadPlus
-#if MIN_VERSION_base(4,8,0)
 instance Class (Monad f, Alternative f) (MonadPlus f) where cls = Sub Dict
-#else
-instance Class (Monad f) (MonadPlus f) where cls = Sub Dict
-#endif
 instance () :=> MonadPlus [] where ins = Sub Dict
 instance () :=> MonadPlus Maybe where ins = Sub Dict
 
@@ -807,7 +731,4 @@ instance Semigroup (Dict a) where
 
 instance a :=> Monoid (Dict a) where ins = Sub Dict
 instance a => Monoid (Dict a) where
-#if !(MIN_VERSION_base(4,11,0))
-  mappend = (<>)
-#endif
   mempty = Dict
