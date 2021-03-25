@@ -249,7 +249,20 @@ newtype a :- b = Sub (a => Dict b)
 
 type role (:-) nominal nominal
 
-deriving stock instance (Typeable p, Typeable q, p, p => q) => Data (p :- q)
+instance (Typeable p, Typeable q, p => q) => Data (p :- q) where
+  gfoldl _ z d = z d
+  gunfold _ z c = case constrIndex c of
+     1 -> z (Sub Dict)
+     _ -> error "Data.Data.Data: Data.Constraint.:- constructor out of bounds"
+  toConstr _ = subCon
+  dataTypeOf _ = subTy
+
+subCon :: Constr
+subCon = mkConstr subTy "Sub Dict" [] Prefix
+{-# noinline subCon #-}
+subTy :: DataType
+subTy = mkDataType "Data.Constraint.:-" [subCon]
+{-# noinline subTy #-}
 
 -- | Possible since GHC 7.8, when 'Category' was made polykinded.
 instance Category (:-) where
