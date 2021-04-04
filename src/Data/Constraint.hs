@@ -93,6 +93,7 @@ import Data.Type.Coercion(Coercion(..))
 import Data.Type.Equality (type (~~))
 import qualified Data.Type.Equality.Hetero as Hetero
 import Type.Reflection (TypeRep, typeRepKind, withTypeable)
+import Data.Boring (Boring (..))
 
 -- | Values of type @'Dict' p@ capture a dictionary for a constraint of type @p@.
 --
@@ -118,6 +119,9 @@ deriving stock instance (Typeable p, p) => Data (Dict p)
 deriving stock instance Eq (Dict a)
 deriving stock instance Ord (Dict a)
 deriving stock instance Show (Dict a)
+
+instance c => Boring (Dict c) where
+    boring = Dict
 
 {-
 instance (Typeable p, p) => Data (Dict p) where
