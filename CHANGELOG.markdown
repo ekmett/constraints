@@ -2,6 +2,7 @@
 -----------------
 * `Data.Constraint.Forall` uses `QuantifiedConstraints` on GHC 8.6+
 * Add `c => Boring (Dict c)` instance
+* Allow building with GHC 9.2.
 
 0.13 [2021.02.17]
 -----------------

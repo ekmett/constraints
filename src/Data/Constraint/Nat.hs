@@ -68,10 +68,10 @@ magic f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal 
 axiom :: forall a b. Dict (a ~ b)
 axiom = unsafeCoerce (Dict :: Dict (a ~ a))
 
-axiomLe :: forall a b. Dict (a <= b)
+axiomLe :: forall (a :: Nat) (b :: Nat). Dict (a <= b)
 axiomLe = axiom
 
-eqLe :: (a ~ b) :- (a <= b)
+eqLe :: forall (a :: Nat) (b :: Nat). (a ~ b) :- (a <= b)
 eqLe = Sub Dict
 
 dividesGcd :: forall a b c. (Divides a b, Divides a c) :- Divides a (Gcd b c)
@@ -141,10 +141,18 @@ timesOne :: forall n. Dict ((n * 1) ~ n)
 timesOne = Dict
 
 minZero :: forall n. Dict (Min n 0 ~ 0)
+#if MIN_VERSION_base(4,16,0)
+minZero = axiom
+#else
 minZero = Dict
+#endif
 
 maxZero :: forall n. Dict (Max n 0 ~ n)
+#if MIN_VERSION_base(4,16,0)
+maxZero = axiom
+#else
 maxZero = Dict
+#endif
 
 powZero :: forall n. Dict ((n ^ 0) ~ 1)
 powZero = Dict
@@ -152,8 +160,12 @@ powZero = Dict
 leZero :: forall a. (a <= 0) :- (a ~ 0)
 leZero = Sub axiom
 
-zeroLe :: forall a. Dict (0 <= a)
+zeroLe :: forall (a :: Nat). Dict (0 <= a)
+#if MIN_VERSION_base(4,16,0)
+zeroLe = axiom
+#else
 zeroLe = Dict
+#endif
 
 plusMinusInverse1 :: forall n m. Dict (((m + n) - n) ~ m)
 plusMinusInverse1 = axiom
@@ -337,11 +349,11 @@ timesDiv = axiom
 
 -- (<=) is an internal category in the category of constraints.
 
-leId :: forall a. Dict (a <= a)
+leId :: forall (a :: Nat). Dict (a <= a)
 leId = Dict
 
-leEq :: forall a b. (a <= b, b <= a) :- (a ~ b)
+leEq :: forall (a :: Nat) (b :: Nat). (a <= b, b <= a) :- (a ~ b)
 leEq = Sub axiom
 
-leTrans :: forall a b c. (b <= c, a <= b) :- (a <= c)
+leTrans :: forall (a :: Nat) (b :: Nat) (c :: Nat). (b <= c, a <= b) :- (a <= c)
 leTrans = Sub (axiomLe @a @c)
