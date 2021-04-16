@@ -1,3 +1,7 @@
+0.13.1 [????.??.??]
+-------------------
+* Allow building with GHC 9.2.
+
 0.13 [2021.02.17]
 -----------------
 * `Data.Constraint.Symbol` now reexports the `GHC.TypeLits.AppendSymbol` type
