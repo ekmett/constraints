@@ -74,8 +74,8 @@ newtype Magic n = Magic (KnownNat n => Dict (KnownNat n))
 magic :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
 magic f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
 
-axiom :: forall a b. Dict (a ~ b)
-axiom = unsafeCoerce (Dict :: Dict (a ~ a))
+axiom :: Dict c
+axiom = unsafeCoerce (Dict :: Dict ())
 
 axiomLe :: forall (a :: Nat) (b :: Nat). Dict (a <= b)
 axiomLe = axiom

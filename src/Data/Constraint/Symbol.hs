@@ -68,8 +68,8 @@ magicSSS f = Sub $ unsafeCoerce (Magic Dict) (symbolVal (Proxy :: Proxy n) `f` s
 magicSN :: forall a n. (String -> Int) -> KnownSymbol a :- KnownNat n
 magicSN f = Sub $ unsafeCoerce (Magic Dict) (toInteger (f (symbolVal (Proxy :: Proxy a))))
 
-axiom :: forall a b. Dict (a ~ b)
-axiom = unsafeCoerce (Dict :: Dict (a ~ a))
+axiom :: Dict c
+axiom = unsafeCoerce (Dict :: Dict ())
 
 -- axioms and operations
 
