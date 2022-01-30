@@ -26,7 +26,6 @@ import Control.Monad.RWS.Class
 import Control.Monad.Trans.Cont
 import Control.Monad.Trans.Except
 import Control.Monad.Trans.Identity
-import Control.Monad.Trans.List
 import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.RWS.Lazy as Lazy
@@ -248,24 +247,6 @@ instance Show1 m => Lifting Show (IdentityT m) where lifting = Sub Dict
 instance Read1 m => Lifting Read (IdentityT m) where lifting = Sub Dict
 instance Ord1 m => Lifting Ord (IdentityT m) where lifting = Sub Dict
 instance Eq1 m => Lifting Eq (IdentityT m) where lifting = Sub Dict
-
-instance Lifting Functor ListT where lifting = Sub Dict
-instance Lifting Applicative ListT where lifting = Sub Dict
-instance Lifting Alternative ListT where lifting = Sub Dict -- overconstrained
-instance Lifting Monad ListT where lifting = Sub Dict
--- instance Lifting MonadFix ListT where lifting = Sub Dict
-instance Lifting MonadPlus ListT where lifting = Sub Dict -- overconstrained
-instance Lifting Foldable ListT where lifting = Sub Dict
-instance Lifting Traversable ListT where lifting = Sub Dict
-instance Lifting MonadIO ListT where lifting = Sub Dict
-instance Lifting Show1 ListT where lifting = Sub Dict
-instance Lifting Read1 ListT where lifting = Sub Dict
-instance Lifting Ord1 ListT where lifting = Sub Dict
-instance Lifting Eq1 ListT where lifting = Sub Dict
-instance Show1 m => Lifting Show (ListT m) where lifting = Sub Dict
-instance Read1 m => Lifting Read (ListT m) where lifting = Sub Dict
-instance Ord1 m => Lifting Ord (ListT m) where lifting = Sub Dict
-instance Eq1 m => Lifting Eq (ListT m) where lifting = Sub Dict
 
 instance Lifting Functor MaybeT where lifting = Sub Dict
 instance Lifting Monad MaybeT where lifting = Sub Dict
