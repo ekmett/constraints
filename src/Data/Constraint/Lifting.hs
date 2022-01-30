@@ -24,7 +24,6 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.RWS.Class
 import Control.Monad.Trans.Cont
-import Control.Monad.Trans.Error
 import Control.Monad.Trans.Except
 import Control.Monad.Trans.Identity
 import Control.Monad.Trans.List
@@ -174,22 +173,6 @@ instance Lifting Monad (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadPlus (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadFix (ReaderT e) where lifting = Sub Dict
 instance Lifting MonadIO (ReaderT e) where lifting = Sub Dict
-
-instance Lifting Functor (ErrorT e) where lifting = Sub Dict
-instance Lifting Foldable (ErrorT e) where lifting = Sub Dict
-instance Lifting Traversable (ErrorT e) where lifting = Sub Dict
-instance Error e => Lifting Monad (ErrorT e) where lifting = Sub Dict
-instance Error e => Lifting MonadFix (ErrorT e) where lifting = Sub Dict
-instance Error e => Lifting MonadPlus (ErrorT e) where lifting = Sub Dict -- overconstrained!
-instance Error e => Lifting MonadIO (ErrorT e) where lifting = Sub Dict
-instance Show e => Lifting Show1 (ErrorT e) where lifting = Sub Dict
-instance Eq e => Lifting Eq1 (ErrorT e) where lifting = Sub Dict
-instance Ord e => Lifting Ord1 (ErrorT e) where lifting = Sub Dict
-instance Read e => Lifting Read1 (ErrorT e) where lifting = Sub Dict
-instance (Show e, Show1 m) => Lifting Show (ErrorT e m) where lifting = Sub Dict
-instance (Eq e, Eq1 m) => Lifting Eq (ErrorT e m) where lifting = Sub Dict
-instance (Ord e, Ord1 m) => Lifting Ord (ErrorT e m) where lifting = Sub Dict
-instance (Read e, Read1 m) => Lifting Read (ErrorT e m) where lifting = Sub Dict
 
 instance Lifting Functor (ExceptT e) where lifting = Sub Dict
 instance Lifting Foldable (ExceptT e) where lifting = Sub Dict
@@ -348,11 +331,9 @@ instance Lifting Show Identity where lifting = Sub Dict
 instance Lifting Read Identity where lifting = Sub Dict
 
 instance Lifting MonadCont MaybeT where lifting = Sub Dict
-instance Lifting MonadCont ListT where lifting = Sub Dict
 instance Lifting MonadCont IdentityT where lifting = Sub Dict
 instance Monoid w => Lifting MonadCont (Strict.WriterT w) where lifting = Sub Dict
 instance Monoid w => Lifting MonadCont (Lazy.WriterT w) where lifting = Sub Dict
-instance Error e => Lifting MonadCont (ErrorT e) where lifting = Sub Dict
 instance Lifting MonadCont (ExceptT w) where lifting = Sub Dict
 instance Lifting MonadCont (Strict.StateT s) where lifting = Sub Dict
 instance Lifting MonadCont (Lazy.StateT s) where lifting = Sub Dict
@@ -361,7 +342,6 @@ instance Monoid w => Lifting MonadCont (Strict.RWST r w s) where lifting = Sub D
 instance Monoid w => Lifting MonadCont (Lazy.RWST r w s) where lifting = Sub Dict
 
 instance Lifting (MonadError e) MaybeT where lifting = Sub Dict
-instance Lifting (MonadError e) ListT where lifting = Sub Dict
 instance Lifting (MonadError e) IdentityT where lifting = Sub Dict
 instance Monoid w => Lifting (MonadError e) (Strict.WriterT w) where lifting = Sub Dict
 instance Monoid w => Lifting (MonadError e) (Lazy.WriterT w) where lifting = Sub Dict
@@ -373,28 +353,23 @@ instance Monoid w => Lifting (MonadError e) (Lazy.RWST r w s) where lifting = Su
 
 instance Lifting (MonadRWS r w s) MaybeT where lifting = Sub Dict
 instance Lifting (MonadRWS r w s) IdentityT where lifting = Sub Dict
-instance Error e => Lifting (MonadRWS r w s) (ErrorT e) where lifting = Sub Dict
 instance Lifting (MonadRWS r w s) (ExceptT e) where lifting = Sub Dict
 
 instance Lifting (MonadReader r) MaybeT where lifting = Sub Dict
-instance Lifting (MonadReader r) ListT where lifting = Sub Dict
 instance Lifting (MonadReader r) IdentityT where lifting = Sub Dict
 instance Monoid w => Lifting (MonadReader r) (Strict.WriterT w) where lifting = Sub Dict
 instance Monoid w => Lifting (MonadReader r) (Lazy.WriterT w) where lifting = Sub Dict
 instance Lifting (MonadReader r) (Strict.StateT s) where lifting = Sub Dict
 instance Lifting (MonadReader r) (Lazy.StateT s) where lifting = Sub Dict
 instance Lifting (MonadReader r) (ExceptT e) where lifting = Sub Dict
-instance Error e => Lifting (MonadReader r) (ErrorT e) where lifting = Sub Dict
 instance Lifting (MonadReader r) (ContT r') where lifting = Sub Dict
 
 instance Lifting (MonadState s) MaybeT where lifting = Sub Dict
-instance Lifting (MonadState s) ListT where lifting = Sub Dict
 instance Lifting (MonadState s) IdentityT where lifting = Sub Dict
 instance Monoid w => Lifting (MonadState s) (Strict.WriterT w) where lifting = Sub Dict
 instance Monoid w => Lifting (MonadState s) (Lazy.WriterT w) where lifting = Sub Dict
 instance Lifting (MonadState s) (ReaderT r) where lifting = Sub Dict
 instance Lifting (MonadState s) (ExceptT e) where lifting = Sub Dict
-instance Error e => Lifting (MonadState s) (ErrorT e) where lifting = Sub Dict
 instance Lifting (MonadState s) (ContT r') where lifting = Sub Dict
 
 class Lifting2 p f where
