@@ -7,7 +7,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
-{-# OPTIONS_GHC -fno-warn-deprecations #-}
+
 module Data.Constraint.Lifting
   ( Lifting(..)
   , Lifting2(..)
