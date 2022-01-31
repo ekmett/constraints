@@ -1,3 +1,7 @@
+next [????.??.??]
+-----------------
+* Allow building with `transformers-0.6.*` and `mtl-2.3.*`.
+
 0.13.2 [2021.11.10]
 -------------------
 * Allow building on GHC HEAD.
