@@ -2,9 +2,12 @@
 -----------------
 * `Data.Constraint.Forall` uses `QuantifiedConstraints` on GHC 8.6+
 * Add `c => Boring (Dict c)` instance
-* Allow building with `transformers-0.6.*` and `mtl-2.3.*`.
 * Remove `Lifting` instances for `ErrorT` and `ListT`, which were removed
   in `transformers-0.6.*`.
+
+0.13.3 [2022.01.31]
+-------------------
+* Allow building with `transformers-0.6.*` and `mtl-2.3.*`.
 
 0.13.2 [2021.11.10]
 -------------------
