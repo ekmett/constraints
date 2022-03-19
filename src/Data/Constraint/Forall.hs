@@ -32,7 +32,7 @@ module Data.Constraint.Forall
   , Forall1, inst1
   , ForallT, instT
   , ForallV, InstV (instV)
-  , forall
+  , forall_
   ) where
 
 import Data.Constraint
@@ -51,8 +51,8 @@ data Dict1 p where
 forallish :: forall p. Dict1 p -> Dict (Forall p)
 forallish Dict1 = Dict
 
-forall :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
-forall d = forallish (unsafeCoerce d)
+forall_ :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
+forall_ d = forallish (unsafeCoerce d)
 
 -- | Composition for constraints.
 class p (f a) => ComposeC (p :: k2 -> Constraint) (f :: k1 -> k2) (a :: k1)
