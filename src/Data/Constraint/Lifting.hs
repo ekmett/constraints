@@ -399,10 +399,12 @@ instance (Show e, Show1 m) => Lifting Show (ErrorT e m) where lifting = Sub Dict
 instance (Eq e, Eq1 m) => Lifting Eq (ErrorT e m) where lifting = Sub Dict
 instance (Ord e, Ord1 m) => Lifting Ord (ErrorT e m) where lifting = Sub Dict
 instance (Read e, Read1 m) => Lifting Read (ErrorT e m) where lifting = Sub Dict
+# if !(MIN_VERSION_mtl(2,3,0))
 instance Error e => Lifting MonadCont (ErrorT e) where lifting = Sub Dict
 instance Error e => Lifting (MonadRWS r w s) (ErrorT e) where lifting = Sub Dict
 instance Error e => Lifting (MonadReader r) (ErrorT e) where lifting = Sub Dict
 instance Error e => Lifting (MonadState s) (ErrorT e) where lifting = Sub Dict
+# endif
 
 instance Lifting Functor ListT where lifting = Sub Dict
 instance Lifting Applicative ListT where lifting = Sub Dict
@@ -421,10 +423,12 @@ instance Show1 m => Lifting Show (ListT m) where lifting = Sub Dict
 instance Read1 m => Lifting Read (ListT m) where lifting = Sub Dict
 instance Ord1 m => Lifting Ord (ListT m) where lifting = Sub Dict
 instance Eq1 m => Lifting Eq (ListT m) where lifting = Sub Dict
+# if !(MIN_VERSION_mtl(2,3,0))
 instance Lifting MonadCont ListT where lifting = Sub Dict
 instance Lifting (MonadError e) ListT where lifting = Sub Dict
 instance Lifting (MonadReader r) ListT where lifting = Sub Dict
 instance Lifting (MonadState s) ListT where lifting = Sub Dict
+# endif
 #endif
 
 class Lifting2 p f where
