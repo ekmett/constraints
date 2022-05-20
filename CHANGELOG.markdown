@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+0.13.4 [2022.05.19]
+-------------------
 * Correct the CPP introduced in `constraints-0.13.3` such that it works when
   building with `mtl-2.3.*` or later combined with `transformers < 0.6`.
 
