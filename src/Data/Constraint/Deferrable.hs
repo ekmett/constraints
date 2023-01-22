@@ -11,7 +11,9 @@
 #if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+# if __GLASGOW_HASKELL__ < 806
 {-# LANGUAGE TypeInType #-}
+# endif
 #endif
 
 -----------------------------------------------------------------------------

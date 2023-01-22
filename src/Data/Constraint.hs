@@ -21,8 +21,10 @@
 {-# LANGUAGE PolyKinds #-}
 #endif
 #if __GLASGOW_HASKELL__ >= 800
-{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
+# if __GLASGOW_HASKELL__ < 806
+{-# LANGUAGE TypeInType #-}
+# endif
 #endif
 #if __GLASGOW_HASKELL__ >= 708 && __GLASGOW_HASKELL__ < 710
 {-# LANGUAGE NullaryTypeClasses #-}
