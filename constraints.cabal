@@ -17,17 +17,22 @@ description:
   This package provides a vocabulary for working with them.
 
 build-type:    Simple
-tested-with:   GHC == 8.6.5
-             , GHC == 8.8.4
-             , GHC == 8.10.7
-             , GHC == 9.0.2
-             , GHC == 9.2.1
+
+tested-with:
+  GHC == 9.6.1
+  GHC == 9.4.4
+  GHC == 9.2.7
+  GHC == 9.0.2
+  GHC == 8.10.7
+  GHC == 8.8.4
+  GHC == 8.6.5
+
 extra-source-files: README.markdown
                   , CHANGELOG.markdown
 
 source-repository head
   type: git
-  location: git://github.com/ekmett/constraints.git
+  location: https://github.com/ekmett/constraints.git
 
 library
   hs-source-dirs: src
