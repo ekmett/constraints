@@ -8,6 +8,8 @@
 * Remove `Lifting` instances for `ErrorT` and `ListT`, which were removed
   in `transformers-0.6.*`.
 * Add `unsafeAxiom` to `Data.Constraint.Unsafe`.
+* Add `unsafeSNat` and `unsafeSSymbol` to `Data.Constraint.Unsafe` when building
+  with `base-4.18` (GHC 9.6) or later.
 
 0.13.4 [2022.05.19]
 -------------------
