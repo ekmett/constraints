@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -36,10 +37,14 @@ module Data.Constraint.Symbol
 
 import Data.Constraint
 import Data.Constraint.Nat
-import Data.Constraint.Unsafe (unsafeAxiom)
+import Data.Constraint.Unsafe
 import Data.Proxy
 import GHC.TypeLits
+#if MIN_VERSION_base(4,18,0)
+import qualified GHC.TypeNats as TN
+#else
 import Unsafe.Coerce
+#endif
 
 -- | An infix synonym for 'AppendSymbol'.
 type (m :: Symbol) ++ (n :: Symbol) = AppendSymbol m n
@@ -51,16 +56,30 @@ type family Length :: Symbol -> Nat where
 
 -- implementation details
 
+#if !MIN_VERSION_base(4,18,0)
 newtype Magic n = Magic (KnownSymbol n => Dict (KnownSymbol n))
+#endif
 
 magicNSS :: forall n m o. (Int -> String -> String) -> (KnownNat n, KnownSymbol m) :- KnownSymbol o
+#if MIN_VERSION_base(4,18,0)
+magicNSS f = Sub $ withKnownSymbol (unsafeSSymbol @o (fromIntegral (natVal (Proxy @n)) `f` symbolVal (Proxy @m))) Dict
+#else
 magicNSS f = Sub $ unsafeCoerce (Magic Dict) (fromIntegral (natVal (Proxy :: Proxy n)) `f` symbolVal (Proxy :: Proxy m))
+#endif
 
 magicSSS :: forall n m o. (String -> String -> String) -> (KnownSymbol n, KnownSymbol m) :- KnownSymbol o
+#if MIN_VERSION_base(4,18,0)
+magicSSS f = Sub $ withKnownSymbol (unsafeSSymbol @o (symbolVal (Proxy @n) `f` symbolVal (Proxy @m))) Dict
+#else
 magicSSS f = Sub $ unsafeCoerce (Magic Dict) (symbolVal (Proxy :: Proxy n) `f` symbolVal (Proxy :: Proxy m))
+#endif
 
 magicSN :: forall a n. (String -> Int) -> KnownSymbol a :- KnownNat n
+#if MIN_VERSION_base(4,18,0)
+magicSN f = Sub $ TN.withKnownNat (unsafeSNat @n (fromIntegral (f (symbolVal (Proxy :: Proxy a))))) Dict
+#else
 magicSN f = Sub $ unsafeCoerce (Magic Dict) (toInteger (f (symbolVal (Proxy :: Proxy a))))
+#endif
 
 -- operations
 

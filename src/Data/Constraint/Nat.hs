@@ -44,11 +44,15 @@ module Data.Constraint.Nat
   ) where
 
 import Data.Constraint
-import Data.Constraint.Unsafe (unsafeAxiom)
+import Data.Constraint.Unsafe
 import Data.Proxy
 import Data.Type.Bool
 import GHC.TypeLits
+#if MIN_VERSION_base(4,18,0)
+import qualified GHC.TypeNats as TN
+#else
 import Unsafe.Coerce
+#endif
 
 type family Min (m::Nat) (n::Nat) :: Nat where
     Min m n = If (n <=? m) n m
@@ -61,10 +65,16 @@ type family Lcm (m::Nat) (n::Nat) :: Nat where
 
 type Divides n m = n ~ Gcd n m
 
+#if !MIN_VERSION_base(4,18,0)
 newtype Magic n = Magic (KnownNat n => Dict (KnownNat n))
+#endif
 
 magic :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
+#if MIN_VERSION_base(4,18,0)
+magic f = Sub $ TN.withKnownNat @o (unsafeSNat (fromInteger (natVal (Proxy @n) `f` natVal (Proxy @m)))) Dict
+#else
 magic f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
+#endif
 
 axiomLe :: forall (a :: Nat) (b :: Nat). Dict (a <= b)
 axiomLe = unsafeAxiom
