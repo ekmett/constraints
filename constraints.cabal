@@ -54,7 +54,7 @@ library
     , base           >= 4.12  && < 5
     , binary         >= 0.7.1 && < 0.9
     , boring         >= 0.2   && < 0.3
-    , deepseq        >= 1.3   && < 1.5
+    , deepseq        >= 1.3   && < 1.6
     , ghc-prim
     , hashable       >= 1.2   && < 1.5
     , mtl            >= 2.2   && < 2.4
