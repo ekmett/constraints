@@ -44,6 +44,7 @@ module Data.Constraint.Nat
   ) where
 
 import Data.Constraint
+import Data.Constraint.Unsafe (unsafeAxiom)
 import Data.Proxy
 import Data.Type.Bool
 import GHC.TypeLits
@@ -65,38 +66,35 @@ newtype Magic n = Magic (KnownNat n => Dict (KnownNat n))
 magic :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
 magic f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
 
-axiom :: Dict c
-axiom = unsafeCoerce (Dict :: Dict ())
-
 axiomLe :: forall (a :: Nat) (b :: Nat). Dict (a <= b)
-axiomLe = axiom
+axiomLe = unsafeAxiom
 
 eqLe :: forall (a :: Nat) (b :: Nat). (a ~ b) :- (a <= b)
 eqLe = Sub Dict
 
 dividesGcd :: forall a b c. (Divides a b, Divides a c) :- Divides a (Gcd b c)
-dividesGcd = Sub axiom
+dividesGcd = Sub unsafeAxiom
 
 dividesLcm :: forall a b c. (Divides a c, Divides b c) :- Divides (Lcm a b) c
-dividesLcm = Sub axiom
+dividesLcm = Sub unsafeAxiom
 
 gcdCommutes :: forall a b. Dict (Gcd a b ~ Gcd b a)
-gcdCommutes = axiom
+gcdCommutes = unsafeAxiom
 
 lcmCommutes :: forall a b. Dict (Lcm a b ~ Lcm b a)
-lcmCommutes = axiom
+lcmCommutes = unsafeAxiom
 
 gcdZero :: forall a. Dict (Gcd 0 a ~ a)
-gcdZero = axiom
+gcdZero = unsafeAxiom
 
 gcdOne :: forall a. Dict (Gcd 1 a ~ 1)
-gcdOne = axiom
+gcdOne = unsafeAxiom
 
 lcmZero :: forall a. Dict (Lcm 0 a ~ 0)
-lcmZero = axiom
+lcmZero = unsafeAxiom
 
 lcmOne :: forall a. Dict (Lcm 1 a ~ a)
-lcmOne = axiom
+lcmOne = unsafeAxiom
 
 gcdNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Gcd n m)
 gcdNat = magic gcd
@@ -142,14 +140,14 @@ timesOne = Dict
 
 minZero :: forall n. Dict (Min n 0 ~ 0)
 #if MIN_VERSION_base(4,16,0)
-minZero = axiom
+minZero = unsafeAxiom
 #else
 minZero = Dict
 #endif
 
 maxZero :: forall n. Dict (Max n 0 ~ n)
 #if MIN_VERSION_base(4,16,0)
-maxZero = axiom
+maxZero = unsafeAxiom
 #else
 maxZero = Dict
 #endif
@@ -158,104 +156,104 @@ powZero :: forall n. Dict ((n ^ 0) ~ 1)
 powZero = Dict
 
 leZero :: forall a. (a <= 0) :- (a ~ 0)
-leZero = Sub axiom
+leZero = Sub unsafeAxiom
 
 zeroLe :: forall (a :: Nat). Dict (0 <= a)
 #if MIN_VERSION_base(4,16,0)
-zeroLe = axiom
+zeroLe = unsafeAxiom
 #else
 zeroLe = Dict
 #endif
 
 plusMinusInverse1 :: forall n m. Dict (((m + n) - n) ~ m)
-plusMinusInverse1 = axiom
+plusMinusInverse1 = unsafeAxiom
 
 plusMinusInverse2 :: forall n m. (m <= n) :- (((m + n) - m) ~ n)
-plusMinusInverse2 = Sub axiom
+plusMinusInverse2 = Sub unsafeAxiom
 
 plusMinusInverse3 :: forall n m. (n <= m) :- (((m - n) + n) ~ m)
-plusMinusInverse3 = Sub axiom
+plusMinusInverse3 = Sub unsafeAxiom
 
 plusMonotone1 :: forall a b c. (a <= b) :- (a + c <= b + c)
-plusMonotone1 = Sub axiom
+plusMonotone1 = Sub unsafeAxiom
 
 plusMonotone2 :: forall a b c. (b <= c) :- (a + b <= a + c)
-plusMonotone2 = Sub axiom
+plusMonotone2 = Sub unsafeAxiom
 
 powMonotone1 :: forall a b c. (a <= b) :- ((a^c) <= (b^c))
-powMonotone1 = Sub axiom
+powMonotone1 = Sub unsafeAxiom
 
 powMonotone2 :: forall a b c. (b <= c) :- ((a^b) <= (a^c))
-powMonotone2 = Sub axiom
+powMonotone2 = Sub unsafeAxiom
 
 divMonotone1 :: forall a b c. (a <= b) :- (Div a c <= Div b c)
-divMonotone1 = Sub axiom
+divMonotone1 = Sub unsafeAxiom
 
 divMonotone2 :: forall a b c. (b <= c) :- (Div a c <= Div a b)
-divMonotone2 = Sub axiom
+divMonotone2 = Sub unsafeAxiom
 
 timesMonotone1 :: forall a b c. (a <= b) :- (a * c <= b * c)
-timesMonotone1 = Sub axiom
+timesMonotone1 = Sub unsafeAxiom
 
 timesMonotone2 :: forall a b c. (b <= c) :- (a * b <= a * c)
-timesMonotone2 = Sub axiom
+timesMonotone2 = Sub unsafeAxiom
 
 minMonotone1 :: forall a b c. (a <= b) :- (Min a c <= Min b c)
-minMonotone1 = Sub axiom
+minMonotone1 = Sub unsafeAxiom
 
 minMonotone2 :: forall a b c. (b <= c) :- (Min a b <= Min a c)
-minMonotone2 = Sub axiom
+minMonotone2 = Sub unsafeAxiom
 
 maxMonotone1 :: forall a b c. (a <= b) :- (Max a c <= Max b c)
-maxMonotone1 = Sub axiom
+maxMonotone1 = Sub unsafeAxiom
 
 maxMonotone2 :: forall a b c. (b <= c) :- (Max a b <= Max a c)
-maxMonotone2 = Sub axiom
+maxMonotone2 = Sub unsafeAxiom
 
 powOne :: forall n. Dict ((n ^ 1) ~ n)
-powOne = axiom
+powOne = unsafeAxiom
 
 plusMod :: forall a b c. (1 <= c) :- (Mod (a + b) c ~ Mod (Mod a c + Mod b c) c)
-plusMod = Sub axiom
+plusMod = Sub unsafeAxiom
 
 timesMod :: forall a b c. (1 <= c) :- (Mod (a * b) c ~ Mod (Mod a c * Mod b c) c)
-timesMod = Sub axiom
+timesMod = Sub unsafeAxiom
 
 modBound :: forall m n. (1 <= n) :- (Mod m n <= n)
-modBound = Sub axiom
+modBound = Sub unsafeAxiom
 
 euclideanNat :: (1 <= c) :- (a ~ (c * Div a c + Mod a c))
-euclideanNat = Sub axiom
+euclideanNat = Sub unsafeAxiom
 
 plusCommutes :: forall n m. Dict ((m + n) ~ (n + m))
-plusCommutes = axiom
+plusCommutes = unsafeAxiom
 
 timesCommutes :: forall n m. Dict ((m * n) ~ (n * m))
-timesCommutes = axiom
+timesCommutes = unsafeAxiom
 
 minCommutes :: forall n m. Dict (Min m n ~ Min n m)
-minCommutes = axiom
+minCommutes = unsafeAxiom
 
 maxCommutes :: forall n m. Dict (Max m n ~ Max n m)
-maxCommutes = axiom
+maxCommutes = unsafeAxiom
 
 plusAssociates :: forall m n o. Dict (((m + n) + o) ~ (m + (n + o)))
-plusAssociates = axiom
+plusAssociates = unsafeAxiom
 
 timesAssociates :: forall m n o. Dict (((m * n) * o) ~ (m * (n * o)))
-timesAssociates = axiom
+timesAssociates = unsafeAxiom
 
 minAssociates :: forall m n o. Dict (Min (Min m n) o ~ Min m (Min n o))
-minAssociates = axiom
+minAssociates = unsafeAxiom
 
 maxAssociates :: forall m n o. Dict (Max (Max m n) o ~ Max m (Max n o))
-maxAssociates = axiom
+maxAssociates = unsafeAxiom
 
 gcdAssociates :: forall a b c. Dict (Gcd (Gcd a b) c  ~ Gcd a (Gcd b c))
-gcdAssociates = axiom
+gcdAssociates = unsafeAxiom
 
 lcmAssociates :: forall a b c. Dict (Lcm (Lcm a b) c ~ Lcm a (Lcm b c))
-lcmAssociates = axiom
+lcmAssociates = unsafeAxiom
 
 minIsIdempotent :: forall n. Dict (Min n n ~ n)
 minIsIdempotent = Dict
@@ -270,82 +268,82 @@ lcmIsIdempotent :: forall n. Dict (Lcm n n ~ n)
 lcmIsIdempotent = Dict
 
 minDistributesOverPlus :: forall n m o. Dict ((n + Min m o) ~ Min (n + m) (n + o))
-minDistributesOverPlus = axiom
+minDistributesOverPlus = unsafeAxiom
 
 minDistributesOverTimes :: forall n m o. Dict ((n * Min m o) ~ Min (n * m) (n * o))
-minDistributesOverTimes = axiom
+minDistributesOverTimes = unsafeAxiom
 
 minDistributesOverPow1 :: forall n m o. Dict ((Min n m ^ o) ~ Min (n ^ o) (m ^ o))
-minDistributesOverPow1 = axiom
+minDistributesOverPow1 = unsafeAxiom
 
 minDistributesOverPow2 :: forall n m o. Dict ((n ^ Min m o) ~ Min (n ^ m) (n ^ o))
-minDistributesOverPow2 = axiom
+minDistributesOverPow2 = unsafeAxiom
 
 minDistributesOverMax :: forall n m o. Dict (Max n (Min m o) ~ Min (Max n m) (Max n o))
-minDistributesOverMax = axiom
+minDistributesOverMax = unsafeAxiom
 
 maxDistributesOverPlus :: forall n m o. Dict ((n + Max m o) ~ Max (n + m) (n + o))
-maxDistributesOverPlus = axiom
+maxDistributesOverPlus = unsafeAxiom
 
 maxDistributesOverTimes :: forall n m o. Dict ((n * Max m o) ~ Max (n * m) (n * o))
-maxDistributesOverTimes = axiom
+maxDistributesOverTimes = unsafeAxiom
 
 maxDistributesOverPow1 :: forall n m o. Dict ((Max n m ^ o) ~ Max (n ^ o) (m ^ o))
-maxDistributesOverPow1 = axiom
+maxDistributesOverPow1 = unsafeAxiom
 
 maxDistributesOverPow2 :: forall n m o. Dict ((n ^ Max m o) ~ Max (n ^ m) (n ^ o))
-maxDistributesOverPow2 = axiom
+maxDistributesOverPow2 = unsafeAxiom
 
 maxDistributesOverMin :: forall n m o. Dict (Min n (Max m o) ~ Max (Min n m) (Min n o))
-maxDistributesOverMin = axiom
+maxDistributesOverMin = unsafeAxiom
 
 plusDistributesOverTimes :: forall n m o. Dict ((n * (m + o)) ~ (n * m + n * o))
-plusDistributesOverTimes = axiom
+plusDistributesOverTimes = unsafeAxiom
 
 timesDistributesOverPow  :: forall n m o. Dict ((n ^ (m + o)) ~ (n ^ m * n ^ o))
-timesDistributesOverPow = axiom
+timesDistributesOverPow = unsafeAxiom
 
 timesDistributesOverGcd :: forall n m o. Dict ((n * Gcd m o) ~ Gcd (n * m) (n * o))
-timesDistributesOverGcd = axiom
+timesDistributesOverGcd = unsafeAxiom
 
 timesDistributesOverLcm :: forall n m o. Dict ((n * Lcm m o) ~ Lcm (n * m) (n * o))
-timesDistributesOverLcm = axiom
+timesDistributesOverLcm = unsafeAxiom
 
 plusIsCancellative :: forall n m o. ((n + m) ~ (n + o)) :- (m ~ o)
-plusIsCancellative = Sub axiom
+plusIsCancellative = Sub unsafeAxiom
 
 timesIsCancellative :: forall n m o. (1 <= n, (n * m) ~ (n * o)) :- (m ~ o)
-timesIsCancellative = Sub axiom
+timesIsCancellative = Sub unsafeAxiom
 
 gcdDistributesOverLcm :: forall a b c. Dict (Gcd (Lcm a b) c ~ Lcm (Gcd a c) (Gcd b c))
-gcdDistributesOverLcm = axiom
+gcdDistributesOverLcm = unsafeAxiom
 
 lcmDistributesOverGcd :: forall a b c. Dict (Lcm (Gcd a b) c ~ Gcd (Lcm a c) (Lcm b c))
-lcmDistributesOverGcd = axiom
+lcmDistributesOverGcd = unsafeAxiom
 
 dividesPlus :: (Divides a b, Divides a c) :- Divides a (b + c)
-dividesPlus = Sub axiom
+dividesPlus = Sub unsafeAxiom
 
 dividesTimes :: Divides a b :- Divides a (b * c)
-dividesTimes = Sub axiom
+dividesTimes = Sub unsafeAxiom
 
 dividesMin :: (Divides a b, Divides a c) :- Divides a (Min b c)
-dividesMin = Sub axiom
+dividesMin = Sub unsafeAxiom
 
 dividesMax :: (Divides a b, Divides a c) :- Divides a (Max b c)
-dividesMax = Sub axiom
+dividesMax = Sub unsafeAxiom
 
 -- This `dividesDef` is simpler and more convenient than Divides a b :- ((a * Div b a) ~ b)
 -- because the latter can be easily derived via 'euclideanNat', but not vice versa.
 
 dividesDef :: forall a b. Divides a b :- (Mod b a ~ 0)
-dividesDef = Sub axiom
+dividesDef = Sub unsafeAxiom
 
 dividesPow :: (1 <= n, Divides a b) :- Divides a (b^n)
-dividesPow = Sub axiom
+dividesPow = Sub unsafeAxiom
 
 timesDiv :: forall a b. Dict ((a * Div b a) <= b)
-timesDiv = axiom
+timesDiv = unsafeAxiom
 
 -- (<=) is an internal category in the category of constraints.
 
@@ -353,7 +351,7 @@ leId :: forall (a :: Nat). Dict (a <= a)
 leId = Dict
 
 leEq :: forall (a :: Nat) (b :: Nat). (a <= b, b <= a) :- (a ~ b)
-leEq = Sub axiom
+leEq = Sub unsafeAxiom
 
 leTrans :: forall (a :: Nat) (b :: Nat) (c :: Nat). (b <= c, a <= b) :- (a <= c)
 leTrans = Sub (axiomLe @a @c)

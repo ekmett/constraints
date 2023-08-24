@@ -36,6 +36,7 @@ module Data.Constraint.Symbol
 
 import Data.Constraint
 import Data.Constraint.Nat
+import Data.Constraint.Unsafe (unsafeAxiom)
 import Data.Proxy
 import GHC.TypeLits
 import Unsafe.Coerce
@@ -61,10 +62,7 @@ magicSSS f = Sub $ unsafeCoerce (Magic Dict) (symbolVal (Proxy :: Proxy n) `f` s
 magicSN :: forall a n. (String -> Int) -> KnownSymbol a :- KnownNat n
 magicSN f = Sub $ unsafeCoerce (Magic Dict) (toInteger (f (symbolVal (Proxy :: Proxy a))))
 
-axiom :: Dict c
-axiom = unsafeCoerce (Dict :: Dict ())
-
--- axioms and operations
+-- operations
 
 appendSymbol :: (KnownSymbol a, KnownSymbol b) :- KnownSymbol (AppendSymbol a b)
 appendSymbol = magicSSS (++)
@@ -76,7 +74,7 @@ appendUnit2 :: forall a. Dict (AppendSymbol a "" ~ a)
 appendUnit2 = Dict
 
 appendAssociates :: forall a b c. Dict (AppendSymbol (AppendSymbol a b) c ~ AppendSymbol a (AppendSymbol b c))
-appendAssociates = axiom
+appendAssociates = unsafeAxiom
 
 takeSymbol :: forall n a. (KnownNat n, KnownSymbol a) :- KnownSymbol (Take n a)
 takeSymbol = magicNSS take
@@ -85,37 +83,37 @@ dropSymbol :: forall n a. (KnownNat n, KnownSymbol a) :- KnownSymbol (Drop n a)
 dropSymbol = magicNSS drop
 
 takeAppendDrop :: forall n a. Dict (AppendSymbol (Take n a) (Drop n a) ~ a)
-takeAppendDrop = axiom
+takeAppendDrop = unsafeAxiom
 
 lengthSymbol :: forall a. KnownSymbol a :- KnownNat (Length a)
 lengthSymbol = magicSN length
 
 takeLength :: forall n a. (Length a <= n) :- (Take n a ~ a)
-takeLength = Sub axiom
+takeLength = Sub unsafeAxiom
 
 take0 :: forall a. Dict (Take 0 a ~ "")
-take0 = axiom
+take0 = unsafeAxiom
 
 takeEmpty :: forall n. Dict (Take n "" ~ "")
-takeEmpty = axiom
+takeEmpty = unsafeAxiom
 
 dropLength :: forall n a. (Length a <= n) :- (Drop n a ~ "")
-dropLength = Sub axiom
+dropLength = Sub unsafeAxiom
 
 drop0 :: forall a. Dict (Drop 0 a ~ a)
-drop0 = axiom
+drop0 = unsafeAxiom
 
 dropEmpty :: forall n. Dict (Drop n "" ~ "")
-dropEmpty = axiom
+dropEmpty = unsafeAxiom
 
 lengthTake :: forall n a. Dict (Length (Take n a) <= n)
-lengthTake = axiom
+lengthTake = unsafeAxiom
 
 lengthDrop :: forall n a. Dict (Length a <= (Length (Drop n a) + n))
-lengthDrop = axiom
+lengthDrop = unsafeAxiom
 
 dropDrop :: forall n m a. Dict (Drop n (Drop m a) ~ Drop (n + m) a)
-dropDrop = axiom
+dropDrop = unsafeAxiom
 
 takeTake :: forall n m a. Dict (Take n (Take m a) ~ Take (Min n m) a)
-takeTake = axiom
+takeTake = unsafeAxiom

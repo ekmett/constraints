@@ -7,6 +7,7 @@
 * Add `c => Boring (Dict c)` instance
 * Remove `Lifting` instances for `ErrorT` and `ListT`, which were removed
   in `transformers-0.6.*`.
+* Add `unsafeAxiom` to `Data.Constraint.Unsafe`.
 
 0.13.4 [2022.05.19]
 -------------------
