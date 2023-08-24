@@ -14,9 +14,13 @@
 -- Stability   :  experimental
 -- Portability :  non-portable
 --
+-- Unsafe utilities used throughout @constraints@. As the names suggest, these
+-- functions are unsafe in general and can cause your program to segfault if
+-- used improperly. Handle with care.
 
 module Data.Constraint.Unsafe
   ( Coercible
+  , unsafeAxiom
   , unsafeCoerceConstraint
   , unsafeDerive
   , unsafeUnderive
@@ -25,6 +29,10 @@ module Data.Constraint.Unsafe
 import Data.Coerce
 import Data.Constraint
 import Unsafe.Coerce
+
+-- | Unsafely create a dictionary for any constraint.
+unsafeAxiom :: Dict c
+unsafeAxiom = unsafeCoerce (Dict :: Dict ())
 
 -- | Coerce a dictionary unsafely from one type to another
 unsafeCoerceConstraint :: a :- b
