@@ -28,6 +28,7 @@ module Data.Constraint.Unsafe
 
 #if MIN_VERSION_base(4,18,0)
     -- * Unsafely creating @GHC.TypeLits@ singleton values
+  , unsafeSChar
   , unsafeSNat
   , unsafeSSymbol
 #endif
@@ -38,7 +39,7 @@ import Data.Constraint
 import Unsafe.Coerce
 
 #if MIN_VERSION_base(4,18,0)
-import GHC.TypeLits (SNat, SSymbol)
+import GHC.TypeLits (SChar, SNat, SSymbol)
 import Numeric.Natural (Natural)
 #endif
 
@@ -61,6 +62,21 @@ unsafeUnderive _ = unsafeCoerceConstraint
 #if MIN_VERSION_base(4,18,0)
 -- NB: if https://gitlab.haskell.org/ghc/ghc/-/issues/23478 were implemented,
 -- then we could avoid using 'unsafeCoerce' in the definitions below.
+
+-- | Unsafely create an 'SChar' value directly from a 'Char'. Use this function
+-- with care:
+--
+-- * The 'Char' value must match the 'Char' @c@ encoded in the return type
+--   @'SChar' c@.
+--
+-- * Be wary of using this function to create multiple values of type
+--   @'SChar' T@, where @T@ is a type family that does not reduce (e.g.,
+--   @Any@ from "GHC.Exts"). If you do, GHC is liable to optimize away one of
+--   the values and replace it with the other during a common subexpression
+--   elimination pass. If the two values have different underlying 'Char'
+--   values, this could be disastrous.
+unsafeSChar :: Char -> SChar c
+unsafeSChar = unsafeCoerce
 
 -- | Unsafely create an 'SNat' value directly from a 'Natural'. Use this
 -- function with care:

@@ -70,6 +70,10 @@ library
     Data.Constraint.Symbol
     Data.Constraint.Unsafe
 
+  if impl(ghc >= 9.2)
+    exposed-modules:
+      Data.Constraint.Char
+
   ghc-options: -Wall -Wno-star-is-type
 
 test-suite spec
@@ -78,6 +82,7 @@ test-suite spec
   hs-source-dirs: tests
   main-is: Spec.hs
   other-modules: GH55Spec
+                 GH117Spec
   ghc-options: -Wall -threaded -rtsopts
   build-tool-depends: hspec-discover:hspec-discover >= 2
   build-depends:
