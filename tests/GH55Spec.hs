@@ -1,22 +1,16 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators #-}
-
-#if __GLASGOW_HASKELL__ >= 800
 {-# LANGUAGE TypeApplications #-}
-#endif
+{-# LANGUAGE TypeOperators #-}
 
 module GH55Spec (main, spec) where
 
-import Test.Hspec
-
-#if __GLASGOW_HASKELL__ >= 800
 import Data.Constraint
 import Data.Constraint.Nat
 import GHC.TypeLits
+import Test.Hspec
 
 newtype GF (n :: Nat) = GF Integer deriving (Eq, Show)
 
@@ -48,10 +42,6 @@ spec :: Spec
 spec = describe "GH #53" $
          it "should normalize Lcm m m" $
            z `shouldBe` (GF 0 :: GF (Lcm 5 5))
-#else
-spec :: Spec
-spec = return ()
-#endif
 
 main :: IO ()
 main = hspec spec
