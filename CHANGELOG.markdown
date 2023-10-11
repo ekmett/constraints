@@ -1,4 +1,4 @@
-0.14 [unreleased]
+0.14 [2023.10.11]
 -----------------
 * Drop support for GHCs older than 8.6.
 * The `forall` function in `Data.Constraint.Forall` has been renamed to
