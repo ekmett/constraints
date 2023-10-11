@@ -1,12 +1,13 @@
 0.14 [unreleased]
 -----------------
-* `Data.Constraint.Forall` uses `QuantifiedConstraints` on GHC 8.6+
+* Drop support for GHCs older than 8.6.
 * The `forall` function in `Data.Constraint.Forall` has been renamed to
   `forall_`, since a future version of GHC will make the use of `forall` as
   an identifier an error.
-* Add `c => Boring (Dict c)` instance
+* Implement `Data.Constraint.Forall` using `QuantifiedConstraints`.
 * Remove `Lifting` instances for `ErrorT` and `ListT`, which were removed
   in `transformers-0.6.*`.
+* Add a `c => Boring (Dict c)` instance.
 * Add the `Data.Constraint.Char` module, which contains utilities for working
   with `KnownChar` constraints. This module is only available on GHC 9.2 or
   later.
