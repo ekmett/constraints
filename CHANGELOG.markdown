@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+0.14.1 [2024.04.29]
+-------------------
 * Remove an unused dependency on the `type-equality` library.
 
 0.14 [2023.10.11]
