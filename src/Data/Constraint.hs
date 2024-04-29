@@ -88,7 +88,7 @@ import Numeric.Natural (Natural)
 import Data.Coerce (Coercible)
 import Data.Type.Coercion(Coercion(..))
 import Data.Type.Equality (type (~~))
-import qualified Data.Type.Equality.Hetero as Hetero
+import qualified Data.Type.Equality as Hetero
 import Type.Reflection (TypeRep, typeRepKind, withTypeable)
 import Data.Boring (Boring (..))
 

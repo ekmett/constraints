@@ -60,7 +60,6 @@ library
     , hashable       >= 1.2   && < 1.5
     , mtl            >= 2.2   && < 2.4
     , transformers   >= 0.5   && < 0.7
-    , type-equality  >= 1     && < 2
 
   exposed-modules:
     Data.Constraint
