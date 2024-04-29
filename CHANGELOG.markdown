@@ -1,3 +1,7 @@
+next [????.??.??]
+-----------------
+* Remove an unused dependency on the `type-equality` library.
+
 0.14 [2023.10.11]
 -----------------
 * Drop support for GHCs older than 8.6.
