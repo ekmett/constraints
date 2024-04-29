@@ -34,7 +34,7 @@ import Data.Typeable (Typeable, cast, typeRep)
 import Data.Type.Equality ((:~:)(Refl))
 
 import GHC.Types (type (~~))
-import Data.Type.Equality.Hetero ((:~~:)(HRefl))
+import Data.Type.Equality ((:~~:)(HRefl))
 
 newtype UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving (Typeable, Show)
