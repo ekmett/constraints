@@ -1,3 +1,8 @@
+next [????.??.??]
+-----------------
+* Re-export `Log2` from `Data.Constraint.Nat`.
+* Add `log2Nat` and `log2Pow` to `Data.Constraint.Nat`.
+
 0.14.1 [2024.04.29]
 -------------------
 * Remove an unused dependency on the `type-equality` library.
