@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE MagicHash #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -15,8 +16,8 @@
 --
 -- This module is only available on GHC 8.0 or later.
 module Data.Constraint.Nat
-  ( Min, Max, Lcm, Gcd, Divides, Div, Mod
-  , plusNat, minusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat
+  ( Min, Max, Lcm, Gcd, Divides, Div, Mod, Log2
+  , plusNat, minusNat, timesNat, powNat, minNat, maxNat, gcdNat, lcmNat, divNat, modNat, log2Nat
   , plusZero, minusZero, timesZero, timesOne, powZero, powOne, maxZero, minZero, gcdZero, gcdOne, lcmZero, lcmOne
   , plusAssociates, timesAssociates, minAssociates, maxAssociates, gcdAssociates, lcmAssociates
   , plusCommutes, timesCommutes, minCommutes, maxCommutes, gcdCommutes, lcmCommutes
@@ -36,6 +37,7 @@ module Data.Constraint.Nat
   , euclideanNat
   , plusMod, timesMod
   , modBound
+  , log2Pow
   , dividesDef
   , timesDiv
   , eqLe, leEq, leId, leTrans
@@ -49,6 +51,14 @@ import Data.Proxy
 import Data.Type.Bool
 import GHC.TypeNats
 import qualified Numeric.Natural as Nat
+
+#if MIN_VERSION_base(4,15,0)
+import GHC.Num.Natural (naturalLog2)
+#else
+import GHC.Exts (Int(..))
+import GHC.Integer.Logarithms (integerLog2#)
+#endif
+
 #if !MIN_VERSION_base(4,18,0)
 import Unsafe.Coerce
 #endif
@@ -73,6 +83,13 @@ magicNNN :: forall n m o. (Nat.Natural -> Nat.Natural -> Nat.Natural) -> (KnownN
 magicNNN f = Sub $ withKnownNat @o (unsafeSNat (natVal (Proxy @n) `f` natVal (Proxy @m))) Dict
 #else
 magicNNN f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
+#endif
+
+magicNN :: forall n m. (Nat.Natural -> Nat.Natural) -> KnownNat n :- KnownNat m
+#if MIN_VERSION_base(4,18,0)
+magicNN f = Sub $ withKnownNat @m (unsafeSNat (f (natVal (Proxy @n)))) Dict
+#else
+magicNN f = Sub $ unsafeCoerce (Magic Dict) (f (natVal (Proxy :: Proxy n)))
 #endif
 
 axiomLe :: forall (a :: Nat) (b :: Nat). Dict (a <= b)
@@ -134,6 +151,16 @@ divNat = Sub $ case magicNNN @n @m div of Sub r -> r
 
 modNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Mod n m)
 modNat = Sub $ case magicNNN @n @m mod of Sub r -> r
+
+log2Nat :: forall n. (KnownNat n, 1 <= n) :- KnownNat (Log2 n)
+log2Nat = Sub $ case magicNN @n log2 of Sub r -> r
+  where
+    log2 :: Nat.Natural -> Nat.Natural
+#if MIN_VERSION_base(4,15,0)
+    log2 n = fromIntegral (naturalLog2 n)
+#else
+    log2 n = fromIntegral (I# (integerLog2# (toInteger n)))
+#endif
 
 plusZero :: forall n. Dict ((n + 0) ~ n)
 plusZero = Dict
@@ -230,6 +257,9 @@ timesMod = Sub unsafeAxiom
 
 modBound :: forall m n. (1 <= n) :- (Mod m n <= n)
 modBound = Sub unsafeAxiom
+
+log2Pow :: forall n. Dict (Log2 (2 ^ n) ~ n)
+log2Pow = unsafeAxiom
 
 euclideanNat :: (1 <= c) :- (a ~ (c * Div a c + Mod a c))
 euclideanNat = Sub unsafeAxiom
