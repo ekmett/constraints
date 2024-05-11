@@ -69,11 +69,11 @@ type Divides n m = n ~ Gcd n m
 newtype Magic n = Magic (KnownNat n => Dict (KnownNat n))
 #endif
 
-magic :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
+magicNNN :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
 #if MIN_VERSION_base(4,18,0)
-magic f = Sub $ TN.withKnownNat @o (unsafeSNat (fromInteger (natVal (Proxy @n) `f` natVal (Proxy @m)))) Dict
+magicNNN f = Sub $ TN.withKnownNat @o (unsafeSNat (fromInteger (natVal (Proxy @n) `f` natVal (Proxy @m)))) Dict
 #else
-magic f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
+magicNNN f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
 #endif
 
 axiomLe :: forall (a :: Nat) (b :: Nat). Dict (a <= b)
@@ -107,34 +107,34 @@ lcmOne :: forall a. Dict (Lcm 1 a ~ a)
 lcmOne = unsafeAxiom
 
 gcdNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Gcd n m)
-gcdNat = magic gcd
+gcdNat = magicNNN gcd
 
 lcmNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Lcm n m)
-lcmNat = magic lcm
+lcmNat = magicNNN lcm
 
 plusNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n + m)
-plusNat = magic (+)
+plusNat = magicNNN (+)
 
 minusNat :: forall n m. (KnownNat n, KnownNat m, m <= n) :- KnownNat (n - m)
-minusNat = Sub $ case magic @n @m (-) of Sub r -> r
+minusNat = Sub $ case magicNNN @n @m (-) of Sub r -> r
 
 minNat   :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Min n m)
-minNat = magic min
+minNat = magicNNN min
 
 maxNat   :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (Max n m)
-maxNat = magic max
+maxNat = magicNNN max
 
 timesNat  :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n * m)
-timesNat = magic (*)
+timesNat = magicNNN (*)
 
 powNat :: forall n m. (KnownNat n, KnownNat m) :- KnownNat (n ^ m)
-powNat = magic (^)
+powNat = magicNNN (^)
 
 divNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Div n m)
-divNat = Sub $ case magic @n @m div of Sub r -> r
+divNat = Sub $ case magicNNN @n @m div of Sub r -> r
 
 modNat :: forall n m. (KnownNat n, KnownNat m, 1 <= m) :- KnownNat (Mod n m)
-modNat = Sub $ case magic @n @m mod of Sub r -> r
+modNat = Sub $ case magicNNN @n @m mod of Sub r -> r
 
 plusZero :: forall n. Dict ((n + 0) ~ n)
 plusZero = Dict
