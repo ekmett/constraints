@@ -47,10 +47,9 @@ import Data.Constraint
 import Data.Constraint.Unsafe
 import Data.Proxy
 import Data.Type.Bool
-import GHC.TypeLits
-#if MIN_VERSION_base(4,18,0)
-import qualified GHC.TypeNats as TN
-#else
+import GHC.TypeNats
+import qualified Numeric.Natural as Nat
+#if !MIN_VERSION_base(4,18,0)
 import Unsafe.Coerce
 #endif
 
@@ -69,9 +68,9 @@ type Divides n m = n ~ Gcd n m
 newtype Magic n = Magic (KnownNat n => Dict (KnownNat n))
 #endif
 
-magicNNN :: forall n m o. (Integer -> Integer -> Integer) -> (KnownNat n, KnownNat m) :- KnownNat o
+magicNNN :: forall n m o. (Nat.Natural -> Nat.Natural -> Nat.Natural) -> (KnownNat n, KnownNat m) :- KnownNat o
 #if MIN_VERSION_base(4,18,0)
-magicNNN f = Sub $ TN.withKnownNat @o (unsafeSNat (fromInteger (natVal (Proxy @n) `f` natVal (Proxy @m)))) Dict
+magicNNN f = Sub $ withKnownNat @o (unsafeSNat (natVal (Proxy @n) `f` natVal (Proxy @m))) Dict
 #else
 magicNNN f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
 #endif
