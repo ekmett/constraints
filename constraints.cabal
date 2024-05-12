@@ -1,7 +1,7 @@
 cabal-version: 2.4
 name:          constraints
 category:      Constraints
-version:       0.14.1
+version:       0.14.2
 license:       BSD-2-Clause
 license-file:  LICENSE
 author:        Edward A. Kmett

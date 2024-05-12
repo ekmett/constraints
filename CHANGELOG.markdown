@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+0.14.2 [2024.05.12]
+-------------------
 * Re-export `Log2` from `Data.Constraint.Nat`.
 * Add `log2Nat` and `log2Pow` to `Data.Constraint.Nat`.
 
