@@ -82,7 +82,7 @@ magicNNN :: forall n m o. (Nat.Natural -> Nat.Natural -> Nat.Natural) -> (KnownN
 #if MIN_VERSION_base(4,18,0)
 magicNNN f = Sub $ withKnownNat @o (unsafeSNat (natVal (Proxy @n) `f` natVal (Proxy @m))) Dict
 #else
-magicNNN f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy :: Proxy n) `f` natVal (Proxy :: Proxy m))
+magicNNN f = Sub $ unsafeCoerce (Magic Dict) (natVal (Proxy @n) `f` natVal (Proxy @m))
 #endif
 
 magicNN :: forall n m. (Nat.Natural -> Nat.Natural) -> KnownNat n :- KnownNat m
