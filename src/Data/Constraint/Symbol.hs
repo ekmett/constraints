@@ -64,21 +64,21 @@ magicNSS :: forall n m o. (Int -> String -> String) -> (KnownNat n, KnownSymbol 
 #if MIN_VERSION_base(4,18,0)
 magicNSS f = Sub $ withKnownSymbol (unsafeSSymbol @o (fromIntegral (natVal (Proxy @n)) `f` symbolVal (Proxy @m))) Dict
 #else
-magicNSS f = Sub $ unsafeCoerce (Magic Dict) (fromIntegral (natVal (Proxy :: Proxy n)) `f` symbolVal (Proxy :: Proxy m))
+magicNSS f = Sub $ unsafeCoerce (Magic Dict) (fromIntegral (natVal (Proxy @n)) `f` symbolVal (Proxy @m))
 #endif
 
 magicSSS :: forall n m o. (String -> String -> String) -> (KnownSymbol n, KnownSymbol m) :- KnownSymbol o
 #if MIN_VERSION_base(4,18,0)
 magicSSS f = Sub $ withKnownSymbol (unsafeSSymbol @o (symbolVal (Proxy @n) `f` symbolVal (Proxy @m))) Dict
 #else
-magicSSS f = Sub $ unsafeCoerce (Magic Dict) (symbolVal (Proxy :: Proxy n) `f` symbolVal (Proxy :: Proxy m))
+magicSSS f = Sub $ unsafeCoerce (Magic Dict) (symbolVal (Proxy @n) `f` symbolVal (Proxy @m))
 #endif
 
 magicSN :: forall a n. (String -> Int) -> KnownSymbol a :- KnownNat n
 #if MIN_VERSION_base(4,18,0)
 magicSN f = Sub $ TN.withKnownNat (unsafeSNat @n (fromIntegral (f (symbolVal (Proxy :: Proxy a))))) Dict
 #else
-magicSN f = Sub $ unsafeCoerce (Magic Dict) (toInteger (f (symbolVal (Proxy :: Proxy a))))
+magicSN f = Sub $ unsafeCoerce (Magic Dict) (toInteger (f (symbolVal (Proxy @a))))
 #endif
 
 -- operations
