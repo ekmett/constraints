@@ -110,7 +110,6 @@ import Data.Boring (Boring (..))
 --
 data Dict :: Constraint -> * where
   Dict :: a => Dict a
-  deriving Typeable
 
 deriving stock instance (Typeable p, p) => Data (Dict p)
 deriving stock instance Eq (Dict a)

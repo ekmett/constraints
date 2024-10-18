@@ -1,6 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
@@ -37,7 +36,7 @@ import GHC.Types (type (~~))
 import Data.Type.Equality ((:~~:)(HRefl))
 
 newtype UnsatisfiedConstraint = UnsatisfiedConstraint String
-  deriving (Typeable, Show)
+  deriving Show
 
 instance Exception UnsatisfiedConstraint
 
