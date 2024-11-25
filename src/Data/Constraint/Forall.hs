@@ -36,6 +36,7 @@ module Data.Constraint.Forall
   ) where
 
 import Data.Constraint
+import Data.Constraint.Compose
 import Unsafe.Coerce (unsafeCoerce)
 
 class (forall a. p a) => Forall (p :: k -> Constraint)
@@ -53,10 +54,6 @@ forallish Dict1 = Dict
 
 forall_ :: forall p. (forall a. Dict (p a)) -> Dict (Forall p)
 forall_ d = forallish (unsafeCoerce d)
-
--- | Composition for constraints.
-class p (f a) => ComposeC (p :: k2 -> Constraint) (f :: k1 -> k2) (a :: k1)
-instance p (f a) => ComposeC p f a
 
 -- | A representation of the quantified constraint @forall a. p (f a)@.
 class Forall (ComposeC p f) => ForallF (p :: k2 -> Constraint) (f :: k1 -> k2)
