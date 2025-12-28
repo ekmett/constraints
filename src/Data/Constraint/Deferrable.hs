@@ -32,8 +32,7 @@ import Data.Proxy
 import Data.Typeable (Typeable, cast, typeRep)
 import Data.Type.Equality ((:~:)(Refl))
 
-import GHC.Types (type (~~))
-import Data.Type.Equality ((:~~:)(HRefl))
+import Data.Type.Equality (type (~~), (:~~:)(HRefl))
 
 newtype UnsatisfiedConstraint = UnsatisfiedConstraint String
   deriving Show
