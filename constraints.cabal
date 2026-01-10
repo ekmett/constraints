@@ -19,6 +19,7 @@ description:
 build-type:    Simple
 
 tested-with:
+  GHC == 9.14.1
   GHC == 9.12.2
   GHC == 9.10.3
   GHC == 9.8.4
