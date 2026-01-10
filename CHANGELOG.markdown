@@ -1,3 +1,7 @@
+next [????.??.??]
+-----------------
+* Remove unused `ghc-prim` dependency.
+
 0.14.2 [2024.05.12]
 -------------------
 * Re-export `Log2` from `Data.Constraint.Nat`.
