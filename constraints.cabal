@@ -62,7 +62,10 @@ library
     , hashable       >= 1.2   && < 1.6
     , mtl            >= 2.2   && < 2.4
     , transformers   >= 0.5   && < 0.7
-  if !impl(ghc >= 9.0)
+  if impl(ghc >= 9.15)
+    build-depends:
+      ghc-bignum
+  elif impl(ghc < 9.0)
     build-depends:
       integer-gmp
 
