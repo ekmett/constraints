@@ -1,5 +1,5 @@
-next [????.??.??]
------------------
+0.14.4 [2026.01.26]
+-------------------
 * Depend on `ghc-bignum` instead of `integer-gmp` on recent versions GHC.
 
 0.14.3 [2026.01.10]
