@@ -1,3 +1,7 @@
+next [????.??.??]
+-----------------
+* Depend on `ghc-bignum` instead of `integer-gmp` on recent versions GHC.
+
 0.14.3 [2026.01.10]
 -------------------
 * Remove unused `ghc-prim` dependency.
